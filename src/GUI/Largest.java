@@ -29,8 +29,18 @@ public class Largest {
             }
         });
 
+        JButton forward = new JButton("Forward");
+        forward.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                engine.forward();
+                drawingPanel.updateMap();
+            }
+        });
 
-        bigPanel.add(back, BorderLayout.AFTER_LAST_LINE);
+
+        bigPanel.add(back, BorderLayout.BEFORE_FIRST_LINE);
+        bigPanel.add(forward, BorderLayout.AFTER_LAST_LINE);
         frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE );
         frame.add(bigPanel);
         frame.setSize(700, 600);

@@ -43,7 +43,7 @@ public class Coords {
 
     @Override
     public String toString(){
-        return q + " " + r + " " + s;
+        return q + "," + r + "," + s;
     }
 
     @Override

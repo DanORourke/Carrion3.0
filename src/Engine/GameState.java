@@ -2,13 +2,14 @@ package Engine;
 
 import GUI.Coords;
 
-public class GameState {
+class GameState {
     private final Board board;
     private final Coords activeCoords;
     private final int playerTurn;
     private final int turnStage;
+    private final String encodedBoard;
 
-    GameState(Board board, Coords activeCoords, int playerTurn, int turnStage){
+    GameState(Board board, Coords activeCoords, int playerTurn, int turnStage, String encodedBoard){
         this.board = new Board(board);
         if (activeCoords == null){
             this.activeCoords = null;
@@ -17,6 +18,7 @@ public class GameState {
         }
         this.playerTurn = playerTurn;
         this.turnStage = turnStage;
+        this.encodedBoard = encodedBoard;
     }
 
     Board getBoard() {
@@ -33,5 +35,9 @@ public class GameState {
 
     Coords getActiveCoords() {
         return activeCoords;
+    }
+
+    String getEncodedBoard() {
+        return encodedBoard;
     }
 }

@@ -9,7 +9,7 @@ import GUI.GameData;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Board {
+class Board {
     //private final int gameType;
     //private final int mapRadius;
     private HashMap<Coords, Parcel> board;
@@ -152,8 +152,6 @@ public class Board {
             Piece oPiece = oPieces.get(t);
             if (!p.equals(oPiece)){
                 nPieces.put(t, oPiece.copy());
-            }else {
-                System.out.println("remove at " + oPieces.get(t).getCoords().toString());
             }
         }
         Parcel np =  new Parcel(op.getTerritory(), nPieces);

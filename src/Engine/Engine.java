@@ -15,7 +15,8 @@ public class Engine {
     private final int gameType;
     private General activeGeneral = null;
     private Coords activeCoords = null;
-    private final HashMap<Alliance, Player> players = new HashMap<>();
+    private Coords nextActiveCoords = null;
+    private HashMap<Alliance, Player> players = new HashMap<>();
     private Board board;
     private int playerTurn;
     private int turnStage;//0=allocate, 1=move, 2=special if needed
@@ -32,7 +33,7 @@ public class Engine {
     private void initializeEngine(ArrayList<String> moves){
         initializeTurn();
         board = new Board(gameType, mapRadius);
-        addToHistory();
+        addStartHistory();
         int i = 2;
         while(i < moves.size()){
             String moveType = moves.get(i);
@@ -56,9 +57,30 @@ public class Engine {
         System.out.println("history size: " + history.size());
     }
 
-    private void addToHistory(){
-        history.add(new GameState(board, activeCoords, playerTurn, turnStage));
+    private void addStartHistory(){
+        String startEncoded = String.valueOf(mapRadius) + "," + String.valueOf(gameType);
+        history.add(new GameState(board, null, playerTurn, turnStage, startEncoded));
+        histIndex++;
+        System.out.println(history.size());
+    }
+
+    private void addClickToHistory(Coords c, boolean leftClick){
+        String encoded = createClickEncoded(c, leftClick);
+        System.out.println(encoded);
+        history.add(new GameState(board, activeCoords, playerTurn, turnStage, encoded));
         histIndex ++;
+    }
+
+    private String createClickEncoded(Coords c, boolean leftClick){
+        //could remove s coord and calculate it up top instead, q + r + s = 0, but might keep it to use as verification
+        String oldEncoded = history.get(histIndex).getEncodedBoard();
+        String left;
+        if (leftClick){
+            left = "1";
+        }else{
+            left = "0";
+        }
+        return oldEncoded + "," + activeCoords.toString() + "," + c.toString() + "," + left;
     }
 
     private void clearFutureHistory(){
@@ -74,7 +96,7 @@ public class Engine {
         board = state.getBoard();
         fillPlayers();
         rotatePhase();
-        history.add(new GameState(new Board(board), null,  playerTurn, turnStage));
+        history.add(new GameState(new Board(board), null,  playerTurn, turnStage, "nextPhase"));
     }
 
     private void rotatePhase(){
@@ -102,7 +124,7 @@ public class Engine {
     }
 
     private void fillPlayers(){
-        players.clear();
+        players = new HashMap<>();
         HashMap<Coords, Parcel> totalBoard = board.getTotalBoard();
         for (Coords c : totalBoard.keySet()){
             Parcel p = totalBoard.get(c);
@@ -110,10 +132,6 @@ public class Engine {
                 addPlayerPieces(p.getPieces());
             }
         }
-    }
-
-    private void setBoard(){
-        board =  history.get(histIndex).getBoard();
     }
 
     private GameState getLastestState(){
@@ -220,9 +238,11 @@ public class Engine {
         }
         if (rememberClick){
             clearFutureHistory();
-            addToHistory();
+            addClickToHistory(c, leftClick);
+            activeCoords = nextActiveCoords;
             return board.getChangeData();
         }
+        activeCoords = nextActiveCoords;
         return new HashMap<>();
     }
 
@@ -269,7 +289,7 @@ public class Engine {
             board.moveGeneral(activeGeneral, c);
             rememberClick = true;
         }
-        activeCoords = c;
+        nextActiveCoords = c;
 
     }
 
@@ -295,7 +315,7 @@ public class Engine {
             dropSupply(board.get(c).getFirstGeneral(),board);
             rememberClick = true;
         }
-        activeCoords = c;
+        nextActiveCoords = c;
 
     }
 
@@ -318,13 +338,27 @@ public class Engine {
     }
 
     public void back(){
-        System.out.println("history size: " + history.size() + " histIndex: " + histIndex);
+        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
+                " ecodedBoard: " + history.get(histIndex).getEncodedBoard());
         if (histIndex > 0){
             histIndex --;
         }
         //setState();
         //fillPlayers(history.get(history.size()-1).getBoard());
-        System.out.println("history size: " + history.size() + " histIndex: " + histIndex);
+        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
+                " ecodedBoard: " + history.get(histIndex).getEncodedBoard());
+    }
+
+    public void forward(){
+        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
+                " ecodedBoard: " + history.get(histIndex).getEncodedBoard());
+        if (histIndex < history.size() - 1){
+            histIndex ++;
+        }
+        //setState();
+        //fillPlayers(history.get(history.size()-1).getBoard());
+        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
+                " ecodedBoard: " + history.get(histIndex).getEncodedBoard());
     }
 
     private void setState(){

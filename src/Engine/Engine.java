@@ -207,12 +207,18 @@ public class Engine {
         activeCoords = null;
     }
 
-    public void printTileInfo(Coords c){
+    public String clickTileInfo(Coords c){
+        return "you clicked me?";
+    }
+
+    public String hoverTileInfo(Coords c){
         //Board board = getBoard();
+        String s = "";
         General g = board.get(c).getFirstGeneral();
         if (g != null){
-            System.out.println(g.getTroops() + " " + g.getMovementPoints());
+            s = g.getTroops() + " " + g.getMovementPoints();
         }
+        return s;
     }
 
     public HashMap<Coords, GameData> click(Coords c, boolean leftClick){

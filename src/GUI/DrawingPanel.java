@@ -14,9 +14,11 @@ import java.util.HashMap;
 
 public class DrawingPanel extends JPanel{
     private final Engine engine;
+    private JTextArea hoverArea;
+    private JTextArea clickArea;
     private final HashMap<Coords, Tile> map;
     private final int mapTileRadius;
-    private int radius;
+    private int radius = 15;//starting zoom
     private int x1;
     private int y1;
     private int y2;
@@ -26,8 +28,8 @@ public class DrawingPanel extends JPanel{
     private int camera;
 
 
-    DrawingPanel(int radius, Engine engine){
-        this.radius = radius;
+    DrawingPanel(Engine engine){
+        //this.radius = radius;
         this.engine = engine;
         this.mapTileRadius = engine.getMapRadius();
         this.camera = 0;
@@ -374,10 +376,25 @@ public class DrawingPanel extends JPanel{
         return closest;
     }
 
-    private void sendTileInfo(Coords c){
+    void setClickArea(JTextArea clickArea){
+        this.clickArea = clickArea;
+    }
+
+    private void sendClickInfo(Coords c){
+        if (clickArea != null){
+            clickArea.append(engine.clickTileInfo(c));
+        }
+    }
+
+    void setHoverArea(JTextArea hoverArea){
+        this.hoverArea = hoverArea;
+    }
+
+    private void sendHoverInfo(Coords c){
         //get pieces from engine, send info about each
-        //System.out.println(c.toString());
-        engine.printTileInfo(c);
+        if (hoverArea != null){
+            hoverArea.setText(engine.hoverTileInfo(c));
+        }
     }
 
     class MyMouseListener extends MouseAdapter {	//inner class inside GUI.DrawingPanel
@@ -408,7 +425,7 @@ public class DrawingPanel extends JPanel{
             }
             revalidate();
             repaint();
-            sendTileInfo(c);
+            sendClickInfo(c);
         }
         public void mousePressed(MouseEvent e) {
             //set start location to move the view from
@@ -429,7 +446,7 @@ public class DrawingPanel extends JPanel{
                 GameData gd = tile.getGd();
                 if (!gd.isBorder() && !gd.isOutskirts()){
                     infoC = c;
-                    sendTileInfo(infoC);
+                    sendHoverInfo(infoC);
                 }
             }
 //            int x = e.getX();

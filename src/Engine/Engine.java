@@ -21,6 +21,7 @@ public class Engine {
     private int playerTurn;
     private int turnStage;//0=allocate, 1=move, 2=special if needed
     private boolean rememberClick = false;
+    private int indexOfNoChange = 0;
 
     public Engine(String encodedBoard){
         ArrayList<String> moves = new ArrayList<>(Arrays.asList(encodedBoard.split(",")));
@@ -37,7 +38,7 @@ public class Engine {
         int i = 2;
         while(i < moves.size()){
             String moveType = moves.get(i);
-            if (moveType.equals("nextPhase")){
+            if (moveType.equals("next")){
                 nextPhase();
                 i++;
             }else{
@@ -96,7 +97,9 @@ public class Engine {
         board = state.getBoard();
         fillPlayers();
         rotatePhase();
-        history.add(new GameState(new Board(board), null,  playerTurn, turnStage, "nextPhase"));
+        String oldEncoded = history.get(histIndex).getEncodedBoard();
+        history.add(new GameState(new Board(board), null,  playerTurn, turnStage, oldEncoded + ",next"));
+        histIndex++;
     }
 
     private void rotatePhase(){
@@ -121,6 +124,7 @@ public class Engine {
                 }
             }
         }
+        indexOfNoChange = histIndex;
     }
 
     private void fillPlayers(){
@@ -160,7 +164,7 @@ public class Engine {
         }else if (gameType == 6){
             playerTurn = 1;
             //for testing, should be 0
-            turnStage = 1;
+            turnStage = 0;
         }
     }
 
@@ -212,6 +216,10 @@ public class Engine {
     }
 
     public HashMap<Coords, GameData> click(Coords c, boolean leftClick){
+        if (histIndex < indexOfNoChange){
+            System.out.println("not your turn");
+            return new HashMap<>();
+        }
         rememberClick = false;
         setState();
         System.out.println(c.toString() + " isEmpty: " + board.get(c).isEmpty() + " turnstage = " + turnStage);
@@ -285,7 +293,8 @@ public class Engine {
         }else {
             activeGeneral = null;
         }
-        if (active && clickedParcel.isEmpty() && activeCoords.isNextTo(c)){
+        if (active && clickedParcel.isEmpty() && activeCoords.isNextTo(c) &&
+                activeGeneral.getAlliance().getDataCode() == playerTurn){
             board.moveGeneral(activeGeneral, c);
             rememberClick = true;
         }
@@ -306,13 +315,15 @@ public class Engine {
             activeGeneral = null;
         }
         if (clickedParcel.hasSingleGeneral() &&
-                !clickedParcel.hasSupplyLine() && clickedParcel.getFirstGeneral().canDrop()){
+                !clickedParcel.hasSupplyLine() && clickedParcel.getFirstGeneral().canDrop() &&
+                clickedParcel.getFirstGeneral().getAlliance().getDataCode() == playerTurn){
             dropSupply(clickedParcel.getFirstGeneral(), board);
             rememberClick = true;
         }
-        if (active && clickedParcel.isEmpty() && activeCoords.isNextTo(c) && activeGeneral.canMoveAndDrop()){
+        if (active && clickedParcel.isEmpty() && activeCoords.isNextTo(c) && activeGeneral.canMoveAndDrop() &&
+                activeGeneral.getAlliance().getDataCode() == playerTurn){
             moveGeneral(activeGeneral, c, board);
-            dropSupply(board.get(c).getFirstGeneral(),board);
+            dropSupply(activeGeneral,board);
             rememberClick = true;
         }
         nextActiveCoords = c;
@@ -321,6 +332,7 @@ public class Engine {
 
     private void moveGeneral(General g, Coords c, Board board){
         board.moveGeneral(g, c);
+        activeGeneral = board.get(c).getFirstGeneral();
     }
 
     private void dropSupply(General g, Board board){
@@ -346,7 +358,7 @@ public class Engine {
         //setState();
         //fillPlayers(history.get(history.size()-1).getBoard());
         System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
-                " ecodedBoard: " + history.get(histIndex).getEncodedBoard());
+                " ecodedBoard: " + history.get(histIndex).getEncodedBoard() + "\n");
     }
 
     public void forward(){
@@ -358,7 +370,7 @@ public class Engine {
         //setState();
         //fillPlayers(history.get(history.size()-1).getBoard());
         System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
-                " ecodedBoard: " + history.get(histIndex).getEncodedBoard());
+                " ecodedBoard: " + history.get(histIndex).getEncodedBoard() + "\n");
     }
 
     private void setState(){

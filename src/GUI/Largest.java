@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 
 public class Largest {
     private int radius = 25;
-    private String encodedBoard = "21,6,12,-8,-4,11,-8,-3,0,11,-8,-3,10,-8,-2,0";//
+    private String encodedBoard = "21,3,next,12,-8,-4,11,-8,-3,0,11,-8,-3,10,-8,-2,0,next,next";//
 
     public Largest(){
         //test encoded before giving to engine

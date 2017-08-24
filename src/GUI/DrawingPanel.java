@@ -393,7 +393,10 @@ public class DrawingPanel extends JPanel{
     private void sendHoverInfo(Coords c){
         //get pieces from engine, send info about each
         if (hoverArea != null){
-            hoverArea.setText(engine.hoverTileInfo(c));
+            String s = engine.hoverTileInfo(c);
+            if (!s.equals("")){
+                hoverArea.setText(s);
+            }
         }
     }
 

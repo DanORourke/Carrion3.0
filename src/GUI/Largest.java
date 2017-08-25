@@ -270,7 +270,7 @@ public class Largest {
     }
 
     private JButton createCurrentButton(){
-        JButton current = new JButton("Forward");
+        JButton current = new JButton("Current");
         current.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

@@ -91,7 +91,7 @@ public class Engine {
     }
 
     private void nextPhase(){
-        GameState state = getLastestState();
+        GameState state = getLatestState();
         playerTurn = state.getPlayerTurn();
         turnStage = state.getTurnStage();
         board = state.getBoard();
@@ -138,7 +138,7 @@ public class Engine {
         }
     }
 
-    private GameState getLastestState(){
+    private GameState getLatestState(){
         return history.get(history.size()-1);
     }
 
@@ -209,6 +209,14 @@ public class Engine {
 
     public String clickTileInfo(Coords c){
         return "you clicked me?";
+    }
+
+    public int[] getStateInfo(){
+        int canAct = 0;
+        if (histIndex > indexOfNoChange){
+            canAct = 1;
+        }
+        return new int[]{playerTurn, turnStage, canAct};
     }
 
     public String hoverTileInfo(Coords c){

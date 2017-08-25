@@ -15,7 +15,6 @@ import java.util.HashMap;
 public class DrawingPanel extends JPanel{
     private final Engine engine;
     private JTextArea hoverArea;
-    private JTextArea clickArea;
     private final HashMap<Coords, Tile> map;
     private final int mapTileRadius;
     private int radius = 15;//starting zoom
@@ -376,14 +375,9 @@ public class DrawingPanel extends JPanel{
         return closest;
     }
 
-    void setClickArea(JTextArea clickArea){
-        this.clickArea = clickArea;
-    }
-
     private void sendClickInfo(Coords c){
-        if (clickArea != null){
-            clickArea.append(engine.clickTileInfo(c));
-        }
+        //?? maybe do something different
+        sendHoverInfo(c);
     }
 
     void setHoverArea(JTextArea hoverArea){

@@ -9,6 +9,7 @@ public class Largest {
     private final Engine engine;
     private final DrawingPanel drawingPanel;
     private final JFrame frame;
+    private JPanel topPanel;
 
     public Largest(String encodedBoard){
         //TODO test encoded before giving to engine
@@ -21,7 +22,7 @@ public class Largest {
 
     private void setFrame(){
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(900, 600);
+        frame.setSize(1000, 600);
         frame.setResizable(true);
         frame.setLocationRelativeTo( null );
         frame.setVisible(true);
@@ -35,6 +36,7 @@ public class Largest {
         tabbed.setMinimumSize(new Dimension(0,0));
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scroll, tabbed);
         split.setOneTouchExpandable(true);
+        split.setResizeWeight(0.66);
         split.setDividerLocation(600);
         frame.add(split);
         frame.revalidate();
@@ -47,15 +49,31 @@ public class Largest {
         JTabbedPane tabbed = new JTabbedPane();
         JPanel mainPanel = createMainPanel();
         tabbed.addTab("Main", mainPanel);
+        tabbed.setOpaque(true);
+        tabbed.setBackground(Colors.BACKGROUND);
         return tabbed;
     }
 
     private JPanel createMainPanel(){
         JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setOpaque(true);
+        mainPanel.setBackground(Colors.BACKGROUND);
+
+        topPanel = new JPanel(new GridBagLayout());
+        topPanel.setOpaque(true);
+        topPanel.setBackground(Colors.BACKGROUND);
+        updateTopPanel();
+        GridBagConstraints c  = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
+        c.insets = new Insets(10, 10, 10, 10);
+        mainPanel.add(topPanel, c);
 
         JTextArea hoverArea = createHoverArea();
         JScrollPane hovScroll = new JScrollPane(hoverArea);
-        GridBagConstraints c  = new GridBagConstraints();
+        c  = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 1;
         c.gridwidth = 2;
@@ -65,37 +83,144 @@ public class Largest {
         c.insets = new Insets(10, 10, 10, 10);
         mainPanel.add(hovScroll, c);
 
-        JTextArea clickArea = createClickArea();
-        JScrollPane clickScroll = new JScrollPane(clickArea);
-        c  = new GridBagConstraints();
+        JPanel bfButtonPanel = new JPanel();
+        bfButtonPanel.setOpaque(true);
+        bfButtonPanel.setBackground(Colors.BACKGROUND);
+        bfButtonPanel.setLayout(new BoxLayout(bfButtonPanel, BoxLayout.LINE_AXIS));
+        JButton back = createBackButton();
+        bfButtonPanel.add(back);
+        bfButtonPanel.add(Box.createHorizontalGlue());
+        JButton forward = createForwardButton();
+        bfButtonPanel.add(forward);
+
+        c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 2;
-        c.gridwidth = 2;
-        c.weightx = 1.0;
-        c.weighty = 1.0;
         c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
         c.insets = new Insets(10, 10, 10, 10);
-        mainPanel.add(clickScroll, c);
-
-        JButton back = createBackButton();
-        c = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = 0;
-        c.gridwidth = 1;
-        c.anchor = GridBagConstraints.CENTER;
-        c.insets = new Insets(10, 10, 10, 10);
-        mainPanel.add(back, c);
-
-        JButton forward = createForwardButton();
-        c = new GridBagConstraints();
-        c.gridx = 1;
-        c.gridy = 0;
-        c.gridwidth = 1;
-        c.anchor = GridBagConstraints.CENTER;
-        c.insets = new Insets(10, 10, 10, 10);
-        mainPanel.add(forward, c);
+        mainPanel.add(bfButtonPanel, c);
 
         return mainPanel;
+    }
+
+    private void updateTopPanel(){
+        topPanel.removeAll();
+
+        int[] info = engine.getStateInfo();
+        int playerTurn = info[0];
+        int turnStage = info[1];
+        int canAct = info[2];
+
+        JLabel turnLabel = createTurnLabel(playerTurn, turnStage);
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
+        c.weighty = 1.0;
+
+        topPanel.add(turnLabel, c);
+
+        if (canAct == 0){
+            frame.revalidate();
+            frame.repaint();
+            return;
+        }
+
+        JPanel actionButtonPanel = new JPanel();
+        actionButtonPanel.setLayout(new BoxLayout(actionButtonPanel, BoxLayout.LINE_AXIS));
+        actionButtonPanel.setOpaque(true);
+        actionButtonPanel.setBackground(Colors.BACKGROUND);
+
+        JButton next = createNextButton();
+        actionButtonPanel.add(next);
+
+        if (turnStage == 0){
+            JButton expose = createExposeButton();
+            actionButtonPanel.add(Box.createHorizontalGlue());
+            actionButtonPanel.add(expose);
+        }else if (turnStage == 1){
+            JButton assist = createAssistButton();
+            actionButtonPanel.add(Box.createHorizontalGlue());
+            actionButtonPanel.add(assist);
+
+            JButton chief = createChiefButton();
+            actionButtonPanel.add(Box.createHorizontalGlue());
+            actionButtonPanel.add(chief);
+        }
+
+        c  = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 1;
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
+        c.insets = new Insets(10, 0, 0, 0);
+        topPanel.add(actionButtonPanel, c);
+
+        frame.revalidate();
+        frame.repaint();
+    }
+
+    private JButton createNextButton(){
+        return new JButton("Next");
+    }
+
+
+    private JButton createExposeButton(){
+        return new JButton("Expose General");
+    }
+
+    private JButton createAssistButton(){
+        return new JButton("Assist General");
+    }
+
+    private JButton createChiefButton(){
+        return new JButton("Move Chief");
+    }
+
+    private JLabel createTurnLabel(int playerTurn, int turnStage){
+        JLabel turnLabel = new JLabel();
+        turnLabel.setFont(new Font("Serif", Font.BOLD, 23));
+        turnLabel.setOpaque(true);
+        turnLabel.setBackground(Colors.BACKGROUND);
+        turnLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        String player = getPlayerColor(playerTurn, turnLabel);
+        String stage = getTurnOrders(turnStage);
+        turnLabel.setText(player + " Player: " + stage);
+        return turnLabel;
+    }
+
+    private String getTurnOrders(int turnOrders){
+        if (turnOrders == 0){
+            return "Allocate";
+        }else if (turnOrders == 1){
+            return "Move";
+        }else{
+            return "?";
+        }
+    }
+
+    private String getPlayerColor(int playerTurn, JLabel turnLabel){
+        if (playerTurn == 0){
+            return "";
+        }else if (playerTurn == 6){
+            turnLabel.setForeground(Colors.PURPLE);
+            return "Purple";
+        }else if (playerTurn == 4){
+            turnLabel.setForeground(Colors.GREEN);
+            return "Green";
+        }else if (playerTurn == 2){
+            turnLabel.setForeground(Colors.ORANGE);
+            return "Purple";
+        }else if (playerTurn == 3){
+            turnLabel.setForeground(Colors.YELLOW);
+            return "Yellow";
+        }else if (playerTurn == 1){
+            turnLabel.setForeground(Colors.RED);
+            return "Red";
+        }else {
+            turnLabel.setForeground(Colors.BLUE);
+            return "Blue";
+        }
     }
 
     private JTextArea createHoverArea(){
@@ -106,14 +231,6 @@ public class Largest {
         return hoverArea;
     }
 
-    private JTextArea createClickArea(){
-        JTextArea clickArea = new JTextArea("clickArea");
-        clickArea.setEditable(false);
-        clickArea.setLineWrap(true);
-        drawingPanel.setClickArea(clickArea);
-        return clickArea;
-    }
-
     private JButton createBackButton(){
         JButton back = new JButton("Back");
         back.addActionListener(new ActionListener() {
@@ -121,6 +238,7 @@ public class Largest {
             public void actionPerformed(ActionEvent e) {
                 engine.back();
                 drawingPanel.updateMap();
+                updateTopPanel();
             }
         });
         return back;
@@ -133,6 +251,7 @@ public class Largest {
             public void actionPerformed(ActionEvent e) {
                 engine.forward();
                 drawingPanel.updateMap();
+                updateTopPanel();
             }
         });
         return forward;

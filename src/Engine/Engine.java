@@ -90,7 +90,7 @@ public class Engine {
         }
     }
 
-    private void nextPhase(){
+    public void nextPhase(){
         GameState state = getLatestState();
         playerTurn = state.getPlayerTurn();
         turnStage = state.getTurnStage();
@@ -115,7 +115,7 @@ public class Engine {
         while(looking){
             playerTurn++;
             if (playerTurn > 6){
-                playerTurn = 0;
+                playerTurn = 1;
             }
             //must be a better way to do this
             for (Alliance a : players.keySet()){
@@ -385,6 +385,10 @@ public class Engine {
         //fillPlayers(history.get(history.size()-1).getBoard());
         System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
                 " ecodedBoard: " + history.get(histIndex).getEncodedBoard() + "\n");
+    }
+
+    public void current(){
+        histIndex = history.size() -1;
     }
 
     private void setState(){

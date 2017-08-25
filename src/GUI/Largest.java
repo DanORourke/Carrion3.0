@@ -92,6 +92,9 @@ public class Largest {
         bfButtonPanel.add(Box.createHorizontalGlue());
         JButton forward = createForwardButton();
         bfButtonPanel.add(forward);
+        JButton current = createCurrentButton();
+        bfButtonPanel.add(Box.createHorizontalGlue());
+        bfButtonPanel.add(current);
 
         c = new GridBagConstraints();
         c.gridx = 0;
@@ -161,7 +164,16 @@ public class Largest {
     }
 
     private JButton createNextButton(){
-        return new JButton("Next");
+        JButton next = new JButton("Next");
+        next.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                engine.nextPhase();
+                drawingPanel.updateMap();
+                updateTopPanel();
+            }
+        });
+        return next;
     }
 
 
@@ -255,5 +267,18 @@ public class Largest {
             }
         });
         return forward;
+    }
+
+    private JButton createCurrentButton(){
+        JButton current = new JButton("Forward");
+        current.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                engine.current();
+                drawingPanel.updateMap();
+                updateTopPanel();
+            }
+        });
+        return current;
     }
 }

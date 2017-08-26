@@ -53,16 +53,26 @@ public class Engine {
             }else{
                 //turnstage == 1
                 //q, r, s (of active coords)  ,q, r, s (of clicked coords) , boolean leftclick(0=false, 1=true)
-                int qc = Integer.valueOf(moves.get(i));
-                int rc = Integer.valueOf(moves.get(i+1));
-                int sc = Integer.valueOf(moves.get(i+2));
-                activeCoords = new Coords(qc, rc, sc);
-                int q = Integer.valueOf(moves.get(i+3));
-                int r = Integer.valueOf(moves.get(i+4));
-                int s = Integer.valueOf(moves.get(i+5));
-                int leftClick = Integer.valueOf(moves.get(i+6));
-                click(new Coords(q, r, s), leftClick == 1);
-                i+=7;
+                if (moveType.equals("wantsChief")){
+                    int q = Integer.valueOf(moves.get(i+1));
+                    int r = Integer.valueOf(moves.get(i+2));
+                    int s = Integer.valueOf(moves.get(i+3));
+                    int leftClick = Integer.valueOf(moves.get(i+4));
+                    settingChief = true;
+                    setChiefOrders(new Coords(q, r, s), leftClick == 1);
+                    i+= 5;
+                }else{
+                    int qc = Integer.valueOf(moves.get(i));
+                    int rc = Integer.valueOf(moves.get(i+1));
+                    int sc = Integer.valueOf(moves.get(i+2));
+                    activeCoords = new Coords(qc, rc, sc);
+                    int q = Integer.valueOf(moves.get(i+3));
+                    int r = Integer.valueOf(moves.get(i+4));
+                    int s = Integer.valueOf(moves.get(i+5));
+                    int leftClick = Integer.valueOf(moves.get(i+6));
+                    click(new Coords(q, r, s), leftClick == 1);
+                    i+=7;
+                }
             }
         }
         System.out.println("history size: " + history.size());
@@ -108,11 +118,6 @@ public class Engine {
     public void nextPhase(){
         histIndex = history.size() - 1;
         setState();
-//        GameState state = getLatestState();
-//        playerTurn = state.getPlayerTurn();
-//        turnStage = state.getTurnStage();
-//        board = state.getBoard();
-//        fillPlayers();//why do this??
         rotatePhase();
         String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
         String encoded = nextEncoded(oldEncoded);
@@ -167,15 +172,12 @@ public class Engine {
 
     private void moveChief(){
         Player aP = getActivePlayer();
-        System.out.println("Move chief false");
         if (aP != null && aP.willMoveChief()){
-            System.out.println("Move chief true");
             Piece[] pieces = aP.moveChief();
             board.removeChief(pieces[0]);
             board.addChief(pieces[1]);
             String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
-            history.add(new GameState(new Board(board), null,  playerTurn, turnStage,
-                    oldEncoded + ",chief," + pieces[1].getCoords().toString()));
+            history.add(new GameState(new Board(board), null,  playerTurn, turnStage, oldEncoded));
             histIndex = history.size() - 1;
             setState();
         }
@@ -314,7 +316,9 @@ public class Engine {
         }
         rememberClick = false;
         setState();
-        System.out.println(c.toString() + " isEmpty: " + board.get(c).isEmpty() + " turnstage = " + turnStage);
+        System.out.println(c.toString() +
+                " isEmpty: " + board.get(c).isEmpty() +
+                " turnstage = " + turnStage);
         board.clearChangeData();
         activeGeneral = null;
         if (turnStage == 0){
@@ -378,7 +382,6 @@ public class Engine {
     }
 
     private void setChiefOrders(Coords c, boolean general){
-
         if (general){
             General first = board.get(c).getFirstGeneral();
             General second = board.get(c).getSecondGeneral();
@@ -403,8 +406,12 @@ public class Engine {
         clearFutureHistory();
         histIndex = history.size() - 1;
         String oldEncoded = history.get(histIndex).getEncodedBoard();
+        String left = "0";
+        if (general){
+            left = "1";
+        }
         history.add(new GameState(board, activeCoords, playerTurn, turnStage,
-                oldEncoded + ",wantsChief," + c.toString()));
+                oldEncoded + ",wantsChief," + c.toString() + "," + left));
         histIndex ++;
     }
 

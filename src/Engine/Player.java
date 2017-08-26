@@ -88,8 +88,7 @@ public class Player {
                 }
             }
         }
-        System.out.println((wantsChief != null) + " " + (hasChief != null));
-
+        //System.out.println((wantsChief != null) + " " + (hasChief != null));
         if (wantsChief != null && hasChief != null){
             return new Piece[]{hasChief, wantsChief};
         }else{

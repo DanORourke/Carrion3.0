@@ -163,6 +163,15 @@ public class Parcel {
         return null;
     }
 
+    Capitol getCapitol(){
+        //return second capitol
+        if (pieces.containsKey(7)){
+            return (Capitol) pieces.get(7);
+        }
+        //catch exception??
+        return null;
+    }
+
     boolean hasSupplyLine() {
         return pieces.containsKey(0);
     }

@@ -1,5 +1,6 @@
 package Engine;
 
+import Engine.Piece.Capitol;
 import Engine.Piece.General.General;
 import Engine.Piece.Piece;
 import Engine.Piece.Supply;
@@ -193,5 +194,45 @@ class Board {
         removePiece(g);
         General gen = g.createNewTroop(n);
         addPiece(gen);
+    }
+
+    void setChiefOrders(General g, boolean wantsChief){
+        General ng = g.createNewWantsChief(wantsChief);
+        removePiece(g);
+        addPiece(ng);
+    }
+
+    void setChiefOrders(Capitol cap, boolean wantsChief){
+        Capitol ncap = cap.createNewWantsChief(wantsChief);
+        removePiece(cap);
+        addPiece(ncap);
+    }
+
+    void removeChief(Piece p){
+        if (p.getType() > 0 && p.getType() < 6){
+            setChief((General)p, false);
+        }else if (p.getType() == 7){
+            setChief((Capitol) p, false);
+        }
+    }
+
+    void addChief(Piece p){
+        if (p.getType() > 0 && p.getType() < 6){
+            setChief((General)p, true);
+        }else if (p.getType() == 7){
+            setChief((Capitol) p, true);
+        }
+    }
+
+    private void setChief(General g, boolean hasChief){
+        General ng = g.createNewHasChief(hasChief);
+        removePiece(g);
+        addPiece(ng);
+    }
+
+    private void setChief(Capitol cap, boolean hasChief){
+        Capitol ncap = cap.createNewHasChief(hasChief);
+        removePiece(cap);
+        addPiece(ncap);
     }
 }

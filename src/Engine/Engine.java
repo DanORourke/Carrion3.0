@@ -1,5 +1,6 @@
 package Engine;
 
+import Engine.Piece.Capitol;
 import Engine.Piece.General.General;
 import Engine.Piece.Piece;
 import GUI.Coords;
@@ -21,7 +22,8 @@ public class Engine {
     private int playerTurn;
     private int turnStage;//0=allocate, 1=move, 2=special if needed
     private boolean rememberClick = false;
-    private int indexOfNoChange = 0;
+    private int indexOfNoChange = -1;
+    private boolean settingChief = false;
 
     public Engine(String encodedBoard){
         ArrayList<String> moves = new ArrayList<>(Arrays.asList(encodedBoard.split(",")));
@@ -41,7 +43,15 @@ public class Engine {
             if (moveType.equals("next")){
                 nextPhase();
                 i++;
+            }else if (turnStage == 0){
+                int q = Integer.valueOf(moves.get(i));
+                int r = Integer.valueOf(moves.get(i+1));
+                int s = Integer.valueOf(moves.get(i+2));
+                int leftClick = Integer.valueOf(moves.get(i+3));
+                click(new Coords(q, r, s), leftClick == 1);
+                i+=4;
             }else{
+                //turnstage == 1
                 //q, r, s (of active coords)  ,q, r, s (of clicked coords) , boolean leftclick(0=false, 1=true)
                 int qc = Integer.valueOf(moves.get(i));
                 int rc = Integer.valueOf(moves.get(i+1));
@@ -62,7 +72,6 @@ public class Engine {
         String startEncoded = String.valueOf(mapRadius) + "," + String.valueOf(gameType);
         history.add(new GameState(board, null, playerTurn, turnStage, startEncoded));
         histIndex++;
-        System.out.println(history.size());
     }
 
     private void addClickToHistory(Coords c, boolean leftClick){
@@ -74,6 +83,7 @@ public class Engine {
 
     private String createClickEncoded(Coords c, boolean leftClick){
         //could remove s coord and calculate it up top instead, q + r + s = 0, but might keep it to use as verification
+        System.out.println("histIndex: " + histIndex);
         String oldEncoded = history.get(histIndex).getEncodedBoard();
         String left;
         if (leftClick){
@@ -81,7 +91,12 @@ public class Engine {
         }else{
             left = "0";
         }
-        return oldEncoded + "," + activeCoords.toString() + "," + c.toString() + "," + left;
+        if (turnStage == 0){
+            return oldEncoded + "," + c.toString() + "," + left;
+
+        }else {
+            return oldEncoded + "," + activeCoords.toString() + "," + c.toString() + "," + left;
+        }
     }
 
     private void clearFutureHistory(){
@@ -91,15 +106,28 @@ public class Engine {
     }
 
     public void nextPhase(){
-        GameState state = getLatestState();
-        playerTurn = state.getPlayerTurn();
-        turnStage = state.getTurnStage();
-        board = state.getBoard();
-        fillPlayers();
+        histIndex = history.size() - 1;
+        setState();
+//        GameState state = getLatestState();
+//        playerTurn = state.getPlayerTurn();
+//        turnStage = state.getTurnStage();
+//        board = state.getBoard();
+//        fillPlayers();//why do this??
         rotatePhase();
-        String oldEncoded = history.get(histIndex).getEncodedBoard();
-        history.add(new GameState(new Board(board), null,  playerTurn, turnStage, oldEncoded + ",next"));
-        histIndex++;
+        String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
+        String encoded = nextEncoded(oldEncoded);
+        history.add(new GameState(new Board(board), null,  playerTurn, turnStage, encoded));
+        histIndex = history.size() - 1;
+    }
+
+    private String nextEncoded(String oldEncoded){
+        //thinking of condensing the allocate clicks
+        if (turnStage == 0){
+            return oldEncoded + ",next";
+
+        }else {
+            return oldEncoded + ",next";
+        }
     }
 
     private void rotatePhase(){
@@ -111,6 +139,12 @@ public class Engine {
     }
 
     private void rotatePlayer(){
+        condenseAllocateHistory();
+        histIndex = history.size() - 1;
+        //do stuff if battles need to happen
+        playoutBattles();
+        //move the chief if someone else wants him and he is connected
+        moveChief();
         boolean looking = true;
         while(looking){
             playerTurn++;
@@ -125,6 +159,50 @@ public class Engine {
             }
         }
         indexOfNoChange = histIndex;
+    }
+
+    private void playoutBattles(){
+        //TODO this
+    }
+
+    private void moveChief(){
+        Player aP = getActivePlayer();
+        System.out.println("Move chief false");
+        if (aP != null && aP.willMoveChief()){
+            System.out.println("Move chief true");
+            Piece[] pieces = aP.moveChief();
+            board.removeChief(pieces[0]);
+            board.addChief(pieces[1]);
+            String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
+            history.add(new GameState(new Board(board), null,  playerTurn, turnStage,
+                    oldEncoded + ",chief," + pieces[1].getCoords().toString()));
+            histIndex = history.size() - 1;
+            setState();
+        }
+    }
+
+    private void condenseAllocateHistory(){
+        //remove all allocate history except for first, make easier to click through
+        int nextNext = 0;
+        int i = indexOfNoChange + 2;
+        boolean searching = true;
+        while (searching){
+            if (history.get(i).getTurnStage() != 0){
+                nextNext = i;
+                searching = false;
+            }
+            i++;
+        }
+        history.subList(indexOfNoChange + 2, nextNext).clear();
+    }
+
+    private Player getActivePlayer(){
+        for (Alliance a : players.keySet()){
+            if (a.getDataCode() == playerTurn){
+                return players.get(a);
+            }
+        }
+        return null;
     }
 
     private void fillPlayers(){
@@ -224,13 +302,13 @@ public class Engine {
         String s = "";
         General g = board.get(c).getFirstGeneral();
         if (g != null){
-            s = g.getTroops() + " " + g.getMovementPoints();
+            s = g.getTroops() + " " + g.getMovementPoints() + " wants " + g.wantsChief() + " has " + g.hasChief();
         }
         return s;
     }
 
     public HashMap<Coords, GameData> click(Coords c, boolean leftClick){
-        if (histIndex < indexOfNoChange){
+        if (histIndex <= indexOfNoChange){
             System.out.println("not your turn");
             return new HashMap<>();
         }
@@ -241,21 +319,25 @@ public class Engine {
         activeGeneral = null;
         if (turnStage == 0){
             if (leftClick){
-                allocateLeftClick(c, board);
+                allocateLeftClick(c);
             }else {
-                allocateRightClick(c, board);
+                allocateRightClick(c);
             }
         }else if (turnStage == 1){
-            if (leftClick){
-                moveLeftClick(c, board);
+            if (settingChief){
+                setChiefOrders(c, leftClick);
+                settingChief = false;
+            }
+            else if (leftClick){
+                moveLeftClick(c);
             }else {
-                moveRightClick(c, board);
+                moveRightClick(c);
             }
         }else{
             if (leftClick){
-                specialLeftClick(c, board);
+                specialLeftClick(c);
             }else {
-                specialRightClick(c, board);
+                specialRightClick(c);
             }
         }
         if (rememberClick){
@@ -268,34 +350,79 @@ public class Engine {
         return new HashMap<>();
     }
 
-    private void allocateLeftClick(Coords c, Board board){
+    private void allocateLeftClick(Coords c){
             activeGeneral = board.get(c).getFirstGeneral();
             if (activeGeneral != null){
                 Alliance a  = activeGeneral.getAlliance();
                 if (a.getDataCode() == playerTurn  && players.get(a).canGeneralAdd(c)){//
-                    addTroops(activeGeneral, 1, board);
+                    addTroops(activeGeneral, 1);
                     rememberClick = true;
                 }
             }
     }
 
-    private void allocateRightClick(Coords c, Board board){
+    private void allocateRightClick(Coords c){
         activeGeneral = board.get(c).getFirstGeneral();
         if (activeGeneral != null){
             Alliance a  = activeGeneral.getAlliance();
             if (a.getDataCode() == playerTurn && players.get(a).canGeneralSubtract(c)){
-                addTroops(activeGeneral, -1, board);
+                addTroops(activeGeneral, -1);
                 rememberClick = true;
             }
         }
     }
 
-    private void addTroops(General g, int n, Board board){
+    private void addTroops(General g, int n){
         board.addTroops(g, n);
         players.get(g.getAlliance()).addTroops(g, n);
     }
 
-    private void moveLeftClick(Coords c, Board board){
+    private void setChiefOrders(Coords c, boolean general){
+
+        if (general){
+            General first = board.get(c).getFirstGeneral();
+            General second = board.get(c).getSecondGeneral();
+            if (first != null){
+                if (first.getAlliance().getDataCode() == playerTurn){
+                    removeActiveChiefOrders();
+                    board.setChiefOrders(first, true);
+                }
+            }else if(second != null){
+                if (second.getAlliance().getDataCode() == playerTurn){
+                    removeActiveChiefOrders();
+                    board.setChiefOrders(second, true);
+                }
+            }
+        }else{
+            Capitol capitol = board.get(c).getCapitol();
+            if (capitol.getAlliance().getDataCode() == playerTurn){
+                removeActiveChiefOrders();
+                board.setChiefOrders(capitol, true);
+            }
+        }
+        clearFutureHistory();
+        histIndex = history.size() - 1;
+        String oldEncoded = history.get(histIndex).getEncodedBoard();
+        history.add(new GameState(board, activeCoords, playerTurn, turnStage,
+                oldEncoded + ",wantsChief," + c.toString()));
+        histIndex ++;
+    }
+
+    private void removeActiveChiefOrders(){
+        Player aP = getActivePlayer();
+        if (aP != null){
+            ArrayList<Piece> wanters = aP.getChiefWanters();
+            for (Piece p : wanters){
+                if (p.getType() > 0 && p.getType() < 6){
+                    board.setChiefOrders((General)p, false);
+                }else if (p.getType() == 7){
+                    board.setChiefOrders((Capitol) p, false);
+                }
+            }
+        }
+    }
+
+    private void moveLeftClick(Coords c){
         Parcel clickedParcel = board.get(c);
         // find active general
         boolean active = false;
@@ -316,7 +443,7 @@ public class Engine {
 
     }
 
-    private void moveRightClick(Coords c, Board board){
+    private void moveRightClick(Coords c){
         Parcel clickedParcel = board.get(c);
         // find active general
         boolean active = false;
@@ -331,36 +458,40 @@ public class Engine {
         if (clickedParcel.hasSingleGeneral() &&
                 !clickedParcel.hasSupplyLine() && clickedParcel.getFirstGeneral().canDrop() &&
                 clickedParcel.getFirstGeneral().getAlliance().getDataCode() == playerTurn){
-            dropSupply(clickedParcel.getFirstGeneral(), board);
+            dropSupply(clickedParcel.getFirstGeneral());
             rememberClick = true;
         }
         if (active && clickedParcel.isEmpty() && activeCoords.isNextTo(c) && activeGeneral.canMoveAndDrop() &&
                 activeGeneral.getAlliance().getDataCode() == playerTurn){
-            moveGeneral(activeGeneral, c, board);
-            dropSupply(activeGeneral,board);
+            moveGeneral(activeGeneral, c);
+            dropSupply(activeGeneral);
             rememberClick = true;
         }
         nextActiveCoords = c;
 
     }
 
-    private void moveGeneral(General g, Coords c, Board board){
+    private void moveGeneral(General g, Coords c){
         board.moveGeneral(g, c);
         activeGeneral = board.get(c).getFirstGeneral();
     }
 
-    private void dropSupply(General g, Board board){
+    private void dropSupply(General g){
         board.dropSupply(g);
     }
 
-    private void specialLeftClick(Coords c, Board board){
+    private void specialLeftClick(Coords c){
     }
 
-    private void specialRightClick(Coords c, Board board){
+    private void specialRightClick(Coords c){
     }
 
     public int getMapRadius() {
         return mapRadius;
+    }
+
+    public void settingChief(){
+        this.settingChief = true;
     }
 
     public void back(){

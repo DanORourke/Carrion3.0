@@ -413,16 +413,14 @@ public class DrawingPanel extends JPanel{
                 leftClick = false;
             }
             HashMap<Coords, GameData> update = engine.click(c, leftClick);
-//            if (!leftClick){
-//                rotateCamera(1);
-//            }
+
             for (Coords cn : update.keySet()){
                 Tile ct = map.get(cn);
                 map.put(cn, new Tile(ct.getX(), ct.getY(), update.get(cn)));
             }
+            sendClickInfo(c);
             revalidate();
             repaint();
-            sendClickInfo(c);
         }
         public void mousePressed(MouseEvent e) {
             //set start location to move the view from

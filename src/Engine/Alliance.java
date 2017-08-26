@@ -35,7 +35,7 @@ public enum Alliance {
         public HashMap<Coords, Parcel> getInitialSetup(){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(16, -8, -8);
-            Parcel p1 = new Parcel(new Capitol(c1, this, true));
+            Parcel p1 = new Parcel(new Capitol(c1, this));
             setup.put(c1, p1);
             Coords c2 = new Coords(14, -7, -7);
             Parcel p2 = new Parcel(new Town(c2, this));
@@ -130,7 +130,7 @@ public enum Alliance {
         public HashMap<Coords, Parcel> getInitialSetup(){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(-8, -8, 16);
-            Parcel p1 = new Parcel(new Capitol(c1, this, true));
+            Parcel p1 = new Parcel(new Capitol(c1, this));
             setup.put(c1, p1);
             Coords c2 = new Coords(-7, -7, 14);
             Parcel p2 = new Parcel(new Town(c2,this));
@@ -226,7 +226,7 @@ public enum Alliance {
         public HashMap<Coords, Parcel> getInitialSetup(){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(-8, 16, -8);
-            Parcel p1 = new Parcel(new Capitol(c1, this, true));
+            Parcel p1 = new Parcel(new Capitol(c1, this));
             setup.put(c1, p1);
             Coords c2 = new Coords(-7, 14, -7);
             Parcel p2 = new Parcel(new Town(c2,this));
@@ -321,7 +321,7 @@ public enum Alliance {
         public HashMap<Coords, Parcel> getInitialSetup(){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(8, -16, 8);
-            Parcel p1 = new Parcel(new Capitol(c1, this, true));
+            Parcel p1 = new Parcel(new Capitol(c1, this));
             setup.put(c1, p1);
             Coords c2 = new Coords(7, -14, 7);
             Parcel p2 = new Parcel(new Town(c2, this));
@@ -417,7 +417,7 @@ public enum Alliance {
         public HashMap<Coords, Parcel> getInitialSetup(){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(-16, 8, 8);
-            Parcel p1 = new Parcel(new Capitol(c1, this, true));
+            Parcel p1 = new Parcel(new Capitol(c1, this));
             setup.put(c1, p1);
             Coords c2 = new Coords(-14, 7, 7);
             Parcel p2 = new Parcel(new Town(c2, this));
@@ -511,7 +511,7 @@ public enum Alliance {
         public HashMap<Coords, Parcel> getInitialSetup(){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(8, 8, -16);
-            Parcel p1 = new Parcel(new Capitol(c1, this, true));
+            Parcel p1 = new Parcel(new Capitol(c1, this));
             setup.put(c1, p1);
             Coords c2 = new Coords(7, 7, -14);
             Parcel p2 = new Parcel(new Town(c2,this));

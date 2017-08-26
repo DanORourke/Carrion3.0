@@ -9,6 +9,7 @@ public class Largest {
     private final Engine engine;
     private final DrawingPanel drawingPanel;
     private final JFrame frame;
+    private final JTextArea hoverArea;
     private JPanel topPanel;
 
     public Largest(String encodedBoard){
@@ -16,6 +17,7 @@ public class Largest {
         this.engine = new Engine(encodedBoard);
         this.drawingPanel = new DrawingPanel(engine);
         this.frame = new JFrame("Carrion");
+        this.hoverArea = createHoverArea();
         setFrame();
         prepareFrame();
     }
@@ -59,21 +61,8 @@ public class Largest {
         mainPanel.setOpaque(true);
         mainPanel.setBackground(Colors.BACKGROUND);
 
-        topPanel = new JPanel(new GridBagLayout());
-        topPanel.setOpaque(true);
-        topPanel.setBackground(Colors.BACKGROUND);
-        updateTopPanel();
-        GridBagConstraints c  = new GridBagConstraints();
-        c.gridx = 0;
-        c.gridy = 0;
-        c.fill = GridBagConstraints.BOTH;
-        c.weightx = 1.0;
-        c.insets = new Insets(10, 10, 10, 10);
-        mainPanel.add(topPanel, c);
-
-        JTextArea hoverArea = createHoverArea();
         JScrollPane hovScroll = new JScrollPane(hoverArea);
-        c  = new GridBagConstraints();
+        GridBagConstraints c  = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 1;
         c.gridwidth = 2;
@@ -82,6 +71,18 @@ public class Largest {
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(10, 10, 10, 10);
         mainPanel.add(hovScroll, c);
+
+        topPanel = new JPanel(new GridBagLayout());
+        topPanel.setOpaque(true);
+        topPanel.setBackground(Colors.BACKGROUND);
+        updateTopPanel();
+        c  = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.fill = GridBagConstraints.BOTH;
+        c.weightx = 1.0;
+        c.insets = new Insets(10, 10, 10, 10);
+        mainPanel.add(topPanel, c);
 
         JPanel bfButtonPanel = new JPanel();
         bfButtonPanel.setOpaque(true);
@@ -186,7 +187,17 @@ public class Largest {
     }
 
     private JButton createChiefButton(){
-        return new JButton("Move Chief");
+        JButton chief =  new JButton("Move Chief");
+        chief.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                engine.settingChief();
+                hoverArea.setText("Left click on the general you are ordering the chief of staff to station with next, " +
+                        "or right click on the capitol you are ordering the chief of staff to station with next.  " +
+                        "The chief will only move if he is connected to his next station at the end of the turn.");
+            }
+        });
+        return chief;
     }
 
     private JLabel createTurnLabel(int playerTurn, int turnStage){
@@ -222,7 +233,7 @@ public class Largest {
             return "Green";
         }else if (playerTurn == 2){
             turnLabel.setForeground(Colors.ORANGE);
-            return "Purple";
+            return "Orange";
         }else if (playerTurn == 3){
             turnLabel.setForeground(Colors.YELLOW);
             return "Yellow";

@@ -24,6 +24,7 @@ public class Engine {
     private boolean rememberClick = false;
     private int indexOfNoChange = -1;
     private boolean settingChief = false;
+    private boolean exposingGeneral = false;
 
     public Engine(String encodedBoard){
         ArrayList<String> moves = new ArrayList<>(Arrays.asList(encodedBoard.split(",")));
@@ -44,12 +45,22 @@ public class Engine {
                 nextPhase();
                 i++;
             }else if (turnStage == 0){
-                int q = Integer.valueOf(moves.get(i));
-                int r = Integer.valueOf(moves.get(i+1));
-                int s = Integer.valueOf(moves.get(i+2));
-                int leftClick = Integer.valueOf(moves.get(i+3));
-                click(new Coords(q, r, s), leftClick == 1);
-                i+=4;
+                if (moveType.equals("expose")){
+                    exposingGeneral = true;
+                    int q = Integer.valueOf(moves.get(i+1));
+                    int r = Integer.valueOf(moves.get(i+2));
+                    int s = Integer.valueOf(moves.get(i+3));
+                    //left click doesn't matter
+                    click(new Coords(q, r, s), true);
+                    i+=4;
+                }else{
+                    int q = Integer.valueOf(moves.get(i));
+                    int r = Integer.valueOf(moves.get(i+1));
+                    int s = Integer.valueOf(moves.get(i+2));
+                    int leftClick = Integer.valueOf(moves.get(i+3));
+                    click(new Coords(q, r, s), leftClick == 1);
+                    i+=4;
+                }
             }else{
                 //turnstage == 1
                 //q, r, s (of active coords)  ,q, r, s (of clicked coords) , boolean leftclick(0=false, 1=true)
@@ -304,7 +315,8 @@ public class Engine {
         String s = "";
         General g = board.get(c).getFirstGeneral();
         if (g != null){
-            s = g.getTroops() + " " + g.getMovementPoints() + " wants " + g.wantsChief() + " has " + g.hasChief();
+            s = g.getTroops() + " " + g.getMovementPoints() + " wants " + g.wantsChief() + " has " + g.hasChief() +
+            " exposed " + g.getExposed();
         }
         return s;
     }
@@ -322,7 +334,10 @@ public class Engine {
         board.clearChangeData();
         activeGeneral = null;
         if (turnStage == 0){
-            if (leftClick){
+            if (exposingGeneral){
+                exposeGeneral(c);
+                exposingGeneral = false;
+            }else if (leftClick){
                 allocateLeftClick(c);
             }else {
                 allocateRightClick(c);
@@ -381,7 +396,21 @@ public class Engine {
         players.get(g.getAlliance()).addTroops(g, n);
     }
 
+    private void exposeGeneral(Coords c){
+        General first = board.get(c).getFirstGeneral();
+        if (first != null){
+            board.setExposedGeneral(first);
+            clearFutureHistory();
+            histIndex = history.size() - 1;
+            String oldEncoded = history.get(histIndex).getEncodedBoard();
+            history.add(new GameState(board, activeCoords, playerTurn, turnStage,
+                    oldEncoded + ",expose," + c.toString()));
+            histIndex ++;
+        }
+    }
+
     private void setChiefOrders(Coords c, boolean general){
+        boolean foundOne = false;
         if (general){
             General first = board.get(c).getFirstGeneral();
             General second = board.get(c).getSecondGeneral();
@@ -389,30 +418,35 @@ public class Engine {
                 if (first.getAlliance().getDataCode() == playerTurn){
                     removeActiveChiefOrders();
                     board.setChiefOrders(first, true);
+                    foundOne = true;
                 }
             }else if(second != null){
                 if (second.getAlliance().getDataCode() == playerTurn){
                     removeActiveChiefOrders();
                     board.setChiefOrders(second, true);
+                    foundOne = true;
                 }
             }
         }else{
             Capitol capitol = board.get(c).getCapitol();
-            if (capitol.getAlliance().getDataCode() == playerTurn){
+            if (capitol != null && capitol.getAlliance().getDataCode() == playerTurn){
                 removeActiveChiefOrders();
                 board.setChiefOrders(capitol, true);
+                foundOne = true;
             }
         }
-        clearFutureHistory();
-        histIndex = history.size() - 1;
-        String oldEncoded = history.get(histIndex).getEncodedBoard();
-        String left = "0";
-        if (general){
-            left = "1";
+        if (foundOne){
+            clearFutureHistory();
+            histIndex = history.size() - 1;
+            String oldEncoded = history.get(histIndex).getEncodedBoard();
+            String left = "0";
+            if (general){
+                left = "1";
+            }
+            history.add(new GameState(board, activeCoords, playerTurn, turnStage,
+                    oldEncoded + ",wantsChief," + c.toString() + "," + left));
+            histIndex ++;
         }
-        history.add(new GameState(board, activeCoords, playerTurn, turnStage,
-                oldEncoded + ",wantsChief," + c.toString() + "," + left));
-        histIndex ++;
     }
 
     private void removeActiveChiefOrders(){
@@ -499,6 +533,10 @@ public class Engine {
 
     public void settingChief(){
         this.settingChief = true;
+    }
+
+    public void setExposingGeneral(){
+        this.exposingGeneral = true;
     }
 
     public void back(){

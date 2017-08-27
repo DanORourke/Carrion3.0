@@ -10,6 +10,7 @@ public class General extends Piece {
     private final int movementPoints;
     private final boolean hasChief;
     private final boolean wantsChief;
+    private final boolean exposed;
 
     public General(Coords coords, int type, Alliance alliance, int name){
         super(coords, type, alliance);
@@ -18,38 +19,49 @@ public class General extends Piece {
         this.movementPoints = 5;
         this.hasChief = false;
         this.wantsChief = false;
+        this.exposed = false;
     }
 
     public General(Coords coords, int type, Alliance alliance, int name,
-                   int troops, int movementPoints, boolean hasChief, boolean wantsChief){
+                   int troops, int movementPoints, boolean hasChief, boolean wantsChief, boolean exposed){
         super(coords, type, alliance);
         this.name = name;
         this.troops = troops;
         this.movementPoints = movementPoints;
         this.hasChief = hasChief;
         this.wantsChief = wantsChief;
+        this.exposed = exposed;
     }
 
     @Override
     public Piece copy(){
-        return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief);
+        return new General(getCoords(), getType(), getAlliance(), name,
+                troops, movementPoints, hasChief, wantsChief, exposed);
     }
 
     public General createNewMoved(Coords c, int n){
-        return new General(c, getType(), getAlliance(), getName(), troops, movementPoints - n, hasChief, wantsChief);
+        return new General(c, getType(), getAlliance(), getName(),
+                troops, movementPoints - n, hasChief, wantsChief, exposed);
     }
 
     public General createNewTroop(int addedTroops){
         return new General(getCoords(), getType(), getAlliance(), getName(),
-                troops + addedTroops, movementPoints, hasChief, wantsChief);
+                troops + addedTroops, movementPoints, hasChief, wantsChief, exposed);
     }
 
     public General createNewWantsChief(boolean wantsChief){
-        return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief);
+        return new General(getCoords(), getType(), getAlliance(), name,
+                troops, movementPoints, hasChief, wantsChief, exposed);
     }
 
     public General createNewHasChief(boolean hasChief){
-        return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief);
+        return new General(getCoords(), getType(), getAlliance(), name,
+                troops, movementPoints, hasChief, wantsChief, exposed);
+    }
+
+    public General createNewExposed(boolean exposed){
+        return new General(getCoords(), getType(), getAlliance(), name,
+                troops, movementPoints, hasChief, wantsChief, exposed);
     }
 
     public int getName() {
@@ -78,5 +90,9 @@ public class General extends Piece {
 
     public boolean wantsChief(){
         return wantsChief;
+    }
+
+    public boolean getExposed(){
+        return exposed;
     }
 }

@@ -61,6 +61,8 @@ public class Largest {
         mainPanel.setOpaque(true);
         mainPanel.setBackground(Colors.BACKGROUND);
 
+        hoverArea.setLineWrap(true);
+        hoverArea.setWrapStyleWord(true);
         JScrollPane hovScroll = new JScrollPane(hoverArea);
         GridBagConstraints c  = new GridBagConstraints();
         c.gridx = 0;
@@ -179,7 +181,15 @@ public class Largest {
 
 
     private JButton createExposeButton(){
-        return new JButton("Expose General");
+        JButton expose = new JButton("Expose General");
+        expose.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                engine.setExposingGeneral();
+                hoverArea.setText("Click on the general whose identity you are exposing to enemy intelligence.");
+            }
+        });
+        return expose;
     }
 
     private JButton createAssistButton(){

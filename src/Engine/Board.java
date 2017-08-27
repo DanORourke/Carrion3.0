@@ -235,4 +235,10 @@ class Board {
         removePiece(cap);
         addPiece(ncap);
     }
+
+    void setExposedGeneral(General g){
+        General ng = g.createNewExposed(true);
+        removePiece(g);
+        addPiece(ng);
+    }
 }

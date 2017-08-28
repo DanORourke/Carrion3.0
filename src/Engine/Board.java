@@ -269,4 +269,22 @@ class Board {
         removePiece(g);
         addPiece(ng);
     }
+
+    void resetGeneral(General g){
+        General ng = g.resetGeneral();
+        removePiece(g);
+        addPiece(ng);
+    }
+
+    void resetTown(Town t) {
+        Town nt = t.resetTown();
+        removePiece(t);
+        addPiece(nt);
+    }
+
+    void resetCap(Capitol cap) {
+        Capitol nCap = cap.resetCapitol();
+        removePiece(cap);
+        addPiece(nCap);
+    }
 }

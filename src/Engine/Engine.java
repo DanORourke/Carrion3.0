@@ -171,6 +171,7 @@ public class Engine {
             //must be a better way to do this
             for (Alliance a : players.keySet()){
                 if (a.getDataCode() == playerTurn){
+                    players.get(a).resetPlayerPieces(board);
                     looking = false;
                 }
             }

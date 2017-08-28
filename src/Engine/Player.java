@@ -18,19 +18,6 @@ public class Player {
         this.alliance = alliance;
     }
 
-//    private void initializePieces(){
-//        //create slot for every kind of piece
-//        pieces.put(0, new HashMap<>());
-//        pieces.put(1, new HashMap<>());
-//        pieces.put(2, new HashMap<>());
-//        pieces.put(3, new HashMap<>());
-//        pieces.put(4, new HashMap<>());
-//        pieces.put(5, new HashMap<>());
-//        pieces.put(6, new HashMap<>());
-//        pieces.put(7, new HashMap<>());
-//        pieces.put(8, new HashMap<>());
-//    }
-
     void addPiece(Piece p){
         Coords c = p.getCoords();
         pieces.put(c, p);
@@ -200,7 +187,37 @@ public class Player {
     }
 
     private boolean areConnected(Piece a, Piece b){
-        //TODO this
-        return true;
+        List<Piece> frontier = new ArrayList<>();
+        List<Piece> visited = new ArrayList<>();
+        visited.add(b);
+        frontier.add(b);
+
+        while (!frontier.isEmpty()) {
+            Piece current = frontier.get(frontier.size()-1);
+            for (Coords k : pieces.keySet()){
+                Piece bigBag = pieces.get(k);
+                //System.out.println("new big bag");
+                if ((!visited.contains(bigBag))&&(areNeighbors(bigBag, current)) ) {
+                    frontier.add(bigBag);
+                }
+            }
+            visited.add(current);
+            frontier.remove(current);
+        }
+
+        return visited.contains(a);
+    }
+
+    void resetPlayerPieces(Board board){
+        for (Coords c : pieces.keySet()){
+            Piece p = pieces.get(c);
+            if (p.isGeneral()){
+                board.resetGeneral((General)p);
+            }else if(p.isTown()){
+                board.resetTown((Town)p);
+            }else if (p.isCapitol()){
+                board.resetCap((Capitol)p);
+            }
+        }
     }
 }

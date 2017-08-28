@@ -25,6 +25,10 @@ public class Town extends Piece {
         return new Town(getCoords(), getAlliance(), haveTroop);
     }
 
+    public Town resetTown(){
+        return new Town(getCoords(), getAlliance(), true);
+    }
+
     public boolean hasTroop(){
         return haveTroop;
     }

@@ -3,10 +3,12 @@ package Engine;
 import Engine.Piece.Capitol;
 import Engine.Piece.General.General;
 import Engine.Piece.Piece;
+import Engine.Piece.Town;
 import GUI.Coords;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Player {
     private final Alliance alliance;
@@ -39,21 +41,104 @@ public class Player {
         pieces.remove(c);
     }
 
-    boolean canGeneralAdd(Coords c) {
-        //TODO
-        return true;
+    boolean canGeneralAdd(General g) {
+        return g.canAdd() && !connectedFullTowns(g).isEmpty();
     }
 
-    boolean canGeneralSubtract(Coords c) {
-        //TODO
-        return true;
+    private ArrayList<Piece> connectedFullTowns(General g){
+        ArrayList<Piece> connectedPieces = new ArrayList<>();
+        for (Coords c : pieces.keySet()) {
+            Piece p = pieces.get(c);
+
+            if (((p.getType() == 6) && ((Town) p).hasTroop()) ||
+                    ((p.getType() == 7) && (((Capitol) p).getTroops() > 0))) {
+                List<Piece> frontier = new ArrayList<>();
+                List<Piece> visited = new ArrayList<>();
+                visited.add(p);
+                frontier.add(p);
+
+                while (!frontier.isEmpty()) {
+                    Piece current = frontier.get(frontier.size()-1);
+                    for (Coords k : pieces.keySet()){
+                        Piece bigBag = pieces.get(k);
+                        //System.out.println("new big bag");
+                        if ((!visited.contains(bigBag))&&(areNeighbors(bigBag, current)) ) {
+                            frontier.add(bigBag);
+                        }
+                    }
+                    visited.add(current);
+                    frontier.remove(current);
+                }
+
+                if (visited.contains(g)){
+                    connectedPieces.add(p);
+                }
+            }
+        }
+        return connectedPieces;
     }
 
-    void addTroops(General g, int n) {
-        General addedG = g.createNewTroop(n);
-        removePiece(g);
-        addPiece(addedG);
+    private boolean areNeighbors(Piece p1, Piece p2){
+        Coords c1 = p1.getCoords();
+        Coords c2 = p2.getCoords();
+        int q1 = c1.getQ();
+        int r1 = c1.getR();
+        int s1 = c1.getS();
+        int q2 = c2.getQ();
+        int r2 = c2.getR();
+        int s2 = c2.getS();
+        return (((q1 == q2) && ((r1 + 1) == r2) && ((s1 - 1) == s2)) ||
+                ((q1 == q2) && ((r1 - 1) == r2) && ((s1 + 1) == s2)) ||
+                (((q1 + 1) == q2) && (r1 == r2) && ((s1 - 1) == s2)) ||
+                (((q1 - 1) == q2) && (r1 == r2) && ((s1 + 1) == s2)) ||
+                (((q1 + 1) == q2) && ((r1 - 1) == r2) && (s1 == s2)) ||
+                (((q1 - 1) == q2) && ((r1 + 1) == r2) && (s1 == s2)));
     }
+
+    Piece getConnectedTroopGiver(General g){
+        return connectedFullTowns(g).get(0);
+    }
+
+    boolean canGeneralSubtract(General g) {
+        return g.canSubtract() && !connectedTowns(g).isEmpty();
+    }
+
+    private ArrayList<Piece> connectedTowns(General g){
+        ArrayList<Piece> connectedPieces = new ArrayList<>();
+        for (Coords c : pieces.keySet()) {
+            Piece p = pieces.get(c);
+
+            if ((p.getType() == 6)  ||
+                    (p.getType() == 7)) {
+                List<Piece> frontier = new ArrayList<>();
+                List<Piece> visited = new ArrayList<>();
+                visited.add(p);
+                frontier.add(p);
+
+                while (!frontier.isEmpty()) {
+                    Piece current = frontier.get(frontier.size()-1);
+                    for (Coords k : pieces.keySet()){
+                        Piece bigBag = pieces.get(k);
+                        //System.out.println("new big bag");
+                        if ((!visited.contains(bigBag))&&(areNeighbors(bigBag, current)) ) {
+                            frontier.add(bigBag);
+                        }
+                    }
+                    visited.add(current);
+                    frontier.remove(current);
+                }
+
+                if (visited.contains(g)){
+                    connectedPieces.add(p);
+                }
+            }
+        }
+        return connectedPieces;
+    }
+//
+//    Piece getConnectedTroopReceiver(General g){
+//        return connectedTowns(g).get(0);
+//    }
 
     boolean willMoveChief(){
         Piece[] movePieces = moveChief();
@@ -88,7 +173,6 @@ public class Player {
                 }
             }
         }
-        //System.out.println((wantsChief != null) + " " + (hasChief != null));
         if (wantsChief != null && hasChief != null){
             return new Piece[]{hasChief, wantsChief};
         }else{

@@ -3,6 +3,7 @@ package Engine;
 import Engine.Piece.Capitol;
 import Engine.Piece.General.General;
 import Engine.Piece.Piece;
+import Engine.Piece.Town;
 import GUI.GameData;
 
 import java.util.HashMap;
@@ -169,6 +170,13 @@ public class Parcel {
             return (Capitol) pieces.get(7);
         }
         //catch exception??
+        return null;
+    }
+
+    Town getTown(){
+        if (pieces.containsKey(6)){
+            return (Town) pieces.get(6);
+        }
         return null;
     }
 

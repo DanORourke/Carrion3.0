@@ -3,6 +3,7 @@ package Engine;
 import Engine.Piece.Capitol;
 import Engine.Piece.General.General;
 import Engine.Piece.Piece;
+import Engine.Piece.Town;
 import GUI.Coords;
 import GUI.GameData;
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class Engine {
             }else{
                 //turnstage == 1
                 //q, r, s (of active coords)  ,q, r, s (of clicked coords) , boolean leftclick(0=false, 1=true)
-                if (moveType.equals("wantsChief")){
+                if (moveType.equals("chief")){
                     int q = Integer.valueOf(moves.get(i+1));
                     int r = Integer.valueOf(moves.get(i+2));
                     int s = Integer.valueOf(moves.get(i+3));
@@ -318,6 +319,15 @@ public class Engine {
             s = g.getTroops() + " " + g.getMovementPoints() + " wants " + g.wantsChief() + " has " + g.hasChief() +
             " exposed " + g.getExposed();
         }
+        Town t = board.get(c).getTown();
+        if (t != null){
+            s = "haveTroop: " + t.hasTroop();
+        }
+        Capitol cap = board.get(c).getCapitol();
+        if (cap != null){
+            s = " haveTroops: " + cap.getTroops();
+        }
+
         return s;
     }
 
@@ -373,8 +383,8 @@ public class Engine {
             activeGeneral = board.get(c).getFirstGeneral();
             if (activeGeneral != null){
                 Alliance a  = activeGeneral.getAlliance();
-                if (a.getDataCode() == playerTurn  && players.get(a).canGeneralAdd(c)){//
-                    addTroops(activeGeneral, 1);
+                if (a.getDataCode() == playerTurn  && players.get(a).canGeneralAdd(activeGeneral)){
+                    addTroopFromTown(activeGeneral);
                     rememberClick = true;
                 }
             }
@@ -384,16 +394,21 @@ public class Engine {
         activeGeneral = board.get(c).getFirstGeneral();
         if (activeGeneral != null){
             Alliance a  = activeGeneral.getAlliance();
-            if (a.getDataCode() == playerTurn && players.get(a).canGeneralSubtract(c)){
-                addTroops(activeGeneral, -1);
+            if (a.getDataCode() == playerTurn && players.get(a).canGeneralSubtract(activeGeneral)){
+                subtractTroop(activeGeneral);
                 rememberClick = true;
             }
         }
     }
 
-    private void addTroops(General g, int n){
-        board.addTroops(g, n);
-        players.get(g.getAlliance()).addTroops(g, n);
+    private void addTroopFromTown(General g){
+        Piece p = players.get(g.getAlliance()).getConnectedTroopGiver(g);
+        board.addTroops(g, 1);
+        board.subtractTroopFromTown(p);
+    }
+
+    private void subtractTroop(General g){
+        board.addTroops(g, -1);
     }
 
     private void exposeGeneral(Coords c){
@@ -406,60 +421,6 @@ public class Engine {
             history.add(new GameState(board, activeCoords, playerTurn, turnStage,
                     oldEncoded + ",expose," + c.toString()));
             histIndex ++;
-        }
-    }
-
-    private void setChiefOrders(Coords c, boolean general){
-        boolean foundOne = false;
-        if (general){
-            General first = board.get(c).getFirstGeneral();
-            General second = board.get(c).getSecondGeneral();
-            if (first != null){
-                if (first.getAlliance().getDataCode() == playerTurn){
-                    removeActiveChiefOrders();
-                    board.setChiefOrders(first, true);
-                    foundOne = true;
-                }
-            }else if(second != null){
-                if (second.getAlliance().getDataCode() == playerTurn){
-                    removeActiveChiefOrders();
-                    board.setChiefOrders(second, true);
-                    foundOne = true;
-                }
-            }
-        }else{
-            Capitol capitol = board.get(c).getCapitol();
-            if (capitol != null && capitol.getAlliance().getDataCode() == playerTurn){
-                removeActiveChiefOrders();
-                board.setChiefOrders(capitol, true);
-                foundOne = true;
-            }
-        }
-        if (foundOne){
-            clearFutureHistory();
-            histIndex = history.size() - 1;
-            String oldEncoded = history.get(histIndex).getEncodedBoard();
-            String left = "0";
-            if (general){
-                left = "1";
-            }
-            history.add(new GameState(board, activeCoords, playerTurn, turnStage,
-                    oldEncoded + ",wantsChief," + c.toString() + "," + left));
-            histIndex ++;
-        }
-    }
-
-    private void removeActiveChiefOrders(){
-        Player aP = getActivePlayer();
-        if (aP != null){
-            ArrayList<Piece> wanters = aP.getChiefWanters();
-            for (Piece p : wanters){
-                if (p.getType() > 0 && p.getType() < 6){
-                    board.setChiefOrders((General)p, false);
-                }else if (p.getType() == 7){
-                    board.setChiefOrders((Capitol) p, false);
-                }
-            }
         }
     }
 
@@ -510,6 +471,60 @@ public class Engine {
         }
         nextActiveCoords = c;
 
+    }
+
+    private void setChiefOrders(Coords c, boolean general){
+        boolean foundOne = false;
+        if (general){
+            General first = board.get(c).getFirstGeneral();
+            General second = board.get(c).getSecondGeneral();
+            if (first != null){
+                if (first.getAlliance().getDataCode() == playerTurn){
+                    removeActiveChiefOrders();
+                    board.setChiefOrders(first, true);
+                    foundOne = true;
+                }
+            }else if(second != null){
+                if (second.getAlliance().getDataCode() == playerTurn){
+                    removeActiveChiefOrders();
+                    board.setChiefOrders(second, true);
+                    foundOne = true;
+                }
+            }
+        }else{
+            Capitol capitol = board.get(c).getCapitol();
+            if (capitol != null && capitol.getAlliance().getDataCode() == playerTurn){
+                removeActiveChiefOrders();
+                board.setChiefOrders(capitol, true);
+                foundOne = true;
+            }
+        }
+        if (foundOne){
+            clearFutureHistory();
+            histIndex = history.size() - 1;
+            String oldEncoded = history.get(histIndex).getEncodedBoard();
+            String left = "0";
+            if (general){
+                left = "1";
+            }
+            history.add(new GameState(board, activeCoords, playerTurn, turnStage,
+                    oldEncoded + ",chief," + c.toString() + "," + left));
+            histIndex ++;
+        }
+    }
+
+    private void removeActiveChiefOrders(){
+        Player aP = getActivePlayer();
+        if (aP != null){
+            ArrayList<Piece> wanters = aP.getChiefWanters();
+            for (Piece p : wanters){
+                if (p.getType() > 0 && p.getType() < 6){
+                    board.setChiefOrders((General)p, false);
+                }else if (p.getType() == 7){
+                    board.setChiefOrders((Capitol) p, false);
+                }
+            }
+        }
     }
 
     private void moveGeneral(General g, Coords c){

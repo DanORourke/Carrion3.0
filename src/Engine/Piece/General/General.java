@@ -95,4 +95,12 @@ public class General extends Piece {
     public boolean getExposed(){
         return exposed;
     }
+
+    public boolean canAdd(){
+        return troops < 20;
+    }
+
+    public boolean canSubtract(){
+        return troops > 1;
+    }
 }

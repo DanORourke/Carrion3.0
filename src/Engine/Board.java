@@ -4,6 +4,7 @@ import Engine.Piece.Capitol;
 import Engine.Piece.General.General;
 import Engine.Piece.Piece;
 import Engine.Piece.Supply;
+import Engine.Piece.Town;
 import GUI.Coords;
 import GUI.GameData;
 
@@ -183,7 +184,6 @@ class Board {
     }
 
     void dropSupply(General g){
-        //addTroops, but really the remove inside it, needs to be first for some reason, equals not working
         Coords c = g.getCoords();
         Supply supply  = new Supply(c, g.getAlliance());
         addPiece(supply);
@@ -194,6 +194,34 @@ class Board {
         removePiece(g);
         General gen = g.createNewTroop(n);
         addPiece(gen);
+    }
+
+    void subtractTroopFromTown(Piece p){
+        if (p.getType() == 6){
+            Town t = ((Town)p).createNewTroop(false);
+            System.out.println("remove troop from town " + ((Town) p).hasTroop() + " " + t.hasTroop());
+            removePiece(p);
+            //System.out.println(board.get(p.getCoords()).getTown().hasTroop());
+            addPiece(t);
+            System.out.println(board.get(p.getCoords()).getTown().hasTroop());
+        }else{
+            System.out.println("remove troop from cap");
+            Capitol cap = ((Capitol)p).createNewTroops(-1);
+            removePiece(p);
+            addPiece(cap);
+        }
+    }
+
+    void addTroopToTown(Piece p){
+        if (p.getType() == 6){
+            Town t = ((Town)p).createNewTroop(true);
+            removePiece(p);
+            addPiece(t);
+        }else{
+            Capitol cap = ((Capitol)p).createNewTroops(1);
+            removePiece(p);
+            addPiece(cap);
+        }
     }
 
     void setChiefOrders(General g, boolean wantsChief){

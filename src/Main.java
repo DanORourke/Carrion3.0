@@ -3,7 +3,7 @@ import GUI.Largest;
 
 public class Main {
     public static void main(String[] args) {
-        new Largest( "21,0", Alliance.RED);
+        new Largest( "21,0");
     }
 }
 

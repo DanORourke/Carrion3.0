@@ -13,9 +13,9 @@ public class Largest {
     private final JTextArea hoverArea;
     private JPanel topPanel;
 
-    public Largest(String encodedBoard, Alliance userTeam){
+    public Largest(String encodedBoard){
         //TODO test encoded before giving to engine
-        this.engine = new Engine(encodedBoard, userTeam);
+        this.engine = new Engine(encodedBoard);
         this.drawingPanel = new DrawingPanel(engine);
         this.frame = new JFrame("Carrion");
         this.hoverArea = createHoverArea();

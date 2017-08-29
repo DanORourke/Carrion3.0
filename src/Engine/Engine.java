@@ -15,7 +15,6 @@ public class Engine {
     private int histIndex = -1;
     private final int mapRadius;
     private final int gameType;
-    private final Alliance userTeam;
     private General activeGeneral = null;
     private Coords activeCoords = null;
     private Coords nextActiveCoords = null;
@@ -28,8 +27,7 @@ public class Engine {
     private boolean settingChief = false;
     private boolean exposingGeneral = false;
 
-    public Engine(String encodedBoard, Alliance userTeam){
-        this.userTeam = userTeam;
+    public Engine(String encodedBoard){
         ArrayList<String> moves = new ArrayList<>(Arrays.asList(encodedBoard.split(",")));
         mapRadius = Integer.valueOf(moves.get(0));
         gameType = Integer.valueOf(moves.get(1));
@@ -227,6 +225,16 @@ public class Engine {
         return null;
     }
 
+    private Alliance getUserTeam(){
+        int latest = history.get(history.size() - 1).getPlayerTurn();
+        for (Alliance a : players.keySet()){
+            if (a.getDataCode() == latest){
+                return a;
+            }
+        }
+        return null;
+    }
+
     private void fillPlayers(){
         players = new HashMap<>();
         HashMap<Coords, Parcel> totalBoard = board.getTotalBoard();
@@ -323,7 +331,7 @@ public class Engine {
         //Board board = getBoard();
         String s = "";
         Parcel activeParcel = board.get(c);
-
+        Alliance userTeam = getUserTeam();
         if (turnStage == 0){
             if (activeParcel.hasTown() && activeParcel.getTown().getAlliance().equals(userTeam)){
                 s = userTeam.toString() + " town has troop to give: " + activeParcel.getTown().hasTroop() + "\n";

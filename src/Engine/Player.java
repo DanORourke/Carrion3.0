@@ -66,20 +66,21 @@ public class Player {
     }
 
     private boolean areNeighbors(Piece p1, Piece p2){
-        Coords c1 = p1.getCoords();
-        Coords c2 = p2.getCoords();
-        int q1 = c1.getQ();
-        int r1 = c1.getR();
-        int s1 = c1.getS();
-        int q2 = c2.getQ();
-        int r2 = c2.getR();
-        int s2 = c2.getS();
-        return (((q1 == q2) && ((r1 + 1) == r2) && ((s1 - 1) == s2)) ||
-                ((q1 == q2) && ((r1 - 1) == r2) && ((s1 + 1) == s2)) ||
-                (((q1 + 1) == q2) && (r1 == r2) && ((s1 - 1) == s2)) ||
-                (((q1 - 1) == q2) && (r1 == r2) && ((s1 + 1) == s2)) ||
-                (((q1 + 1) == q2) && ((r1 - 1) == r2) && (s1 == s2)) ||
-                (((q1 - 1) == q2) && ((r1 + 1) == r2) && (s1 == s2)));
+        return p1.getCoords().isNextTo(p2.getCoords());
+//        Coords c1 = p1.getCoords();
+//        Coords c2 = p2.getCoords();
+//        int q1 = c1.getQ();
+//        int r1 = c1.getR();
+//        int s1 = c1.getS();
+//        int q2 = c2.getQ();
+//        int r2 = c2.getR();
+//        int s2 = c2.getS();
+//        return (((q1 == q2) && ((r1 + 1) == r2) && ((s1 - 1) == s2)) ||
+//                ((q1 == q2) && ((r1 - 1) == r2) && ((s1 + 1) == s2)) ||
+//                (((q1 + 1) == q2) && (r1 == r2) && ((s1 - 1) == s2)) ||
+//                (((q1 - 1) == q2) && (r1 == r2) && ((s1 + 1) == s2)) ||
+//                (((q1 + 1) == q2) && ((r1 - 1) == r2) && (s1 == s2)) ||
+//                (((q1 - 1) == q2) && ((r1 + 1) == r2) && (s1 == s2)));
     }
 
     Piece getConnectedTroopGiver(General g){

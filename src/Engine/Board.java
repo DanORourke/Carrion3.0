@@ -188,6 +188,12 @@ class Board {
         Supply supply  = new Supply(c, g.getAlliance());
         addPiece(supply);
         addTroops(g, -1);
+        if (!g.getLines()){
+            General ng = g.createNewLines();
+            General nng = ng.createNewMoved(c, 1);
+            removePiece(g);
+            addPiece(nng);
+        }
     }
 
     void addTroops(General g, int n){

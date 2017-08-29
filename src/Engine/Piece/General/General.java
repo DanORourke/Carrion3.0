@@ -64,7 +64,7 @@ public class General extends Piece {
                 troops, movementPoints, hasChief, wantsChief, exposed);
     }
 
-    public General resetGeneral(){
+    public General resetGeneralMove(){
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, 5, hasChief, wantsChief, exposed);
     }

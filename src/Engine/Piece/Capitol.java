@@ -39,7 +39,7 @@ public class Capitol extends Piece{
         return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, troops + troopChange);
     }
 
-    public Capitol resetCapitol(){
+    public Capitol resetCapitolAllocate(){
         return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, 2);
     }
 

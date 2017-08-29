@@ -208,16 +208,27 @@ public class Player {
         return visited.contains(a);
     }
 
-    void resetPlayerPieces(Board board){
+    void resetPlayerPiecesAllocate(Board board){
+        for (Coords c : pieces.keySet()){
+            Piece p = pieces.get(c);
+            if(p.isTown()){
+                board.resetTownAllocate((Town)p);
+            }else if (p.isCapitol()){
+                board.resetCapAllocate((Capitol)p);
+            }
+        }
+    }
+
+    void resetPlayerPiecesMove(Board board){
         for (Coords c : pieces.keySet()){
             Piece p = pieces.get(c);
             if (p.isGeneral()){
-                board.resetGeneral((General)p);
-            }else if(p.isTown()){
-                board.resetTown((Town)p);
-            }else if (p.isCapitol()){
-                board.resetCap((Capitol)p);
+                board.resetGeneralMove((General)p);
             }
         }
+    }
+
+    public Alliance getAlliance() {
+        return alliance;
     }
 }

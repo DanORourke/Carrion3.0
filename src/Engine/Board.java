@@ -270,20 +270,20 @@ class Board {
         addPiece(ng);
     }
 
-    void resetGeneral(General g){
-        General ng = g.resetGeneral();
+    void resetGeneralMove(General g){
+        General ng = g.resetGeneralMove();
         removePiece(g);
         addPiece(ng);
     }
 
-    void resetTown(Town t) {
-        Town nt = t.resetTown();
+    void resetTownAllocate(Town t) {
+        Town nt = t.resetTownAllocate();
         removePiece(t);
         addPiece(nt);
     }
 
-    void resetCap(Capitol cap) {
-        Capitol nCap = cap.resetCapitol();
+    void resetCapAllocate(Capitol cap) {
+        Capitol nCap = cap.resetCapitolAllocate();
         removePiece(cap);
         addPiece(nCap);
     }

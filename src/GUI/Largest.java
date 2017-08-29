@@ -1,5 +1,6 @@
 package GUI;
 import Engine.Engine;
+import Engine.Alliance;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -12,9 +13,9 @@ public class Largest {
     private final JTextArea hoverArea;
     private JPanel topPanel;
 
-    public Largest(String encodedBoard){
+    public Largest(String encodedBoard, Alliance userTeam){
         //TODO test encoded before giving to engine
-        this.engine = new Engine(encodedBoard);
+        this.engine = new Engine(encodedBoard, userTeam);
         this.drawingPanel = new DrawingPanel(engine);
         this.frame = new JFrame("Carrion");
         this.hoverArea = createHoverArea();

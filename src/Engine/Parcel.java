@@ -146,6 +146,14 @@ public class Parcel {
         return (pieces.containsKey(1) && !pieces.containsKey(2));
     }
 
+    boolean hasTown(){
+        return pieces.containsKey(6);
+    }
+
+    boolean hasCapitol(){
+        return pieces.containsKey(7);
+    }
+
     General getFirstGeneral(){
         //return first general
         if (pieces.containsKey(1)){

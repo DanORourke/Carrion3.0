@@ -15,6 +15,7 @@ public class Engine {
     private int histIndex = -1;
     private final int mapRadius;
     private final int gameType;
+    private final Alliance userTeam;
     private General activeGeneral = null;
     private Coords activeCoords = null;
     private Coords nextActiveCoords = null;
@@ -27,7 +28,8 @@ public class Engine {
     private boolean settingChief = false;
     private boolean exposingGeneral = false;
 
-    public Engine(String encodedBoard){
+    public Engine(String encodedBoard, Alliance userTeam){
+        this.userTeam = userTeam;
         ArrayList<String> moves = new ArrayList<>(Arrays.asList(encodedBoard.split(",")));
         mapRadius = Integer.valueOf(moves.get(0));
         gameType = Integer.valueOf(moves.get(1));
@@ -152,6 +154,11 @@ public class Engine {
         if (turnStage > 1){
             turnStage = 0;
             rotatePlayer();
+        }else {
+            Player active = getActivePlayer();
+            if (active != null){
+                active.resetPlayerPiecesMove(board);
+            }
         }
     }
 
@@ -171,7 +178,7 @@ public class Engine {
             //must be a better way to do this
             for (Alliance a : players.keySet()){
                 if (a.getDataCode() == playerTurn){
-                    players.get(a).resetPlayerPieces(board);
+                    players.get(a).resetPlayerPiecesAllocate(board);
                     looking = false;
                 }
             }
@@ -315,20 +322,43 @@ public class Engine {
     public String hoverTileInfo(Coords c){
         //Board board = getBoard();
         String s = "";
-        General g = board.get(c).getFirstGeneral();
-        if (g != null){
-            s = g.getTroops() + " " + g.getMovementPoints() + " wants " + g.wantsChief() + " has " + g.hasChief() +
-            " exposed " + g.getExposed();
-        }
-        Town t = board.get(c).getTown();
-        if (t != null){
-            s = "haveTroop: " + t.hasTroop();
-        }
-        Capitol cap = board.get(c).getCapitol();
-        if (cap != null){
-            s = " haveTroops: " + cap.getTroops();
-        }
+        Parcel activeParcel = board.get(c);
 
+        if (turnStage == 0){
+            if (activeParcel.hasTown() && activeParcel.getTown().getAlliance().equals(userTeam)){
+                s = userTeam.toString() + " town has troop to give: " + activeParcel.getTown().hasTroop() + "\n";
+            }
+            if (activeParcel.hasCapitol() && activeParcel.getCapitol().getAlliance().equals(userTeam)){
+                s = userTeam.toString() + " capitol has " + activeParcel.getCapitol().getTroops() + " troops to give.\n";
+            }
+            if (activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
+                s += userTeam.toString() + " General " + activeParcel.getFirstGeneral().getType() + " has:\n" +
+                        activeParcel.getFirstGeneral().getTroops() + " troops under command.";
+            }
+            if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
+                s = activeParcel.getFirstGeneral().getAlliance().toString() + " General " +
+                        activeParcel.getFirstGeneral().getType() + " has:\n" +
+                        activeParcel.getFirstGeneral().getTroops() + " troops under command.";
+            }
+        }else{
+
+            if(activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
+                General g = activeParcel.getFirstGeneral();
+                s = userTeam.toString() + " General " + g.getType() + " has:\n" +
+                        g.getTroops() + " troops under his command.\n" + g.getMovementPoints() + " movement points.\n";
+                if (g.hasChief()){
+                    s += "The Chief of Staff.\n";
+                }
+                if (g.wantsChief()){
+                    s += "Orders to receive the Chief of Staff.\n";
+                }
+            }
+            if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
+                General g = activeParcel.getFirstGeneral();
+                s = g.getAlliance().toString() + " General " + g.getType() + " has:\n" +
+                        g.getTroops() + " troops under command.";
+            }
+        }
         return s;
     }
 

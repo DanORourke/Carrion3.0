@@ -466,30 +466,41 @@ public class Engine {
     private void moveLeftClick(Coords c){
         Parcel clickedParcel = board.get(c);
         // find active general
+        Alliance a = getUserTeam();
         boolean active = false;
         if (activeCoords != null){
-            activeGeneral = board.get(activeCoords).getFirstGeneral();
+            activeGeneral = board.get(activeCoords).getAllianceGeneral(a);
             if (activeGeneral != null){
                 active = true;
             }
         }else {
             activeGeneral = null;
         }
-        if (active && clickedParcel.isEmpty() && activeCoords.isNextTo(c) &&
-                activeGeneral.getAlliance().getDataCode() == playerTurn && activeGeneral.canMove(false)){
-            board.moveGeneral(activeGeneral, c);
-            rememberClick = true;
+        if (active && activeCoords.isNextTo(c)){
+            //move to open parcel
+            if (clickedParcel.isEmpty() && activeGeneral.canMove(false)){
+                board.moveGeneral(activeGeneral, c);
+                rememberClick = true;
+            }
+            //cut line
+            if (clickedParcel.hasOnlySupply() && !clickedParcel.getSupply().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true)){
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.cutSupply(activeGeneral);
+                rememberClick = true;
+            }
         }
         nextActiveCoords = c;
-
     }
 
     private void moveRightClick(Coords c){
         Parcel clickedParcel = board.get(c);
         // find active general
+        Alliance a = getUserTeam();
         boolean active = false;
         if (activeCoords != null){
-            activeGeneral = board.get(activeCoords).getFirstGeneral();
+            activeGeneral = board.get(activeCoords).getAllianceGeneral(a);
             if (activeGeneral != null){
                 active = true;
             }
@@ -497,6 +508,7 @@ public class Engine {
             activeCoords = c;
             activeGeneral = null;
         }
+
         //drop troop where he stands
         if (clickedParcel.hasSingleGeneral() &&
                 !clickedParcel.hasSupplyLine() && clickedParcel.getFirstGeneral().canDrop() &&
@@ -504,16 +516,26 @@ public class Engine {
             board.dropSupply(clickedParcel.getFirstGeneral());
             rememberClick = true;
         }
-        //move and drop a troop
-        if (active && clickedParcel.isEmpty() && activeCoords.isNextTo(c) && activeGeneral.canMoveAndDrop() &&
-                activeGeneral.getAlliance().getDataCode() == playerTurn){
-            board.moveGeneral(activeGeneral, c);
-            activeGeneral = board.get(c).getFirstGeneral();
-            board.dropSupply(activeGeneral);
-            rememberClick = true;
+        if (active && activeCoords.isNextTo(c)){
+            //move and drop a troop
+            if (clickedParcel.isEmpty() && activeGeneral.canMoveAndDrop()){
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getFirstGeneral();
+                board.dropSupply(activeGeneral);
+                rememberClick = true;
+            }
+            //move and cut and drop
+            if (clickedParcel.hasOnlySupply() && !clickedParcel.getSupply().getAlliance().equals(a)
+                    && activeGeneral.canMoveAndDrop()){
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.cutSupply(activeGeneral);
+                activeGeneral = board.get(c).getFirstGeneral();
+                board.dropSupply(activeGeneral);
+                rememberClick = true;
+            }
         }
         nextActiveCoords = c;
-
     }
 
     private void setChiefOrders(Coords c, boolean general){

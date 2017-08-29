@@ -196,6 +196,18 @@ class Board {
         }
     }
 
+    void cutSupply(General g){
+        Coords c = g.getCoords();
+        Supply s = board.get(c).getSupply();
+        removePiece(s);
+        if (!g.getLines()){
+            General ng = g.createNewLines();
+            General nng = ng.createNewMoved(c, 1);
+            removePiece(g);
+            addPiece(nng);
+        }
+    }
+
     void addTroops(General g, int n){
         removePiece(g);
         General gen = g.createNewTroop(n);
@@ -213,18 +225,6 @@ class Board {
         }else{
             System.out.println("remove troop from cap");
             Capitol cap = ((Capitol)p).createNewTroops(-1);
-            removePiece(p);
-            addPiece(cap);
-        }
-    }
-
-    void addTroopToTown(Piece p){
-        if (p.getType() == 6){
-            Town t = ((Town)p).createNewTroop(true);
-            removePiece(p);
-            addPiece(t);
-        }else{
-            Capitol cap = ((Capitol)p).createNewTroops(1);
             removePiece(p);
             addPiece(cap);
         }

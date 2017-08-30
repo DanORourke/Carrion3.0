@@ -96,27 +96,39 @@ public class Parcel {
             hold[j] = getSecondGeneral().getAlliance().getDataCode();
             j++;
         }else{
+            //make towns first
             for (int t : pieces.keySet()){
                 Piece p = pieces.get(t);
-                hold[j] = p.getType();
-                j++;
-                hold[j] = p.getAlliance().getDataCode();
-                j++;
-                if (p.isGeneral()){
-                    General g = (General)p;
-                    if (g.hasChief()){
-                        hold[j] = 8;
-                        j++;
-                        hold[j] = g.getAlliance().getDataCode();
-                        j++;
-                    }
-                }else if (p.isCapitol()){
-                    Capitol c = (Capitol) p;
-                    if (c.hasChief()){
-                        hold[j] = 8;
-                        j++;
-                        hold[j] = c.getAlliance().getDataCode();
-                        j++;
+                if (p.isTown()){
+                    hold[j] = p.getType();
+                    j++;
+                    hold[j] = p.getAlliance().getDataCode();
+                    j++;
+                }
+            }
+            for (int t : pieces.keySet()){
+                Piece p = pieces.get(t);
+                if (!p.isTown()){
+                    hold[j] = p.getType();
+                    j++;
+                    hold[j] = p.getAlliance().getDataCode();
+                    j++;
+                    if (p.isGeneral()){
+                        General g = (General)p;
+                        if (g.hasChief()){
+                            hold[j] = 8;
+                            j++;
+                            hold[j] = g.getAlliance().getDataCode();
+                            j++;
+                        }
+                    }else if (p.isCapitol()){
+                        Capitol c = (Capitol) p;
+                        if (c.hasChief()){
+                            hold[j] = 8;
+                            j++;
+                            hold[j] = c.getAlliance().getDataCode();
+                            j++;
+                        }
                     }
                 }
             }

@@ -341,12 +341,12 @@ public class Engine {
             }
             if (activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
                 s += userTeam.toString() + " General " + activeParcel.getFirstGeneral().getType() + " has:\n" +
-                        activeParcel.getFirstGeneral().getTroops() + " troops under command.";
+                        activeParcel.getFirstGeneral().getTroops() + " troops under his command.";
             }
             if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
                 s = activeParcel.getFirstGeneral().getAlliance().toString() + " General " +
                         activeParcel.getFirstGeneral().getType() + " has:\n" +
-                        activeParcel.getFirstGeneral().getTroops() + " troops under command.";
+                        activeParcel.getFirstGeneral().getTroops() + " troops under his command.";
             }
         }else{
 
@@ -364,7 +364,7 @@ public class Engine {
             if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
                 General g = activeParcel.getFirstGeneral();
                 s = g.getAlliance().toString() + " General " + g.getType() + " has:\n" +
-                        g.getTroops() + " troops under command.";
+                        g.getTroops() + " troops under his command.";
             }
         }
         return s;
@@ -478,16 +478,26 @@ public class Engine {
         }
         if (active && activeCoords.isNextTo(c)){
             //move to open parcel
-            if (clickedParcel.isEmpty() && activeGeneral.canMove(false)){
+            if (clickedParcel.isEmpty() && activeGeneral.canMove(false))
+            {
                 board.moveGeneral(activeGeneral, c);
                 rememberClick = true;
             }
             //cut line
-            if (clickedParcel.hasOnlySupply() && !clickedParcel.getSupply().getAlliance().equals(a) &&
-                    activeGeneral.canMove(true)){
+            else if (clickedParcel.hasOnlySupply() && !clickedParcel.getSupply().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
                 board.moveGeneral(activeGeneral, c);
                 activeGeneral = board.get(c).getAllianceGeneral(a);
                 board.cutSupply(activeGeneral);
+                rememberClick = true;
+            }
+            //enter unoccupied town
+            else if (clickedParcel.hasTown() &&
+                    clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    activeGeneral.canMove(false))
+            {
+                board.moveGeneral(activeGeneral, c);
                 rememberClick = true;
             }
         }

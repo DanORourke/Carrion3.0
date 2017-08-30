@@ -3,7 +3,6 @@ package Engine;
 import Engine.Piece.Capitol;
 import Engine.Piece.General.General;
 import Engine.Piece.Piece;
-import Engine.Piece.Town;
 import GUI.Coords;
 import GUI.GameData;
 import java.util.ArrayList;
@@ -244,14 +243,6 @@ public class Engine {
                 addPlayerPieces(p.getPieces());
             }
         }
-//        for (Alliance a : players.keySet()){
-//            Player p = players.get(a);
-//            System.out.println(a.toString() + " player size: " + p.getPieces().size());
-//        }
-    }
-
-    private GameState getLatestState(){
-        return history.get(history.size()-1);
     }
 
     private void initializeTurn(){
@@ -309,18 +300,9 @@ public class Engine {
         player.addPiece(p);
     }
 
-    private void removePlayerPiece(Piece p){
-        Player player = players.get(p.getAlliance());
-        player.removePiece(p);
-    }
-
     public void clearActive(){
         activeGeneral = null;
         activeCoords = null;
-    }
-
-    public String clickTileInfo(Coords c){
-        return "you clicked me?";
     }
 
     public int[] getStateInfo(){
@@ -497,11 +479,81 @@ public class Engine {
                 rememberClick = true;
             }
             //enter unoccupied town
-            else if (clickedParcel.hasTown() &&
+            else if (clickedParcel.hasTown() && clickedParcel.getPieces().size() == 1 &&
                     clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
                     activeGeneral.canMove(false))
             {
                 board.moveGeneral(activeGeneral, c);
+                rememberClick = true;
+            }
+            //attack empty enemy town
+            else if (clickedParcel.hasTown() && clickedParcel.getPieces().size() == 1 &&
+                    !clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    !clickedParcel.getTown().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, false);
+                rememberClick = true;
+            }
+            //attack empty enemy capitol
+            else if (clickedParcel.hasCapitol() && clickedParcel.getPieces().size() == 1 &&
+                    !clickedParcel.getCapitol().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    !clickedParcel.getCapitol().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, false);
+                rememberClick = true;
+            }
+            //attack field general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.getPieces().size() == 1 &&
+                    !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
+                    activeGeneral.canMove(false))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, false);
+                rememberClick = true;
+            }
+            //attack supply general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasSupplyLine() &&
+                    clickedParcel.getPieces().size() == 2 &&
+                    !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
+                    !clickedParcel.getSupply().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.cutSupply(activeGeneral);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, false);
+                rememberClick = true;
+            }
+            //attack capitol general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasCapitol() &&
+                    clickedParcel.getPieces().size() == 2 &&
+                    !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
+                    !clickedParcel.getCapitol().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, false);
+                rememberClick = true;
+            }
+            //attack town general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasTown() &&
+                    clickedParcel.getPieces().size() == 2 &&
+                    !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
+                    !clickedParcel.getTown().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, false);
                 rememberClick = true;
             }
         }
@@ -525,7 +577,7 @@ public class Engine {
 
         //drop troop where he stands
         if (clickedParcel.hasSingleGeneral() && clickedParcel.getPieces().size() == 1 &&
-                !clickedParcel.hasSupplyLine() && clickedParcel.getFirstGeneral().canDrop() &&
+                clickedParcel.getFirstGeneral().canDrop() &&
                 clickedParcel.getFirstGeneral().getAlliance().getDataCode() == playerTurn){
             board.dropSupply(clickedParcel.getFirstGeneral());
             rememberClick = true;
@@ -547,13 +599,93 @@ public class Engine {
                 rememberClick = true;
             }
             //move and cut and drop
-            if (clickedParcel.hasOnlySupply() && !clickedParcel.getSupply().getAlliance().equals(a)
+            else if (clickedParcel.hasOnlySupply() && !clickedParcel.getSupply().getAlliance().equals(a)
                     && activeGeneral.canMoveAndDrop()){
                 board.moveGeneral(activeGeneral, c);
                 activeGeneral = board.get(c).getAllianceGeneral(a);
                 board.cutSupply(activeGeneral);
                 activeGeneral = board.get(c).getFirstGeneral();
                 board.dropSupply(activeGeneral);
+                rememberClick = true;
+            }
+            //enter and occupy unoccupied town
+            else if (clickedParcel.hasTown() && clickedParcel.getPieces().size() == 1 &&
+                    clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    activeGeneral.canMoveAndDrop())
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getFirstGeneral();
+                board.occupyTown(activeGeneral);
+                rememberClick = true;
+            }
+            //attack empty enemy town
+            else if (clickedParcel.hasTown() && clickedParcel.getPieces().size() == 1 &&
+                    !clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    !clickedParcel.getTown().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, true);
+                rememberClick = true;
+            }
+            //attack empty enemy capitol
+            else if (clickedParcel.hasCapitol() && clickedParcel.getPieces().size() == 1 &&
+                    !clickedParcel.getCapitol().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    !clickedParcel.getCapitol().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, true);
+                rememberClick = true;
+            }
+            //attack field general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.getPieces().size() == 1 &&
+                    !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
+                    activeGeneral.canMove(false))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, true);
+                rememberClick = true;
+            }
+            //attack supply general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasSupplyLine() &&
+                    clickedParcel.getPieces().size() == 2 &&
+                    !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
+                    !clickedParcel.getSupply().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.cutSupply(activeGeneral);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, true);
+                rememberClick = true;
+            }
+            //attack capitol general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasCapitol() &&
+                    clickedParcel.getPieces().size() == 2 &&
+                    !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
+                    !clickedParcel.getCapitol().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, true);
+                rememberClick = true;
+            }
+            //attack town general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasTown() &&
+                    clickedParcel.getPieces().size() == 2 &&
+                    !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
+                    !clickedParcel.getTown().getAlliance().equals(a) &&
+                    activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, true);
                 rememberClick = true;
             }
         }

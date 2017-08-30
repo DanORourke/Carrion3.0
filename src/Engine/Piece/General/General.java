@@ -12,6 +12,8 @@ public class General extends Piece {
     private final boolean wantsChief;
     private final boolean exposed;
     private final boolean lines;
+    private final Coords launchPoint;
+    private final boolean dropAfterWin;
 
     public General(Coords coords, int type, Alliance alliance, int name){
         super(coords, type, alliance);
@@ -22,10 +24,13 @@ public class General extends Piece {
         this.wantsChief = false;
         this.exposed = false;
         this.lines = false;
+        this.launchPoint = null;
+        this.dropAfterWin = false;
     }
 
     public General(Coords coords, int type, Alliance alliance, int name, int troops,
-                   int movementPoints, boolean hasChief, boolean wantsChief, boolean exposed, boolean lines){
+                   int movementPoints, boolean hasChief, boolean wantsChief, boolean exposed, boolean lines,
+                   Coords launchPoint, boolean dropAfterWin){
         super(coords, type, alliance);
         this.name = name;
         this.troops = troops;
@@ -34,47 +39,55 @@ public class General extends Piece {
         this.wantsChief = wantsChief;
         this.exposed = exposed;
         this.lines = lines;
+        this.launchPoint = launchPoint;
+        this.dropAfterWin = dropAfterWin;
     }
 
     @Override
     public Piece copy(){
         return new General(getCoords(), getType(), getAlliance(), name,
-                troops, movementPoints, hasChief, wantsChief, exposed, lines);
+                troops, movementPoints, hasChief, wantsChief, exposed, lines, launchPoint, dropAfterWin);
     }
 
     public General createNewMoved(Coords c, int n){
-        return new General(c, getType(), getAlliance(), getName(),
-                troops, movementPoints - n, hasChief, wantsChief, exposed, lines);
+        return new General(c, getType(), getAlliance(), getName(), troops, movementPoints - n,
+                hasChief, wantsChief, exposed, lines, launchPoint, dropAfterWin);
     }
 
     public General createNewTroop(int addedTroops){
         return new General(getCoords(), getType(), getAlliance(), getName(),
-                troops + addedTroops, movementPoints, hasChief, wantsChief, exposed, lines);
+                troops + addedTroops, movementPoints,
+                hasChief, wantsChief, exposed, lines, launchPoint, dropAfterWin);
     }
 
     public General createNewWantsChief(boolean wantsChief){
         return new General(getCoords(), getType(), getAlliance(), name,
-                troops, movementPoints, hasChief, wantsChief, exposed, lines);
+                troops, movementPoints, hasChief, wantsChief, exposed, lines, launchPoint, dropAfterWin);
     }
 
     public General createNewHasChief(boolean hasChief){
         return new General(getCoords(), getType(), getAlliance(), name,
-                troops, movementPoints, hasChief, wantsChief, exposed, lines);
+                troops, movementPoints, hasChief, wantsChief, exposed, lines, launchPoint, dropAfterWin);
     }
 
     public General createNewExposed(boolean exposed){
         return new General(getCoords(), getType(), getAlliance(), name,
-                troops, movementPoints, hasChief, wantsChief, exposed, lines);
+                troops, movementPoints, hasChief, wantsChief, exposed, lines, launchPoint, dropAfterWin);
     }
 
     public General createNewLines(){
         return new General(getCoords(), getType(), getAlliance(), name,
-                troops, movementPoints, hasChief, wantsChief, exposed, true);
+                troops, movementPoints, hasChief, wantsChief, exposed, true, launchPoint, dropAfterWin);
     }
 
     public General resetGeneralMove(){
-        return new General(getCoords(), getType(), getAlliance(), name,
-                troops, calcMovementPoints(), hasChief, wantsChief, exposed, false);
+        return new General(getCoords(), getType(), getAlliance(), name, troops, calcMovementPoints(),
+                hasChief, wantsChief, exposed, false, null, dropAfterWin);
+    }
+
+    public General createNewFighting(Coords launchPoint, boolean dropAfterWin){
+        return new General(getCoords(), getType(), getAlliance(), name, troops, 0,
+                hasChief, wantsChief, exposed, true, launchPoint, dropAfterWin);
     }
 
     public int getName() {

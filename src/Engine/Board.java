@@ -229,6 +229,12 @@ class Board {
         addPiece(gen);
     }
 
+    void setFightingGeneral(General g, Coords launchPoint, boolean dropAfterWin){
+        General ng = g.createNewFighting(launchPoint, dropAfterWin);
+        removePiece(g);
+        addPiece(ng);
+    }
+
     void subtractTroopFromTown(Piece p){
         if (p.getType() == 6){
             Town t = ((Town)p).createNewTroop(false);

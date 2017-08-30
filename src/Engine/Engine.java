@@ -8,6 +8,7 @@ import GUI.GameData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Random;
 
 public class Engine {
     private final ArrayList<GameState> history = new ArrayList<>();
@@ -23,6 +24,9 @@ public class Engine {
     private int turnStage;//0=allocate, 1=move, 2=special if needed
     private boolean rememberClick = false;
     private int indexOfNoChange = -1;
+    private boolean assisting = false;
+    private Coords assistingCoords = null;
+    private boolean assisted = false;
     private boolean settingChief = false;
     private boolean exposingGeneral = false;
 
@@ -72,6 +76,16 @@ public class Engine {
                     settingChief = true;
                     setChiefOrders(new Coords(q, r, s), leftClick == 1);
                     i+= 5;
+                }else if (moveType.equals("assist")){
+                    int q = Integer.valueOf(moves.get(i+1));
+                    int r = Integer.valueOf(moves.get(i+2));
+                    int s = Integer.valueOf(moves.get(i+3));
+                    assistingCoords = new Coords(q, r, s);
+                    int qa = Integer.valueOf(moves.get(i+4));
+                    int ra = Integer.valueOf(moves.get(i+5));
+                    int sa = Integer.valueOf(moves.get(i+6));
+                    setAssisted(new Coords(qa, ra, sa));
+                    i+= 7;
                 }else{
                     int qc = Integer.valueOf(moves.get(i));
                     int rc = Integer.valueOf(moves.get(i+1));
@@ -157,6 +171,10 @@ public class Engine {
                 active.resetPlayerPiecesMove(board);
             }
         }
+        settingChief = false;
+        exposingGeneral = false;
+        assisting = false;
+        assisted = false;
     }
 
     private void rotatePlayer(){
@@ -184,7 +202,35 @@ public class Engine {
     }
 
     private void playoutBattles(){
-        //TODO this
+        ArrayList<Coords> bCoords = board.getBattleCoords();
+        for (Coords c : bCoords){
+            battle(c);
+        }
+    }
+
+    private void battle(Coords c){
+        // get attacker and defender
+        General ga = board.get(c).getAttacker();
+        Piece p = board.get(c).getDefender();
+        if (p.isGeneral()){
+            General gd = (General)p;
+
+        }else if (p.isTown()){
+            int aBonus = ga.getAttackTownBonus(board);
+            Random rand = new Random();
+            int attack = aBonus + rand.nextInt(20) + 1;
+            int defence = 1 + rand.nextInt(20) + 1;
+            if (attack > defence){
+
+            }else{
+                //defence wins
+            }
+        }else{
+            //defender is capitol
+        }
+        // decide who wins
+        // decide where loser goes
+        // tell history
     }
 
     private void moveChief(){
@@ -340,6 +386,17 @@ public class Engine {
                 General g = activeParcel.getFirstGeneral();
                 s = userTeam.toString() + " General " + g.getType() + " has:\n" +
                         g.getTroops() + " troops under his command.\n" + g.getMovementPoints() + " movement points.\n";
+                if (g.getiAmAssisting() != null){
+                    General assisted = board.get(g.getiAmAssisting()).getAllianceGeneral(g.getAlliance());
+                    s+= "Orders to assist " + userTeam.toString() + " General " + assisted.getType() + "\n";
+                }
+                if (!g.getAssistingMe().isEmpty()){
+                    for (Coords cords : g.getAssistingMe()){
+                        General assisting = board.get(cords).getAllianceGeneral(g.getAlliance());
+                        s += "Orders to receive assistance from  " + userTeam.toString() +
+                                " General " + assisting.getType() + "\n";
+                    }
+                }
                 if (g.hasChief()){
                     s += "The Chief of Staff.\n";
                 }
@@ -381,8 +438,11 @@ public class Engine {
             if (settingChief){
                 setChiefOrders(c, leftClick);
                 settingChief = false;
-            }
-            else if (leftClick){
+            }else if (assisting){
+                setAssiting(c);
+            }else if (assisted){
+                setAssisted(c);
+            }else if (leftClick){
                 moveLeftClick(c);
             }else {
                 moveRightClick(c);
@@ -692,6 +752,47 @@ public class Engine {
         nextActiveCoords = c;
     }
 
+    private void setAssiting(Coords c){
+        General g = board.get(c).getFirstGeneral();
+        if (board.get(c).hasSingleGeneral() && g.getAlliance().equals(getUserTeam())){
+            assistingCoords = c;
+            assisting = false;
+            assisted = true;
+        }else{
+            assisting = false;
+            assisted = false;
+        }
+    }
+
+    private void setAssisted(Coords c){
+        Parcel p = board.get(c);
+        General g = board.get(assistingCoords).getFirstGeneral();
+        General g1 = p.getFirstGeneral();
+        General g2 = p.getSecondGeneral();
+        if (g != null && g1 != null && g1.getAlliance().equals(getUserTeam()) &&
+                (g.canAssist(c) || g1.canBeAssistedBy(assistingCoords)))
+        {
+            board.setAssist(g, g1);
+            String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
+            String encoded = nextEncoded(oldEncoded);
+            history.add(new GameState(new Board(board), null,  playerTurn, turnStage,
+                    encoded + ",assist," + assistingCoords.toString() + "," + c.toString()));
+            histIndex = history.size() - 1;
+
+        }else if (g != null &&g2 != null && g2.getAlliance().equals(getUserTeam()) &&
+                (g.canAssist(c) || g2.canBeAssistedBy(assistingCoords)))
+        {
+            board.setAssist(g, g2);
+            String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
+            String encoded = nextEncoded(oldEncoded);
+            history.add(new GameState(new Board(board), null,  playerTurn, turnStage,
+                    encoded + ",assist," + assistingCoords.toString() + "," + c.toString()));
+            histIndex = history.size() - 1;
+        }
+        assisting = false;
+        assisted = false;
+    }
+
     private void setChiefOrders(Coords c, boolean general){
         boolean foundOne = false;
         if (general){
@@ -756,12 +857,20 @@ public class Engine {
         return mapRadius;
     }
 
+    public void assist(){
+        assisting = true;
+        assisted = false;
+        settingChief = false;
+    }
+
     public void settingChief(){
-        this.settingChief = true;
+        settingChief = true;
+        assisting = false;
+        assisted = false;
     }
 
     public void setExposingGeneral(){
-        this.exposingGeneral = true;
+        exposingGeneral = true;
     }
 
     public void back(){

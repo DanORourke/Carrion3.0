@@ -162,8 +162,12 @@ public class Parcel {
         return new GameData(data);
     }
 
-    public boolean isBattle(){
-        return (pieces.containsKey(1) && pieces.containsKey(2));
+    boolean isBattle(){
+        return ((pieces.containsKey(1) && pieces.containsKey(2)) ||
+                (pieces.containsKey(1) && pieces.containsKey(6) &&
+                        !getFirstGeneral().getAlliance().equals(getTown().getAlliance())) ||
+                (pieces.containsKey(1) && pieces.containsKey(7) &&
+                        !getFirstGeneral().getAlliance().equals(getCapitol().getAlliance())));
     }
 
     private boolean isFieldBattle(){
@@ -262,5 +266,23 @@ public class Parcel {
 
     boolean hasOnlySupply(){
         return pieces.keySet().size() == 1 && pieces.containsKey(0);
+    }
+
+    General getAttacker(){
+        if (pieces.containsKey(2)){
+            return (General)pieces.get(2);
+        }else{
+            return (General)pieces.get(1);
+        }
+    }
+
+    Piece getDefender(){
+        if (pieces.containsKey(2)){
+            return pieces.get(1);
+        }else if (pieces.containsKey(6)){
+            return pieces.get(6);
+        }else {
+            return pieces.get(7);
+        }
     }
 }

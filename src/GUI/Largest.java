@@ -194,7 +194,17 @@ public class Largest {
     }
 
     private JButton createAssistButton(){
-        return new JButton("Assist General");
+        JButton assist = new JButton("Assist General");
+        assist.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                engine.assist();
+                hoverArea.setText("Left click on the general you are ordering to assist, " +
+                        "then left click on the general you are ordering be assisted.  " +
+                        "A general cannot assist another if he is more than one space away from him or engaged in battle.");
+            }
+        });
+        return assist;
     }
 
     private JButton createChiefButton(){

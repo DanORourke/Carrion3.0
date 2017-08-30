@@ -11,7 +11,7 @@ import GUI.GameData;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-class Board {
+public class Board {
     //private final int gameType;
     //private final int mapRadius;
     private HashMap<Coords, Parcel> board;
@@ -143,6 +143,18 @@ class Board {
         removePiece(g);
         General gen = g.createNewMoved(next, 1);
         addPiece(gen);
+        for (Coords c : g.getAssistingMe()){
+            General assisting = getAssistingGeneral(c, g.getAlliance());
+            General nAssisting = assisting.createNewClearAssisting();
+            removePiece(assisting);
+            addPiece(nAssisting);
+        }
+        if (g.getiAmAssisting() != null){
+            General assisted = board.get(g.getiAmAssisting()).getAllianceGeneral(g.getAlliance());
+            General nAssisted = assisted.createNewRemoveAssistingMe(g.getCoords());
+            removePiece(assisted);
+            addPiece(nAssisted);
+        }
     }
 
     private void removePiece(Piece p){
@@ -172,8 +184,13 @@ class Board {
         if (p.isGeneral()){
             if (!op.hasGeneral()){
                 nPieces.put(1, p.copy());
-            }else {
+            }else if(op.hasSingleGeneral())
+            {
                 nPieces.put(2, p.copy());
+            }else if (op.hasGeneral()){
+                //if have a general in the second position
+                //did it this way so new generals go where they came from
+                nPieces.put(1, p.copy());
             }
         }else{
             nPieces.put(p.getType(), p.copy());
@@ -230,7 +247,15 @@ class Board {
     }
 
     void setFightingGeneral(General g, Coords launchPoint, boolean dropAfterWin){
-        General ng = g.createNewFighting(launchPoint, dropAfterWin);
+        Parcel par = board.get(g.getCoords());
+        if (par.hasSingleGeneral()){
+            General oldDefender = par.getFirstGeneral();
+            General nD = oldDefender.createNewFighting(true, false,
+                    launchPoint, false);
+            removePiece(oldDefender);
+            addPiece(nD);
+        }
+        General ng = g.createNewFighting(true, true, launchPoint, dropAfterWin);
         removePiece(g);
         addPiece(ng);
     }
@@ -313,5 +338,31 @@ class Board {
         Capitol nCap = cap.resetCapitolAllocate();
         removePiece(cap);
         addPiece(nCap);
+    }
+
+    ArrayList<Coords> getBattleCoords(){
+        ArrayList<Coords> bCoords = new ArrayList<>();
+        for (Coords c : board.keySet()){
+            Parcel p = board.get(c);
+            if (p.isBattle()){
+                bCoords.add(c);
+            }
+        }
+        return bCoords;
+    }
+
+    public General getAssistingGeneral(Coords c, Alliance a){
+        Parcel p = board.get(c);
+        //attacking gen cant be assisting
+        return p.getFirstGeneral();
+    }
+
+    void setAssist(General assistingG, General assistedG){
+        General nAssisting = assistingG.createNewAssisting(assistedG.getCoords());
+        removePiece(assistingG);
+        addPiece(nAssisting);
+        General nAssisted = assistedG.createNewAssisted(assistingG.getCoords());
+        removePiece(assistedG);
+        addPiece(nAssisted);
     }
 }

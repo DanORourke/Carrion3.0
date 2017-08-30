@@ -2,7 +2,7 @@ package Engine;
 
 import GUI.Coords;
 
-class GameState {
+public class GameState {
     private final Board board;
     private final Coords activeCoords;
     private final int playerTurn;

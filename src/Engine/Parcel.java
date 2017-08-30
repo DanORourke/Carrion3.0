@@ -95,6 +95,30 @@ public class Parcel {
             j++;
             hold[j] = getSecondGeneral().getAlliance().getDataCode();
             j++;
+        }else if (isTownBattle()){
+            Town t = getTown();
+            hold[j] = t.getType();
+            j++;
+            hold[j] = t.getAlliance().getDataCode();
+            j++;
+            hold[j] = 9;
+            j++;
+            hold[j] = getFirstGeneral().getAlliance().getDataCode();
+            j++;
+            hold[j] = getSecondGeneral().getAlliance().getDataCode();
+            j++;
+        }else if (isCapitolBattle()){
+            Capitol cap = getCapitol();
+            hold[j] = cap.getType();
+            j++;
+            hold[j] = cap.getAlliance().getDataCode();
+            j++;
+            hold[j] = 9;
+            j++;
+            hold[j] = getFirstGeneral().getAlliance().getDataCode();
+            j++;
+            hold[j] = getSecondGeneral().getAlliance().getDataCode();
+            j++;
         }else{
             //make towns first
             for (int t : pieces.keySet()){
@@ -138,9 +162,21 @@ public class Parcel {
         return new GameData(data);
     }
 
-    private boolean isFieldBattle(){
-        //return true if parcel contains more than one general;
+    public boolean isBattle(){
         return (pieces.containsKey(1) && pieces.containsKey(2));
+    }
+
+    private boolean isFieldBattle(){
+        //return true if parcel contains more than one general and no town or capitol;
+        return (pieces.containsKey(1) && pieces.containsKey(2) && !pieces.containsKey(6) && !pieces.containsKey(7));
+    }
+
+    private boolean isTownBattle(){
+        return (pieces.containsKey(1) && pieces.containsKey(2) && pieces.containsKey(6));
+    }
+
+    private boolean isCapitolBattle(){
+        return (pieces.containsKey(1) && pieces.containsKey(2) && pieces.containsKey(7));
     }
 
     HashMap<Integer, Piece> getPieces() {

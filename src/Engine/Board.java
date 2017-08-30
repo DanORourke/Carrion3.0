@@ -183,6 +183,21 @@ class Board {
         changeData.put(init, np.getGD());
     }
 
+    void occupyTown(General g){
+        Coords c = g.getCoords();
+        Town t = get(c).getTown();
+        removePiece(t);
+        Town nt  = new Town(c, g.getAlliance());
+        addPiece(nt);
+        addTroops(g, -1);
+        if (!g.getLines()){
+            General ng = g.createNewLines();
+            General nng = ng.createNewMoved(c, 1);
+            removePiece(g);
+            addPiece(nng);
+        }
+    }
+
     void dropSupply(General g){
         Coords c = g.getCoords();
         Supply supply  = new Supply(c, g.getAlliance());

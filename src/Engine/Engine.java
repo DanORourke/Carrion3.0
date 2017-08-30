@@ -244,6 +244,10 @@ public class Engine {
                 addPlayerPieces(p.getPieces());
             }
         }
+//        for (Alliance a : players.keySet()){
+//            Player p = players.get(a);
+//            System.out.println(a.toString() + " player size: " + p.getPieces().size());
+//        }
     }
 
     private GameState getLatestState(){
@@ -520,10 +524,18 @@ public class Engine {
         }
 
         //drop troop where he stands
-        if (clickedParcel.hasSingleGeneral() &&
+        if (clickedParcel.hasSingleGeneral() && clickedParcel.getPieces().size() == 1 &&
                 !clickedParcel.hasSupplyLine() && clickedParcel.getFirstGeneral().canDrop() &&
                 clickedParcel.getFirstGeneral().getAlliance().getDataCode() == playerTurn){
             board.dropSupply(clickedParcel.getFirstGeneral());
+            rememberClick = true;
+        }
+        //occupy town he is in
+        if (clickedParcel.hasSingleGeneral() &&
+                clickedParcel.hasTown() && clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                clickedParcel.getFirstGeneral().canDrop() &&
+                clickedParcel.getFirstGeneral().getAlliance().getDataCode() == playerTurn){
+            board.occupyTown(clickedParcel.getFirstGeneral());
             rememberClick = true;
         }
         if (active && activeCoords.isNextTo(c)){

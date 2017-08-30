@@ -4,29 +4,30 @@ import Engine.Piece.Capitol;
 import Engine.Piece.General.General;
 import Engine.Piece.Piece;
 import Engine.Piece.Town;
-import GUI.Coords;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class Player {
     private final Alliance alliance;
-    private final HashMap<Coords, Piece> pieces = new HashMap<>();
+    private final ArrayList<Piece> pieces = new ArrayList<>();
 
     Player(Alliance alliance){
         this.alliance = alliance;
     }
 
     void addPiece(Piece p){
-        Coords c = p.getCoords();
-        pieces.put(c, p);
+        pieces.add(p);
     }
 
     void removePiece(Piece p){
-        Coords c = p.getCoords();
-        pieces.remove(c);
+        pieces.remove(p);
     }
+
+    ArrayList<Piece> getPieces(){
+        return pieces;
+    }
+
 
     boolean canGeneralAdd(General g) {
         return g.canAdd() && !connectedFullTowns(g).isEmpty();
@@ -34,53 +35,17 @@ public class Player {
 
     private ArrayList<Piece> connectedFullTowns(General g){
         ArrayList<Piece> connectedPieces = new ArrayList<>();
-        for (Coords c : pieces.keySet()) {
-            Piece p = pieces.get(c);
-
-            if (((p.getType() == 6) && ((Town) p).hasTroop()) ||
-                    ((p.getType() == 7) && (((Capitol) p).getTroops() > 0))) {
-                List<Piece> frontier = new ArrayList<>();
-                List<Piece> visited = new ArrayList<>();
-                visited.add(p);
-                frontier.add(p);
-
-                while (!frontier.isEmpty()) {
-                    Piece current = frontier.get(frontier.size()-1);
-                    for (Coords k : pieces.keySet()){
-                        Piece bigBag = pieces.get(k);
-                        //System.out.println("new big bag");
-                        if ((!visited.contains(bigBag))&&(areNeighbors(bigBag, current)) ) {
-                            frontier.add(bigBag);
-                        }
-                    }
-                    visited.add(current);
-                    frontier.remove(current);
-                }
-
-                if (visited.contains(g)){
-                    connectedPieces.add(p);
-                }
+        for (Piece p : pieces) {
+            if ((((p.getType() == 6) && ((Town) p).hasTroop()) ||
+                    ((p.getType() == 7) && (((Capitol) p).getTroops() > 0))) && areConnected(p, g)) {
+                connectedPieces.add(p);
             }
         }
         return connectedPieces;
     }
 
-    private boolean areNeighbors(Piece p1, Piece p2){
-        return p1.getCoords().isNextTo(p2.getCoords());
-//        Coords c1 = p1.getCoords();
-//        Coords c2 = p2.getCoords();
-//        int q1 = c1.getQ();
-//        int r1 = c1.getR();
-//        int s1 = c1.getS();
-//        int q2 = c2.getQ();
-//        int r2 = c2.getR();
-//        int s2 = c2.getS();
-//        return (((q1 == q2) && ((r1 + 1) == r2) && ((s1 - 1) == s2)) ||
-//                ((q1 == q2) && ((r1 - 1) == r2) && ((s1 + 1) == s2)) ||
-//                (((q1 + 1) == q2) && (r1 == r2) && ((s1 - 1) == s2)) ||
-//                (((q1 - 1) == q2) && (r1 == r2) && ((s1 + 1) == s2)) ||
-//                (((q1 + 1) == q2) && ((r1 - 1) == r2) && (s1 == s2)) ||
-//                (((q1 - 1) == q2) && ((r1 + 1) == r2) && (s1 == s2)));
+    private boolean areNeighborsOrRoommates(Piece p1, Piece p2){
+        return p1.getCoords().isNextTo(p2.getCoords()) || p1.getCoords().equals(p2.getCoords());
     }
 
     Piece getConnectedTroopGiver(General g){
@@ -93,32 +58,10 @@ public class Player {
 
     private ArrayList<Piece> connectedTowns(General g){
         ArrayList<Piece> connectedPieces = new ArrayList<>();
-        for (Coords c : pieces.keySet()) {
-            Piece p = pieces.get(c);
-
-            if ((p.getType() == 6)  ||
-                    (p.getType() == 7)) {
-                List<Piece> frontier = new ArrayList<>();
-                List<Piece> visited = new ArrayList<>();
-                visited.add(p);
-                frontier.add(p);
-
-                while (!frontier.isEmpty()) {
-                    Piece current = frontier.get(frontier.size()-1);
-                    for (Coords k : pieces.keySet()){
-                        Piece bigBag = pieces.get(k);
-                        //System.out.println("new big bag");
-                        if ((!visited.contains(bigBag))&&(areNeighbors(bigBag, current)) ) {
-                            frontier.add(bigBag);
-                        }
-                    }
-                    visited.add(current);
-                    frontier.remove(current);
-                }
-
-                if (visited.contains(g)){
-                    connectedPieces.add(p);
-                }
+        for (Piece p : pieces) {
+            if (((p.getType() == 6)  ||
+                    (p.getType() == 7)) && areConnected(p, g) ) {
+                connectedPieces.add(p);
             }
         }
         return connectedPieces;
@@ -143,8 +86,7 @@ public class Player {
     Piece[] moveChief(){
         Piece wantsChief = null;
         Piece hasChief = null;
-        for (Coords c : pieces.keySet()){
-            Piece p = pieces.get(c);
+        for (Piece p : pieces){
             if ((p.getType() > 0 && p.getType() < 6)){
                 General g = (General)p;
                 if (g.wantsChief()){
@@ -170,8 +112,7 @@ public class Player {
 
     ArrayList<Piece> getChiefWanters(){
         ArrayList<Piece> wanters = new ArrayList<>();
-        for (Coords c : pieces.keySet()){
-            Piece p = pieces.get(c);
+        for (Piece p : pieces){
             if ((p.getType() > 0 && p.getType() < 6)){
                 General g = (General)p;
                 if (g.wantsChief()){
@@ -195,10 +136,9 @@ public class Player {
 
         while (!frontier.isEmpty()) {
             Piece current = frontier.get(frontier.size()-1);
-            for (Coords k : pieces.keySet()){
-                Piece bigBag = pieces.get(k);
+            for (Piece bigBag : pieces){
                 //System.out.println("new big bag");
-                if ((!visited.contains(bigBag))&&(areNeighbors(bigBag, current)) ) {
+                if ((!visited.contains(bigBag))&&(areNeighborsOrRoommates(bigBag, current)) ) {
                     frontier.add(bigBag);
                 }
             }
@@ -210,8 +150,7 @@ public class Player {
     }
 
     void resetPlayerPiecesAllocate(Board board){
-        for (Coords c : pieces.keySet()){
-            Piece p = pieces.get(c);
+        for (Piece p : pieces){
             if(p.isTown()){
                 board.resetTownAllocate((Town)p);
             }else if (p.isCapitol()){
@@ -221,8 +160,7 @@ public class Player {
     }
 
     void resetPlayerPiecesMove(Board board){
-        for (Coords c : pieces.keySet()){
-            Piece p = pieces.get(c);
+        for (Piece p : pieces){
             if (p.isGeneral()){
                 board.resetGeneralMove((General)p);
             }

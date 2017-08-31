@@ -106,7 +106,7 @@ public class General extends Piece {
 
     public General createNewFighting(boolean isFighting, boolean isAttacking, Coords launchPoint, boolean dropAfterWin){
         return new General(getCoords(), getType(), getAlliance(), name, troops, 0, hasChief, wantsChief,
-                exposed,true, isFighting, isAttacking, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed,true, isFighting, isAttacking, launchPoint, dropAfterWin, null, assistingMe);
     }
 
     public General createNewAssisting(Coords iAmAssisting){
@@ -238,5 +238,17 @@ public class General extends Piece {
 
     public ArrayList<Coords> getAssistingMe(){
         return assistingMe;
+    }
+
+    public Coords getLaunchPoint(){
+        return launchPoint;
+    }
+
+    public boolean getDropAfterWin(){
+        return dropAfterWin;
+    }
+
+    public boolean canLoseToTown(){
+        return troops > 1;
     }
 }

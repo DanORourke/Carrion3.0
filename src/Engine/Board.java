@@ -10,6 +10,7 @@ import GUI.GameData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 public class Board {
     //private final int gameType;
@@ -143,17 +144,24 @@ public class Board {
         removePiece(g);
         General gen = g.createNewMoved(next, 1);
         addPiece(gen);
-        for (Coords c : g.getAssistingMe()){
-            General assisting = getAssistingGeneral(c, g.getAlliance());
-            General nAssisting = assisting.createNewClearAssisting();
-            removePiece(assisting);
-            addPiece(nAssisting);
-        }
+        removeHelpFromGeneralIAmAssisting(g);
+        removeAssistingFromGeneralsAssistingMe(g);
+    }
+
+    private void removeHelpFromGeneralIAmAssisting(General g){
         if (g.getiAmAssisting() != null){
             General assisted = board.get(g.getiAmAssisting()).getAllianceGeneral(g.getAlliance());
             General nAssisted = assisted.createNewRemoveAssistingMe(g.getCoords());
             removePiece(assisted);
             addPiece(nAssisted);
+        }
+    }
+    private void removeAssistingFromGeneralsAssistingMe(General g){
+        for (Coords c : g.getAssistingMe()){
+            General assisting = getAssistingGeneral(c, g.getAlliance());
+            General nAssisting = assisting.createNewClearAssisting();
+            removePiece(assisting);
+            addPiece(nAssisting);
         }
     }
 
@@ -215,6 +223,25 @@ public class Board {
         }
     }
 
+    void razeTown(General g){
+        System.out.println("razeTown called");
+        Coords c = g.getCoords();
+        Town t = get(c).getTown();
+        removePiece(t);
+        Town nt  = new Town(c, Alliance.UNOCCUPIED);
+        addPiece(nt);
+    }
+
+    void injureGeneral(General g, int amount){
+        General nG = g.createNewTroop(amount);
+        removePiece(g);
+        addPiece(nG);
+    }
+
+    void killGeneral(General g){
+        removePiece(g);
+    }
+
     void dropSupply(General g){
         Coords c = g.getCoords();
         Supply supply  = new Supply(c, g.getAlliance());
@@ -250,12 +277,15 @@ public class Board {
         Parcel par = board.get(g.getCoords());
         if (par.hasSingleGeneral()){
             General oldDefender = par.getFirstGeneral();
+            //tell general i am assisting that i am no longer assisting him
+            removeHelpFromGeneralIAmAssisting(oldDefender);
             General nD = oldDefender.createNewFighting(true, false,
                     launchPoint, false);
             removePiece(oldDefender);
             addPiece(nD);
         }
         General ng = g.createNewFighting(true, true, launchPoint, dropAfterWin);
+        removeHelpFromGeneralIAmAssisting(g);
         removePiece(g);
         addPiece(ng);
     }
@@ -263,13 +293,13 @@ public class Board {
     void subtractTroopFromTown(Piece p){
         if (p.getType() == 6){
             Town t = ((Town)p).createNewTroop(false);
-            System.out.println("remove troop from town " + ((Town) p).hasTroop() + " " + t.hasTroop());
+            //System.out.println("remove troop from town " + ((Town) p).hasTroop() + " " + t.hasTroop());
             removePiece(p);
             //System.out.println(board.get(p.getCoords()).getTown().hasTroop());
             addPiece(t);
-            System.out.println(board.get(p.getCoords()).getTown().hasTroop());
+            //System.out.println(board.get(p.getCoords()).getTown().hasTroop());
         }else{
-            System.out.println("remove troop from cap");
+            //System.out.println("remove troop from cap");
             Capitol cap = ((Capitol)p).createNewTroops(-1);
             removePiece(p);
             addPiece(cap);
@@ -364,5 +394,44 @@ public class Board {
         General nAssisted = assistedG.createNewAssisted(assistingG.getCoords());
         removePiece(assistedG);
         addPiece(nAssisted);
+    }
+
+    Coords calcRetreat(Coords battle, Coords launch, Alliance retreatingAlliance, boolean attackerWon){
+        if (attackerWon){
+            ArrayList<Coords> options = new ArrayList<>();
+            for (Coords c : board.keySet()){
+                if(c.isNextTo(battle) && !(c.isNextTo(launch) || c.equals(launch))){
+                    options.add(c);
+                }
+            }
+            return pickARetreat(options, retreatingAlliance);
+        }else{
+            ArrayList<Coords> options = new ArrayList<>();
+            options.add(launch);
+            for (Coords c : board.keySet()){
+                if(c.isNextTo(battle) && c.isNextTo(launch)){
+                    options.add(c);
+                }
+            }
+            return pickARetreat(options, retreatingAlliance);
+        }
+    }
+
+    private Coords pickARetreat(ArrayList<Coords> options, Alliance retreatingAlliance){
+        for (Coords c : options){
+            Parcel p = board.get(c);
+            if (p.hasGeneral() || (p.hasTown() && !p.getTown().getAlliance().equals(retreatingAlliance)) ||
+                    (p.hasCapitol() && !p.getCapitol().getAlliance().equals(retreatingAlliance)) ||
+                    (p.hasSupplyLine() && !p.getSupply().getAlliance().equals(retreatingAlliance))){
+                options.remove(c);
+            }
+        }
+        if (options.isEmpty()){
+            return null;
+        }
+        else{
+            Random rand = new Random();
+            return options.get(rand.nextInt(options.size()));
+        }
     }
 }

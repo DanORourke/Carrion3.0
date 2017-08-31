@@ -86,6 +86,24 @@ public class Engine {
                     int sa = Integer.valueOf(moves.get(i+6));
                     setAssisted(new Coords(qa, ra, sa));
                     i+= 7;
+                }else if (moveType.equals("battle")){
+                    int q = Integer.valueOf(moves.get(i+1));
+                    int r = Integer.valueOf(moves.get(i+2));
+                    int s = Integer.valueOf(moves.get(i+3));
+                    Coords c = new Coords(q, r, s);
+                    int wonEnc = Integer.valueOf(moves.get(i+4));
+                    Coords launch;
+                    if (moves.get(i+5).equals("null")){
+                        launch = null;
+                        i+=6;
+                    }else{
+                        int ql = Integer.valueOf(moves.get(i+5));
+                        int rl = Integer.valueOf(moves.get(i+6));
+                        int sl = Integer.valueOf(moves.get(i+7));
+                        launch = new Coords(q, r, s);
+                        i+=8;
+                    }
+                    afterBattle(c, wonEnc, launch);
                 }else{
                     int qc = Integer.valueOf(moves.get(i));
                     int rc = Integer.valueOf(moves.get(i+1));
@@ -161,16 +179,17 @@ public class Engine {
     }
 
     private void rotatePhase(){
-        turnStage++;
-        if (turnStage > 1){
-            turnStage = 0;
-            rotatePlayer();
-        }else {
+        if (turnStage == 0){
+            turnStage = 1;
             Player active = getActivePlayer();
             if (active != null){
                 active.resetPlayerPiecesMove(board);
             }
+        }else if (turnStage == 1){
+            rotatePlayer();
+            turnStage = 0;
         }
+
         settingChief = false;
         exposingGeneral = false;
         assisting = false;
@@ -208,6 +227,13 @@ public class Engine {
         }
     }
 
+    private void addToHistory(String newOrders){
+        String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
+        history.add(new GameState(new Board(board), null,  playerTurn, turnStage, oldEncoded + newOrders));
+        histIndex = history.size() - 1;
+        setState();
+    }
+
     private void battle(Coords c){
         // get attacker and defender
         General ga = board.get(c).getAttacker();
@@ -221,16 +247,55 @@ public class Engine {
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = 1 + rand.nextInt(20) + 1;
             if (attack > defence){
-
+                afterBattle(c, 1, null);
             }else{
                 //defence wins
+                Coords retreat = board.calcRetreat(c, ga.getLaunchPoint(), ga.getAlliance(), false);
+                afterBattle(c, 0, retreat);
             }
         }else{
             //defender is capitol
         }
-        // decide who wins
-        // decide where loser goes
-        // tell history
+    }
+
+    private void afterBattle(Coords battleField, int attackerWon, Coords retreat){
+        //attackerWon == 1 equals true, 0 equals false
+        Parcel parcel = board.get(battleField);
+        General ga = board.get(battleField).getAttacker();
+        Piece p = board.get(battleField).getDefender();
+
+        if (parcel.isFieldBattle()){
+
+        }else if (parcel.isDefendedTownBattle()){
+
+        }else if (parcel.isDefendedCapitolBattle()){
+
+        }else if (parcel.isTownBattle()){
+            if (attackerWon == 1){
+                board.razeTown(ga);
+                ga = board.get(battleField).getFirstGeneral();
+                if (ga.getDropAfterWin()){
+                    board.occupyTown(ga);
+                }
+            }else{
+                if (ga.canLoseToTown()){
+                    board.injureGeneral(ga, -1);
+                    ga = board.get(battleField).getFirstGeneral();
+                    board.moveGeneral(ga, retreat);
+                }else{
+                    board.killGeneral(ga);
+                }
+            }
+
+        }else if (parcel.isCapitolBattle()){
+
+        }
+
+        String re = "null";
+        if (retreat != null){
+            re = retreat.toString();
+        }
+        addToHistory(",battle," + battleField.toString() + "," + String.valueOf(attackerWon) + "," + re);
     }
 
     private void moveChief(){

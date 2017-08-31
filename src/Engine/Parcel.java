@@ -95,7 +95,7 @@ public class Parcel {
             j++;
             hold[j] = getSecondGeneral().getAlliance().getDataCode();
             j++;
-        }else if (isTownBattle()){
+        }else if (isDefendedTownBattle()){
             Town t = getTown();
             hold[j] = t.getType();
             j++;
@@ -107,7 +107,7 @@ public class Parcel {
             j++;
             hold[j] = getSecondGeneral().getAlliance().getDataCode();
             j++;
-        }else if (isCapitolBattle()){
+        }else if (isDefendedCapitolBattle()){
             Capitol cap = getCapitol();
             hold[j] = cap.getType();
             j++;
@@ -164,24 +164,35 @@ public class Parcel {
 
     boolean isBattle(){
         return ((pieces.containsKey(1) && pieces.containsKey(2)) ||
-                (pieces.containsKey(1) && pieces.containsKey(6) &&
-                        !getFirstGeneral().getAlliance().equals(getTown().getAlliance())) ||
+                ((pieces.containsKey(1) && pieces.containsKey(6)) &&
+                        (!getFirstGeneral().getAlliance().equals(getTown().getAlliance()) &&
+                        !getTown().getAlliance().equals(Alliance.UNOCCUPIED))) ||
                 (pieces.containsKey(1) && pieces.containsKey(7) &&
-                        !getFirstGeneral().getAlliance().equals(getCapitol().getAlliance())));
+                        (!getFirstGeneral().getAlliance().equals(getCapitol().getAlliance()) &&
+                                !getTown().getAlliance().equals(Alliance.UNOCCUPIED))));
     }
 
-    private boolean isFieldBattle(){
+    boolean isFieldBattle(){
         //return true if parcel contains more than one general and no town or capitol;
         return (pieces.containsKey(1) && pieces.containsKey(2) && !pieces.containsKey(6) && !pieces.containsKey(7));
     }
 
-    private boolean isTownBattle(){
+    boolean isDefendedTownBattle(){
         return (pieces.containsKey(1) && pieces.containsKey(2) && pieces.containsKey(6));
     }
 
-    private boolean isCapitolBattle(){
+    boolean isDefendedCapitolBattle(){
         return (pieces.containsKey(1) && pieces.containsKey(2) && pieces.containsKey(7));
     }
+
+    boolean isTownBattle(){
+        return (pieces.containsKey(1) && !pieces.containsKey(2) && pieces.containsKey(6));
+    }
+
+    boolean isCapitolBattle(){
+        return (pieces.containsKey(1) && !pieces.containsKey(2) && pieces.containsKey(7));
+    }
+
 
     HashMap<Integer, Piece> getPieces() {
         return pieces;

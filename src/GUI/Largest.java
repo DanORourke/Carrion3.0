@@ -201,7 +201,9 @@ public class Largest {
                 engine.assist();
                 hoverArea.setText("Left click on the general you are ordering to assist, " +
                         "then left click on the general you are ordering be assisted.  " +
-                        "A general cannot assist another if he is more than one space away from him or engaged in battle.");
+                        "A general cannot assist another if he is more than one space away or " +
+                        "engaged in battle.  If a general is attacked when he is assisting another, he will suffer " +
+                        "a penalty due to the distraction.");
             }
         });
         return assist;

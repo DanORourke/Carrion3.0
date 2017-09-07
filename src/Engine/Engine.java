@@ -3,6 +3,7 @@ package Engine;
 import Engine.Piece.Capitol;
 import Engine.Piece.General.General;
 import Engine.Piece.Piece;
+import Engine.Piece.Town;
 import GUI.Coords;
 import GUI.GameData;
 import java.util.ArrayList;
@@ -100,7 +101,7 @@ public class Engine {
                         int ql = Integer.valueOf(moves.get(i+5));
                         int rl = Integer.valueOf(moves.get(i+6));
                         int sl = Integer.valueOf(moves.get(i+7));
-                        launch = new Coords(q, r, s);
+                        launch = new Coords(ql, rl, sl);
                         i+=8;
                     }
                     afterBattle(c, wonEnc, launch);
@@ -236,12 +237,29 @@ public class Engine {
 
     private void battle(Coords c){
         // get attacker and defender
-        General ga = board.get(c).getAttacker();
-        Piece p = board.get(c).getDefender();
-        if (p.isGeneral()){
-            General gd = (General)p;
+        Parcel parcel = board.get(c);
+        General ga = parcel.getAttacker();
+        Piece p = parcel.getDefender();
 
-        }else if (p.isTown()){
+        if (parcel.isFieldBattle()){
+            General gd = (General)p;
+            int aBonus = ga.getAttackBonus(board);
+            int dBonus = gd.getDefendBonus(board);
+            Random rand = new Random();
+            int attack = aBonus + rand.nextInt(20) + 1;
+            int defence = dBonus + rand.nextInt(20) + 1;
+            if (attack > defence) {
+                Coords retreat = board.calcRetreat(c, gd.getLaunchPoint(), gd.getAlliance(), true);
+                afterBattle(c, 1, retreat);
+            }else{
+                Coords retreat = board.calcRetreat(c, ga.getLaunchPoint(), ga.getAlliance(), false);
+                afterBattle(c, 0, retreat);
+            }
+        }else if (parcel.isDefendedTownBattle()){
+
+        }else if (parcel.isDefendedCapitolBattle()){
+
+        }else if (parcel.isTownBattle()){
             int aBonus = ga.getAttackTownBonus(board);
             Random rand = new Random();
             int attack = aBonus + rand.nextInt(20) + 1;
@@ -253,19 +271,63 @@ public class Engine {
                 Coords retreat = board.calcRetreat(c, ga.getLaunchPoint(), ga.getAlliance(), false);
                 afterBattle(c, 0, retreat);
             }
-        }else{
-            //defender is capitol
+        }else if (parcel.isCapitolBattle()){
+
         }
     }
 
     private void afterBattle(Coords battleField, int attackerWon, Coords retreat){
         //attackerWon == 1 equals true, 0 equals false
         Parcel parcel = board.get(battleField);
-        General ga = board.get(battleField).getAttacker();
-        Piece p = board.get(battleField).getDefender();
+        General ga = parcel.getAttacker();
+        Piece p = parcel.getDefender();
 
         if (parcel.isFieldBattle()){
-
+            General gd = (General) p;
+            if (attackerWon == 1){
+                int casualties = ga.getCasualties(board);
+                if (gd.canSufferCasualties(casualties) && retreat != null){
+                    board.injureGeneral(gd, casualties);
+                    gd = board.get(battleField).getAllianceGeneral(gd.getAlliance());
+                    board.moveGeneral(gd, retreat);
+                }else {
+                    board.killGeneral(gd);
+                    fillPlayers();
+                    Player killed = players.get(gd.getAlliance());
+                    if (killed.noGenerals()){
+                        System.out.println("kill player " + gd.getAlliance().toString());
+                        board.killPlayer(killed, ga.getAlliance());
+                        //dont need to reset playoutBattles list, parcel will return false for all battle types if general died
+                    }
+                }
+                if (ga.getDropAfterWin()){
+                    board.dropSupply(ga);
+                }
+            }else{
+                int casualties = gd.getCasualties(board);
+                board.stopAssisting(gd);
+                if (ga.canSufferCasualties(casualties) && retreat != null){
+                    board.injureGeneral(ga, casualties);
+                    ga = board.get(battleField).getSecondGeneral();
+                    board.moveGeneral(ga, retreat);
+                }else {
+                    board.killGeneral(ga);
+                    fillPlayers();
+                    Player killed = players.get(ga.getAlliance());
+                    if (killed.noGenerals()){
+                        System.out.println("kill player " + ga.getAlliance().toString());
+                        board.killPlayer(killed, gd.getAlliance());
+                        String re = "null";
+                        if (retreat != null){
+                            re = retreat.toString();
+                        }
+                        addToHistory(",battle," + battleField.toString() + "," +
+                                String.valueOf(attackerWon) + "," + re);
+                        playoutBattles();
+                        return;
+                    }
+                }
+            }
         }else if (parcel.isDefendedTownBattle()){
 
         }else if (parcel.isDefendedCapitolBattle()){
@@ -278,8 +340,8 @@ public class Engine {
                     board.occupyTown(ga);
                 }
             }else{
-                if (ga.canLoseToTown()){
-                    board.injureGeneral(ga, -1);
+                if (ga.canLoseToTown() && retreat != null){
+                    board.injureGeneral(ga, 1);
                     ga = board.get(battleField).getFirstGeneral();
                     board.moveGeneral(ga, retreat);
                 }else{
@@ -446,8 +508,21 @@ public class Engine {
                         activeParcel.getFirstGeneral().getTroops() + " troops under his command.";
             }
         }else{
-
-            if(activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
+            if (activeParcel.isTownBattle()){
+                General g = activeParcel.getFirstGeneral();
+                Town t = activeParcel.getTown();
+                s = g.getAlliance().toString() + " General " + g.getType() + " attacking " +
+                        t.getAlliance().toString() + " town with " +
+                        g.getTroops() + " troops under his command.\n";
+                if (!g.getAssistingMe().isEmpty()){
+                    for (Coords cords : g.getAssistingMe()){
+                        General assisting = board.get(cords).getAllianceGeneral(g.getAlliance());
+                        s += "Receiving assistance from  " + assisting.getAlliance().toString() +
+                                " General " + assisting.getType() + "\n";
+                    }
+                }
+            }
+            else if(activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
                 General g = activeParcel.getFirstGeneral();
                 s = userTeam.toString() + " General " + g.getType() + " has:\n" +
                         g.getTroops() + " troops under his command.\n" + g.getMovementPoints() + " movement points.\n";
@@ -469,7 +544,7 @@ public class Engine {
                     s += "Orders to receive the Chief of Staff.\n";
                 }
             }
-            if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
+            else if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
                 General g = activeParcel.getFirstGeneral();
                 s = g.getAlliance().toString() + " General " + g.getType() + " has:\n" +
                         g.getTroops() + " troops under his command.";

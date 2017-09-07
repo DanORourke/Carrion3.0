@@ -172,6 +172,10 @@ public class Parcel {
                                 !getTown().getAlliance().equals(Alliance.UNOCCUPIED))));
     }
 
+    boolean isGeneralBattle(){
+        return (pieces.containsKey(1) && pieces.containsKey(2));
+    }
+
     boolean isFieldBattle(){
         //return true if parcel contains more than one general and no town or capitol;
         return (pieces.containsKey(1) && pieces.containsKey(2) && !pieces.containsKey(6) && !pieces.containsKey(7));
@@ -186,13 +190,16 @@ public class Parcel {
     }
 
     boolean isTownBattle(){
-        return (pieces.containsKey(1) && !pieces.containsKey(2) && pieces.containsKey(6));
+        return (pieces.containsKey(1) && !pieces.containsKey(2) && pieces.containsKey(6) &&
+        !pieces.get(6).getAlliance().equals(pieces.get(1).getAlliance()) &&
+                !pieces.get(6).getAlliance().equals(Alliance.UNOCCUPIED));
     }
 
     boolean isCapitolBattle(){
-        return (pieces.containsKey(1) && !pieces.containsKey(2) && pieces.containsKey(7));
+        return (pieces.containsKey(1) && !pieces.containsKey(2) && pieces.containsKey(7) &&
+                !pieces.get(7).getAlliance().equals(pieces.get(1).getAlliance()) &&
+                !pieces.get(7).getAlliance().equals(Alliance.UNOCCUPIED));
     }
-
 
     HashMap<Integer, Piece> getPieces() {
         return pieces;
@@ -292,8 +299,8 @@ public class Parcel {
             return pieces.get(1);
         }else if (pieces.containsKey(6)){
             return pieces.get(6);
-        }else {
-            return pieces.get(7);
+        }else{
+            return pieces.containsKey(7) ? pieces.get(7): new Piece();
         }
     }
 }

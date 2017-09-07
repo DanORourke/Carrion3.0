@@ -8,6 +8,12 @@ public class Piece {
     private final int type;
     private final Alliance alliance;
 
+    public Piece (){
+        this.coords = null;
+        this.type = 0;
+        this.alliance = null;
+    }
+
     public Piece(Coords coords, int type, Alliance alliance){
         this.coords = coords;
         this.type = type;

@@ -170,4 +170,14 @@ public class Player {
     public Alliance getAlliance() {
         return alliance;
     }
+
+    boolean noGenerals(){
+        int gens = 0;
+        for (Piece p : pieces){
+            if (p.isGeneral()){
+                gens ++;
+            }
+        }
+        return gens == 0;
+    }
 }

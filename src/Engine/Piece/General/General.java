@@ -15,8 +15,6 @@ public class General extends Piece {
     private final boolean wantsChief;
     private final boolean exposed;
     private final boolean lines;
-    private final boolean isFighting;
-    private final boolean isAttacking;
     private final Coords launchPoint;
     private final boolean dropAfterWin;
     private final Coords iAmAssisting;
@@ -31,8 +29,6 @@ public class General extends Piece {
         this.wantsChief = false;
         this.exposed = false;
         this.lines = false;
-        this.isFighting = false;
-        this.isAttacking = false;
         this.launchPoint = null;
         this.dropAfterWin = false;
         this.iAmAssisting = null;
@@ -41,7 +37,7 @@ public class General extends Piece {
 
     private General(Coords coords, int type, Alliance alliance, int name, int troops,
                    int movementPoints, boolean hasChief, boolean wantsChief, boolean exposed, boolean lines,
-                   boolean isFighting, boolean isAttacking, Coords launchPoint, boolean dropAfterWin,
+                   Coords launchPoint, boolean dropAfterWin,
                     Coords iAmAssisting, ArrayList<Coords> assistingMe){
         super(coords, type, alliance);
         this.name = name;
@@ -51,8 +47,6 @@ public class General extends Piece {
         this.wantsChief = wantsChief;
         this.exposed = exposed;
         this.lines = lines;
-        this.isFighting = isFighting;
-        this.isAttacking = isAttacking;
         this.launchPoint = launchPoint;
         this.dropAfterWin = dropAfterWin;
         this.iAmAssisting = iAmAssisting;
@@ -63,76 +57,83 @@ public class General extends Piece {
     public Piece copy(){
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                isFighting, isAttacking, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public General createNewMoved(Coords c, int n){
         return new General(c, getType(), getAlliance(), getName(), troops, movementPoints - n,
-                hasChief, wantsChief, exposed, lines, isFighting, isAttacking, launchPoint, dropAfterWin,
+                hasChief, wantsChief, exposed, lines, launchPoint, dropAfterWin,
                 null, new ArrayList<>());
     }
 
     public General createNewTroop(int addedTroops){
         return new General(getCoords(), getType(), getAlliance(), getName(), troops + addedTroops,
-                movementPoints, hasChief, wantsChief, exposed, lines, isFighting, isAttacking,
+                movementPoints, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public General createNewWantsChief(boolean wantsChief){
         return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, lines, isFighting, isAttacking,launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public General createNewHasChief(boolean hasChief){
         return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, lines, isFighting, isAttacking,launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public General createNewExposed(boolean exposed){
         return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, lines, isFighting, isAttacking,launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public General createNewLines(){
         return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, true, isFighting, isAttacking,launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, true, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public General resetGeneralMove(){
         return new General(getCoords(), getType(), getAlliance(), name, troops, calcMovementPoints(),
-                hasChief, wantsChief, exposed, false, false, false,null,
+                hasChief, wantsChief, exposed, false, null,
                 false, null, new ArrayList<>());
     }
 
-    public General createNewFighting(boolean isFighting, boolean isAttacking, Coords launchPoint, boolean dropAfterWin){
+    public General createNewFighting(Coords launchPoint, boolean dropAfterWin){
+        //keep iamassisting to tell if general is distracted
         return new General(getCoords(), getType(), getAlliance(), name, troops, 0, hasChief, wantsChief,
-                exposed,true, isFighting, isAttacking, launchPoint, dropAfterWin, null, assistingMe);
+                exposed,true, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public General createNewAssisting(Coords iAmAssisting){
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                isFighting, isAttacking, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public General createNewAssisted(Coords assistingGeneral){
         assistingMe.add(assistingGeneral);
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                isFighting, isAttacking, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public General createNewClearAssisting(){
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                isFighting, isAttacking, launchPoint, dropAfterWin, null, assistingMe);
+                launchPoint, dropAfterWin, null, assistingMe);
     }
 
     public General createNewRemoveAssistingMe(Coords assistingGeneral){
         assistingMe.remove(assistingGeneral);
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                isFighting, isAttacking, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+    }
+
+    public General createNewTraitor(Alliance alliance){
+        return new General(getCoords(), getType(), alliance, name,
+                troops, movementPoints, hasChief, wantsChief, exposed, lines,
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public int getName() {
@@ -169,7 +170,7 @@ public class General extends Piece {
 
     public boolean canMoveAndDrop() {
         if (lines){
-            return troops > 1;
+            return movementPoints > 0 && troops > 1;
         }else {
             return movementPoints > 1 && troops > 1;
         }
@@ -211,6 +212,27 @@ public class General extends Piece {
         return lines;
     }
 
+    public int getAttackBonus(Board board){
+        int bonus = troops;
+        for (Coords c : assistingMe){
+            General ag = board.getAssistingGeneral(c, getAlliance());
+            bonus += ag.getAssistBonus();
+        }
+        return bonus;
+    }
+
+    public int getDefendBonus(Board board){
+        int bonus = troops;
+        for (Coords c : assistingMe){
+            General ag = board.getAssistingGeneral(c, getAlliance());
+            bonus += ag.getAssistBonus();
+        }
+        if (iAmAssisting != null && bonus > 1){
+            bonus -= 1;
+        }
+        return bonus;
+    }
+
     public int getAttackTownBonus(Board board){
         int bonus = 0;
         for (Coords c : assistingMe){
@@ -250,5 +272,22 @@ public class General extends Piece {
 
     public boolean canLoseToTown(){
         return troops > 1;
+    }
+
+    public int getCasualties(Board board){
+        int casualties = (int)Math.ceil((double)troops / 2);
+        for (Coords c : assistingMe){
+            General ag = board.getAssistingGeneral(c, getAlliance());
+            casualties += ag.getAssistCasualties();
+        }
+        return casualties;
+    }
+
+    public int getAssistCasualties(){
+        return (int)Math.ceil((double)troops / 4);
+    }
+
+    public boolean canSufferCasualties(int casualties){
+        return troops > casualties;
     }
 }

@@ -32,4 +32,12 @@ public class Town extends Piece {
     public boolean hasTroop(){
         return haveTroop;
     }
+
+    public int getAttackBonus() {
+        return 1;
+    }
+
+    public int getCasualties(){
+        return 1;
+    }
 }

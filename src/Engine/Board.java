@@ -136,7 +136,7 @@ public class Board {
         updateMap(parcels);
     }
 
-    Parcel get(Coords c){
+    public Parcel get(Coords c){
         return board.get(c);
     }
 
@@ -198,14 +198,15 @@ public class Board {
         if (p.isGeneral()){
             if (!op.hasGeneral()){
                 nPieces.put(1, p.copy());
-            }else if(op.hasSingleGeneral())
-            {
+            }else if(op.hasSingleGeneral()) {
                 nPieces.put(2, p.copy());
-            }else if (op.hasGeneral()){
-                //if have a general in the second position
-                //did it this way so new generals go where they came from
-                nPieces.put(1, p.copy());
             }
+            //why dont i need to worry about this?????
+//            else if (op.hasGeneral()){
+//                //if have a general in the second position
+//                //did it this way so new generals go where they came from
+//                nPieces.put(1, p.copy());
+//            }
         }else{
             nPieces.put(p.getType(), p.copy());
         }
@@ -286,8 +287,7 @@ public class Board {
             General oldDefender = par.getFirstGeneral();
             //tell general i am assisting that i am no longer assisting him
             removeHelpFromGeneralIAmAssisting(oldDefender);
-            General nD = oldDefender.createNewFighting(
-                    launchPoint, false);
+            General nD = oldDefender.createNewFighting(launchPoint, false);
             removePiece(oldDefender);
             addPiece(nD);
         }
@@ -381,8 +381,16 @@ public class Board {
         ArrayList<Coords> bCoords = new ArrayList<>();
         for (Coords c : board.keySet()){
             Parcel p = board.get(c);
-            if (p.isBattle()){
+            if (p.isCapitolBattle() || p.isDefendedCapitolBattle()){
                 bCoords.add(c);
+            }
+        }
+        if (bCoords.isEmpty()){
+            for (Coords c : board.keySet()){
+                Parcel p = board.get(c);
+                if (p.isBattle()){
+                    bCoords.add(c);
+                }
             }
         }
         return bCoords;
@@ -462,12 +470,15 @@ public class Board {
                 addPiece(ghost);
             }
         }
-        if (!traitors.isEmpty()){
-            General gen = traitors.get(new Random().nextInt(traitors.size())).createNewTraitor(killer);
-            addPiece(gen);
-        }
+//        if (!traitors.isEmpty()){
+//            General gen = traitors.get(new Random().nextInt(traitors.size())).createNewTraitor(killer);
+//            addPiece(gen);
+//        }
         for (General g : traitors){
+            //turn all non fighting generals
+            General gen = g.createNewTraitor(killer);
             removePiece(g);
+            addPiece(gen);
         }
     }
 }

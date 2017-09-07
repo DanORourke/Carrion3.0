@@ -169,7 +169,7 @@ public class Parcel {
                         !getTown().getAlliance().equals(Alliance.UNOCCUPIED))) ||
                 (pieces.containsKey(1) && pieces.containsKey(7) &&
                         (!getFirstGeneral().getAlliance().equals(getCapitol().getAlliance()) &&
-                                !getTown().getAlliance().equals(Alliance.UNOCCUPIED))));
+                                !getCapitol().getAlliance().equals(Alliance.UNOCCUPIED))));
     }
 
     boolean isGeneralBattle(){
@@ -205,7 +205,7 @@ public class Parcel {
         return pieces;
     }
 
-    Alliance getTerritory() {
+    public Alliance getTerritory() {
         return territory;
     }
 

@@ -1,8 +1,11 @@
 package Engine.Piece.General;
 
 import Engine.Alliance;
+import Engine.Parcel;
+import Engine.Piece.Capitol;
 import Engine.Piece.Piece;
 import Engine.Board;
+import Engine.Piece.Town;
 import GUI.Coords;
 
 import java.util.ArrayList;
@@ -212,38 +215,97 @@ public class General extends Piece {
         return lines;
     }
 
-    public int getAttackBonus(Board board){
-        int bonus = troops;
-        for (Coords c : assistingMe){
-            General ag = board.getAssistingGeneral(c, getAlliance());
-            bonus += ag.getAssistBonus();
+    private int addTerritoryBonus(Board board){
+        int bonus = 0;
+        Parcel p = board.get(getCoords());
+        if (p.getTerritory().equals(getAlliance())){
+            bonus++;
+        }else if (!p.getTerritory().equals(getAlliance()) && p.getTerritory().equals(Alliance.UNOCCUPIED)){
+            bonus --;
         }
         return bonus;
     }
 
-    public int getDefendBonus(Board board){
-        int bonus = troops;
-        for (Coords c : assistingMe){
-            General ag = board.getAssistingGeneral(c, getAlliance());
-            bonus += ag.getAssistBonus();
-        }
-        if (iAmAssisting != null && bonus > 1){
-            bonus -= 1;
-        }
-        return bonus;
-    }
-
-    public int getAttackTownBonus(Board board){
+    private int addAssistingAttackBonus(Board board){
         int bonus = 0;
         for (Coords c : assistingMe){
             General ag = board.getAssistingGeneral(c, getAlliance());
             bonus += ag.getAssistBonus();
         }
-        return bonus + troops;
+        return bonus;
+    }
+
+    private int addDistractedBonus(){
+        if (iAmAssisting != null){
+            return ((int)Math.ceil((double)troops / 4) * -1);
+        }
+        return 0;
+    }
+
+    public int getAttackBonus(Board board){
+        int bonus = troops;
+        bonus += addAssistingAttackBonus(board);
+        bonus += addTerritoryBonus(board);
+        return bonus;
+    }
+
+    public int getDefendBonus(Board board){
+        int bonus = troops;
+        bonus += addAssistingAttackBonus(board);
+        bonus += addTerritoryBonus(board);
+        bonus += addDistractedBonus();
+        return bonus;
+    }
+
+    public int getAttackTownBonus(Board board){
+        int bonus = troops;
+        bonus += addAssistingAttackBonus(board);
+        bonus += addTerritoryBonus(board);
+        return bonus;
+    }
+
+    public int getAttackDefendedTownBonus(Board board, Town t){
+        int bonus = troops;
+        bonus += addAssistingAttackBonus(board);
+        bonus += addTerritoryBonus(board);
+        return bonus;
+    }
+
+    public int getDefendTownBonus(Board board, Town t){
+        int bonus = troops;
+        bonus += addAssistingAttackBonus(board);
+        bonus += addTerritoryBonus(board);
+        bonus += addDistractedBonus();
+        if (getAlliance().equals(t.getAlliance())){
+            bonus += t.getAttackBonus();
+        }
+        return bonus;
+    }
+
+    public int getAttackCapitolBonus(Board board){
+        return getAttackTownBonus(board);
+    }
+
+    public int getAttackDefendedCapitolBonus(Board board, Capitol cap){
+        int bonus = troops;
+        bonus += addAssistingAttackBonus(board);
+        bonus += addTerritoryBonus(board);
+        return bonus;
+    }
+
+    public int getDefendCapitolBonus(Board board, Capitol cap){
+        int bonus = troops;
+        bonus += addAssistingAttackBonus(board);
+        bonus += addTerritoryBonus(board);
+        bonus += addDistractedBonus();
+        if (getAlliance().equals(cap.getAlliance())){
+            bonus += cap.getAttackBonus();
+        }
+        return bonus;
     }
 
     public int getAssistBonus(){
-        return troops/2;
+        return (int)Math.ceil((double)troops / 2);
     }
 
     public boolean canAssist(Coords c){
@@ -270,8 +332,12 @@ public class General extends Piece {
         return dropAfterWin;
     }
 
-    public boolean canLoseToTown(){
-        return troops > 1;
+    public boolean canLoseToTown(int casualties){
+        return troops > casualties;
+    }
+
+    public boolean canLoseToCap(int casualties){
+        return troops > casualties;
     }
 
     public int getCasualties(Board board){
@@ -280,6 +346,44 @@ public class General extends Piece {
             General ag = board.getAssistingGeneral(c, getAlliance());
             casualties += ag.getAssistCasualties();
         }
+        return casualties;
+    }
+
+    public int getAttackDefendedTownCasualties(Board board, Town t){
+        int casualties = (int)Math.ceil((double)troops / 2);
+        for (Coords c : assistingMe){
+            General ag = board.getAssistingGeneral(c, getAlliance());
+            casualties += ag.getAssistCasualties();
+        }
+        return casualties;
+    }
+
+    public int getDefendTownCasualties(Board board, Town t){
+        int casualties = (int)Math.ceil((double)troops / 2);
+        for (Coords c : assistingMe){
+            General ag = board.getAssistingGeneral(c, getAlliance());
+            casualties += ag.getAssistCasualties();
+        }
+        casualties += t.getCasualties();
+        return casualties;
+    }
+
+    public int getAttackDefendedCapitolCasualties(Board board, Capitol cap){
+        int casualties = (int)Math.ceil((double)troops / 2);
+        for (Coords c : assistingMe){
+            General ag = board.getAssistingGeneral(c, getAlliance());
+            casualties += ag.getAssistCasualties();
+        }
+        return casualties;
+    }
+
+    public int getDefendCapitalCasualties(Board board, Capitol cap){
+        int casualties = (int)Math.ceil((double)troops / 2);
+        for (Coords c : assistingMe){
+            General ag = board.getAssistingGeneral(c, getAlliance());
+            casualties += ag.getAssistCasualties();
+        }
+        casualties += cap.getCasualties();
         return casualties;
     }
 

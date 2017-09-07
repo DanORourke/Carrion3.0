@@ -54,4 +54,18 @@ public class Capitol extends Piece{
     public int getTroops(){
         return troops;
     }
+
+    public int getAttackBonus() {
+        if (hasChief()){
+            return 4;
+        }
+        return 2;
+    }
+
+    public int getCasualties(){
+        if (hasChief()){
+            return 2;
+        }
+        return 1;
+    }
 }

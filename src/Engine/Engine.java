@@ -914,9 +914,9 @@ public class Engine {
         {
             board.setAssist(g, g1);
             String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
-            String encoded = nextEncoded(oldEncoded);
+            //String encoded = nextEncoded(oldEncoded);
             history.add(new GameState(new Board(board), null,  playerTurn, turnStage,
-                    encoded + ",assist," + assistingCoords.toString() + "," + c.toString()));
+                    oldEncoded + ",assist," + assistingCoords.toString() + "," + c.toString()));
             histIndex = history.size() - 1;
 
         }else if (g != null &&g2 != null && g2.getAlliance().equals(getUserTeam()) &&
@@ -924,9 +924,9 @@ public class Engine {
         {
             board.setAssist(g, g2);
             String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
-            String encoded = nextEncoded(oldEncoded);
+            //String encoded = nextEncoded(oldEncoded);
             history.add(new GameState(new Board(board), null,  playerTurn, turnStage,
-                    encoded + ",assist," + assistingCoords.toString() + "," + c.toString()));
+                    oldEncoded + ",assist," + assistingCoords.toString() + "," + c.toString()));
             histIndex = history.size() - 1;
         }
         assisting = false;

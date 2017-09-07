@@ -318,24 +318,21 @@ public class DrawingPanel extends JPanel{
                                     (x1 - thickness) *2, (y2-thickness-thickness)*2);
                     g2.draw(circle);
                 }else if(type == 1){
-                    g2.drawLine(x+x1-thickness-thickness, y, x-x1+thickness+thickness, y);
+                    g2.drawLine(x+x1-thickness-thickness, y + y1, x-x1+thickness+thickness, y + y1);
 
                 }else if(type == 2){
-                    g2.drawLine(x+x1-thickness-thickness, y + y1, x-x1+thickness+thickness, y+y1);
-                    g2.drawLine(x+x1-thickness-thickness, y - y1, x-x1+thickness+thickness, y-y1);
+                    g2.drawLine(x+x1-thickness-thickness, y, x-x1+thickness+thickness, y);
 
                 }else if(type == 3){
-                    g2.drawLine(x+x1-thickness-thickness, y - y1, x-x1+thickness+thickness, y-y1);
+                    g2.drawLine(x+x1-thickness-thickness, y + y1, x-x1+thickness+thickness, y+y1);
                     g2.drawLine(x+x1-thickness-thickness, y, x-x1+thickness+thickness, y);
 
                 }else if(type == 4){
-                    g2.drawLine(x+x1-thickness-thickness, y, x-x1+thickness+thickness, y);
-                    g2.drawLine(x+x1-thickness-thickness, y + y1, x-x1+thickness+thickness, y+y1);
+                    g2.drawLine(x+x1-thickness-thickness, y - y1, x-x1+thickness+thickness, y-y1);
 
                 }else if(type == 5){
                     g2.drawLine(x+x1-thickness-thickness, y + y1, x-x1+thickness+thickness, y+y1);
                     g2.drawLine(x+x1-thickness-thickness, y - y1, x-x1+thickness+thickness, y-y1);
-                    g2.drawLine(x+x1-thickness-thickness, y, x-x1+thickness+thickness, y);
 
                 }else if(type == 6){
                     g2.drawLine(x, y-y2+thickness+thickness, x-x1+thickness, y+y1-thickness);

@@ -281,8 +281,7 @@ public class Engine {
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = dBonus + rand.nextInt(20) + 1;
             if (attack > defence) {
-                Coords retreat = board.calcRetreat(c, gd.getLaunchPoint(), gd.getAlliance(), true);
-                afterBattle(c, 1, retreat);
+                afterBattle(c, 1, null);
             }else{
                 Coords retreat = board.calcRetreat(c, ga.getLaunchPoint(), ga.getAlliance(), false);
                 afterBattle(c, 0, retreat);
@@ -1066,7 +1065,7 @@ public class Engine {
         General g1 = p.getFirstGeneral();
         General g2 = p.getSecondGeneral();
         if (g != null && g1 != null && g1.getAlliance().equals(getUserTeam()) &&
-                (g.canAssist(c) || g1.canBeAssistedBy(assistingCoords)))
+                g.canAssist(c))
         {
             board.setAssist(g, g1);
             String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
@@ -1076,7 +1075,7 @@ public class Engine {
             histIndex = history.size() - 1;
 
         }else if (g != null &&g2 != null && g2.getAlliance().equals(getUserTeam()) &&
-                (g.canAssist(c) || g2.canBeAssistedBy(assistingCoords)))
+                g.canAssist(c))
         {
             board.setAssist(g, g2);
             String oldEncoded = history.get(history.size() - 1).getEncodedBoard();

@@ -12,6 +12,8 @@ import java.util.HashMap;
 public class Parcel {
     private final Alliance territory;
     private final HashMap<Integer, Piece> pieces = new HashMap<>();
+    //type; 0 = supply, 1 = first gen, 2 = second gen, 6 = town,
+    // 7 = capitol
 
     Parcel(){
         this.territory = Alliance.UNOCCUPIED;
@@ -32,28 +34,8 @@ public class Parcel {
         }
     }
 
-    Parcel(Alliance home, Piece[] ps){
-        this.territory = home;
-        for (Piece p : ps){
-            addPiece(p);
-        }
-    }
-
-    Parcel(Piece[] ps){
-        this.territory = Alliance.UNOCCUPIED;
-        for (Piece p : ps){
-            addPiece(p);
-        }
-    }
-
     Parcel(Alliance home){
         this.territory = home;
-    }
-
-    public Parcel(Alliance home, Piece p){
-        this.territory = home;
-        addPiece(p);
-
     }
 
     Parcel(Piece p){

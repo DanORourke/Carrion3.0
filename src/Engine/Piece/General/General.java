@@ -69,6 +69,12 @@ public class General extends Piece {
                 null, new ArrayList<>());
     }
 
+    public General createNewStuck(){
+        return new General(getCoords(), getType(), getAlliance(), name,
+                troops, 0, hasChief, wantsChief, exposed, lines,
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+    }
+
     public General createNewTroop(int addedTroops){
         return new General(getCoords(), getType(), getAlliance(), getName(), troops + addedTroops,
                 movementPoints, hasChief, wantsChief, exposed, lines,
@@ -109,7 +115,7 @@ public class General extends Piece {
 
     public General createNewAssisting(Coords iAmAssisting){
         return new General(getCoords(), getType(), getAlliance(), name,
-                troops, movementPoints, hasChief, wantsChief, exposed, lines,
+                troops, movementPoints - 1, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
@@ -309,11 +315,7 @@ public class General extends Piece {
     }
 
     public boolean canAssist(Coords c){
-        return getCoords().isNextTo(c);
-    }
-
-    public boolean canBeAssistedBy(Coords c){
-        return getCoords().isNextTo(c);
+        return getCoords().isNextTo(c) && movementPoints > 0;
     }
 
     public Coords getiAmAssisting(){

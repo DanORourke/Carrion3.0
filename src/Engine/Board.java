@@ -221,13 +221,17 @@ public class Board {
         removePiece(t);
         Town nt  = new Town(c, g.getAlliance());
         addPiece(nt);
-        addTroops(g, -1);
-        if (!g.getLines()){
-            General ng = g.createNewLines();
-            General nng = ng.createNewMoved(c, 1);
-            removePiece(g);
-            addPiece(nng);
-        }
+        General gen = g.createNewTroop(-1);
+        General ngen = gen.createNewStuck();
+        removePiece(g);
+        addPiece(ngen);
+
+//        if (!g.getLines()){
+//            General ng = g.createNewLines();
+//            General nng = ng.createNewMoved(c, 1);
+//            removePiece(g);
+//            addPiece(nng);
+//        }
     }
 
     void razeTown(General g){
@@ -463,6 +467,7 @@ public class Board {
                 if (parc.hasSingleGeneral()){
                     traitors.add((General)p);
                 }
+                removePiece(p);
             }else{
                 //is town or capitol
                 Town ghost = new Town(p.getCoords(), Alliance.UNOCCUPIED);
@@ -477,7 +482,6 @@ public class Board {
         for (General g : traitors){
             //turn all non fighting generals
             General gen = g.createNewTraitor(killer);
-            removePiece(g);
             addPiece(gen);
         }
     }

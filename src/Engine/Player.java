@@ -33,6 +33,19 @@ public class Player {
         return g.canAdd() && !connectedFullTowns(g).isEmpty();
     }
 
+    public int getUnassisgnedTroops(General g){
+        ArrayList<Piece> connectedTowns = connectedFullTowns(g);
+        int total = 0;
+        for (Piece p : connectedTowns) {
+            if ((p.getType() == 6) && ((Town) p).hasTroop()) {
+                total++;
+            }else if ((p.getType() == 7) && ((Capitol) p).getTroops() > 0){
+                total+= ((Capitol) p).getTroops();
+            }
+        }
+        return total;
+    }
+
     private ArrayList<Piece> connectedFullTowns(General g){
         ArrayList<Piece> connectedPieces = new ArrayList<>();
         for (Piece p : pieces) {

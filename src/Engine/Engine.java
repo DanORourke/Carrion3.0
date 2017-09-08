@@ -625,6 +625,7 @@ public class Engine {
         String s = "";
         Parcel activeParcel = board.get(c);
         Alliance userTeam = getUserTeam();
+        fillPlayers();
         if (turnStage == 0){
             if (activeParcel.hasTown() && activeParcel.getTown().getAlliance().equals(userTeam)){
                 s = userTeam.toString() + " town has troop to give: " + activeParcel.getTown().hasTroop() + "\n";
@@ -634,7 +635,9 @@ public class Engine {
             }
             if (activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
                 s += userTeam.toString() + " General " + activeParcel.getFirstGeneral().getType() + " has:\n" +
-                        activeParcel.getFirstGeneral().getTroops() + " troops under his command.";
+                        activeParcel.getFirstGeneral().getTroops() + " troops under his command.\n" +
+                        players.get(userTeam).getUnassisgnedTroops(activeParcel.getFirstGeneral()) +
+                        " unassigned troops he is connected to.";
             }
             if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
                 s = activeParcel.getFirstGeneral().getAlliance().toString() + " General " +

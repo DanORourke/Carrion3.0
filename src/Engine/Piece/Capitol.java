@@ -70,8 +70,6 @@ public class Capitol extends Piece{
         return 1;
     }
 
-
-
     public String getAllocateString(Alliance turnTeam){
         String s = "";
         if (!getAlliance().equals(turnTeam)){
@@ -83,11 +81,16 @@ public class Capitol extends Piece{
             }
         }else if (getAlliance().equals(turnTeam)){
             if (getTroops() == 2){
-                s = getAlliance().toString() + " Capitol has " + 2 +" unassigned troops.\n\n";
+                s = getAlliance().toString() + " Capitol has " + 2 +" unassigned troops";
             }else if (getTroops() == 1){
-                s = getAlliance().toString() + " Capitol has " + 1 +" unassigned troop.\n\n";
+                s = getAlliance().toString() + " Capitol has " + 1 +" unassigned troop";
             }else {
-                s = getAlliance().toString() + " Capitol has " + 0 +" unassigned troops.\n\n";
+                s = getAlliance().toString() + " Capitol has " + 0 +" unassigned troops";
+            }
+            if (hasChief()){
+                s+= " and the Chief of Staff.\n\n";
+            }else {
+                s+= ".\n\n";
             }
         }
         return s;

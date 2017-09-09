@@ -336,11 +336,14 @@ public class Parcel {
     }
 
     String getOldMoveString(Alliance turnTeam, Alliance userTeam, HashMap<Alliance, Player> players){
+        if (turnTeam.equals(userTeam)){
+            return getActiveMoveString(userTeam, players);
+        }
         String s = "";
         return s;
     }
 
-    String getActiveMoveString(Alliance turnTeam, Alliance userTeam, HashMap<Alliance, Player> players){
+    String getActiveMoveString(Alliance userTeam, HashMap<Alliance, Player> players){
         String s = "";
         return s;
     }

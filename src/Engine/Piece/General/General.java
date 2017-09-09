@@ -436,13 +436,21 @@ public class General extends Piece {
 
     private static ArrayList<String> createAllPossibleG(){
         ArrayList<String> allPossibleG = new ArrayList<>();
-        Collections.addAll(allPossibleG, "Ramses");
+        Collections.addAll(allPossibleG, "Ramses", "Charlemagne", "Frederick", "Oda", "Alexander");
         return allPossibleG;
     }
 
     private static General makeFromName(String name){
         if (name.equals("Ramses")){
             return new Ramses();
+        }else if (name.equals("Charlemagne")){
+            return new Charlemagne();
+        }else if (name.equals("Frederick")){
+            return new Frederick();
+        }else if (name.equals("Oda")){
+            return new Oda();
+        }else if (name.equals("Alexander")){
+            return new Alexander();
         }
         return new General("General");
     }

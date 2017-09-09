@@ -677,7 +677,7 @@ public class Engine {
             if (turnStage == 0){
                 return activeParcel.getActiveAllocateString(userTeam, players);
             }else{
-                return activeParcel.getActiveMoveString(turnTeam, userTeam, players);
+                return activeParcel.getActiveMoveString(userTeam, players);
             }
         }
     }

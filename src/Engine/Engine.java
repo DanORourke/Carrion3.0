@@ -219,6 +219,7 @@ public class Engine {
         condenseAllocateHistory();
         histIndex = history.size() - 1;
         //do stuff if battles need to happen
+        exposeBattles();
         playoutBattles();
         //move the chief if someone else wants him and he is connected
         moveChief();
@@ -237,6 +238,18 @@ public class Engine {
             }
         }
         indexOfNoChange = histIndex;
+    }
+
+    private void exposeBattles(){
+        ArrayList<General> generals = board.getBattleExpose();
+        for (General g : generals){
+            board.setExposedGeneral(g);
+        }
+        histIndex = history.size() - 1;
+        String oldEncoded = history.get(histIndex).getEncodedBoard();
+        history.add(new GameState(board, activeCoords, playerTurn, turnStage, oldEncoded));
+        histIndex ++;
+        setState();
     }
 
     private void playoutBattles(){

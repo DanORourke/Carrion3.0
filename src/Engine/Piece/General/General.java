@@ -202,7 +202,7 @@ public class General extends Piece {
         return wantsChief;
     }
 
-    public boolean getExposed(){
+    public boolean isExposed(){
         return exposed;
     }
 
@@ -244,7 +244,7 @@ public class General extends Piece {
     private int addAssistingAttackBonus(Board board){
         int bonus = 0;
         for (Coords c : assistingMe){
-            General ag = board.getAssistingGeneral(c, getAlliance());
+            General ag = board.getAssistingGeneral(c);
             bonus += ag.getAssistBonus(this);
         }
         return bonus;
@@ -384,7 +384,7 @@ public class General extends Piece {
     public int addAssistingCasualties(Board board){
         int casualties = 0;
         for (Coords c : assistingMe){
-            General ag = board.getAssistingGeneral(c, getAlliance());
+            General ag = board.getAssistingGeneral(c);
             casualties += ag.getAssistCasualties(this);
         }
         return casualties;

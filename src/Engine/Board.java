@@ -167,7 +167,7 @@ public class Board {
     }
     private void removeAssistingFromGeneralsAssistingMe(General g){
         for (Coords c : g.getAssistingMe()){
-            General assisting = getAssistingGeneral(c, g.getAlliance());
+            General assisting = getAssistingGeneral(c);
             General nAssisting = assisting.createNewClearAssisting();
             removePiece(assisting);
             addPiece(nAssisting);
@@ -384,6 +384,31 @@ public class Board {
         addPiece(nCap);
     }
 
+    ArrayList<General> getBattleExpose(){
+        ArrayList<General> generals = new ArrayList<>();
+        for (Coords c : board.keySet()){
+            Parcel p = board.get(c);
+            if (p.isBattle()){
+                if (p.isGeneralBattle()){
+                    General d = p.getFirstGeneral();
+                    General a = p.getSecondGeneral();
+                        if (!d.isExposed()){
+                            generals.add(d);
+                        }
+                        if (!a.isExposed()){
+                            generals.add(a);
+                        }
+                }else {
+                    General a = p.getFirstGeneral();
+                    if (!a.isExposed()){
+                        generals.add(a);
+                    }
+                }
+            }
+        }
+        return  generals;
+    }
+
     ArrayList<Coords> getBattleCoords(){
         ArrayList<Coords> bCoords = new ArrayList<>();
         for (Coords c : board.keySet()){
@@ -403,7 +428,7 @@ public class Board {
         return bCoords;
     }
 
-    public General getAssistingGeneral(Coords c, Alliance a){
+    public General getAssistingGeneral(Coords c){
         Parcel p = board.get(c);
         //attacking gen cant be assisting
         return p.getFirstGeneral();

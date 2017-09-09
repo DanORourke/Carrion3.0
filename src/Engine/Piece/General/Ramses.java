@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class Ramses extends General{
 
-    public Ramses(){
+    Ramses(){
         super("Ramses");
     }
 
@@ -133,23 +133,41 @@ public class Ramses extends General{
 
     @Override
     public int calcMovementPoints(){
-        //faster
-        if (getTroops() < 6){
-            return 6;
-        }else if (getTroops() < 11){
-            return 5;
-        }else if (getTroops() < 16){
-            return 4;
+        if (exposed){
+            //faster
+            if (getTroops() < 6){
+                return 6;
+            }else if (getTroops() < 11){
+                return 5;
+            }else if (getTroops() < 16){
+                return 4;
+            }else{
+                return 3;
+            }
         }else{
-            return 3;
+            if (getTroops() < 6){
+                return 5;
+            }else if (getTroops() < 11){
+                return 4;
+            }else if (getTroops() < 16){
+                return 3;
+            }else{
+                return 2;
+            }
         }
     }
 
     @Override
     public int getStandardCasualties(Board board, General g){
-        //kills at two thirds normal, doesn't apply to when assisting
-        int casualties = (int)Math.ceil((double)troops / 3);
-        casualties += addAssistingCasualties(board);
-        return casualties;
+        //kills at two thirds normal, doesn't apply when assisting
+        if (hasChief){
+            int casualties = (int)Math.ceil((double)troops / 2);
+            casualties += addAssistingCasualties(board);
+            return casualties;
+        }else {
+            int casualties = (int)Math.ceil((double)troops / 3);
+            casualties += addAssistingCasualties(board);
+            return casualties;
+        }
     }
 }

@@ -5,6 +5,7 @@ import Engine.Piece.General.General;
 import GUI.Coords;
 
 import java.util.HashMap;
+import java.util.List;
 
 public enum Alliance {
 
@@ -32,7 +33,7 @@ public enum Alliance {
         }
 
         @Override
-        public HashMap<Coords, Parcel> getInitialSetup(){
+        public HashMap<Coords, Parcel> getInitialSetup(List<General> generals){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(16, -8, -8);
             Parcel p1 = new Parcel(new Capitol(c1, this));
@@ -80,19 +81,19 @@ public enum Alliance {
             Parcel p15 = new Parcel(new Supply(c15,this));
             setup.put(c15, p15);
             Coords c16 = new Coords(12, -8, -4);
-            Parcel p16 = new Parcel(new General(c16, 1, this, 0));
+            Parcel p16 = new Parcel(generals.get(0).createNewNew(c16, 1, this));
             setup.put(c16, p16);
             Coords c17 = new Coords(12, -7, -5);
-            Parcel p17 = new Parcel(new General(c17, 2, this, 0));
+            Parcel p17 = new Parcel(generals.get(1).createNewNew(c17, 2, this));
             setup.put(c17, p17);
             Coords c18 = new Coords(12, -6, -6);
-            Parcel p18 = new Parcel(new General(c18, 3, this, 0));
+            Parcel p18 = new Parcel(generals.get(2).createNewNew(c18, 3, this));
             setup.put(c18, p18);
             Coords c19 = new Coords(12, -5, -7);
-            Parcel p19 = new Parcel(new General(c19, 4, this, 0));
+            Parcel p19 = new Parcel(generals.get(3).createNewNew(c19, 4, this));
             setup.put(c19, p19);
             Coords c20 = new Coords(12, -4, -8);
-            Parcel p20 = new Parcel(new General(c20, 5, this, 0));
+            Parcel p20 = new Parcel(generals.get(4).createNewNew(c20, 5, this));
             setup.put(c20, p20);
             return setup;
         }
@@ -127,7 +128,7 @@ public enum Alliance {
         }
 
         @Override
-        public HashMap<Coords, Parcel> getInitialSetup(){
+        public HashMap<Coords, Parcel> getInitialSetup(List<General> generals){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(-8, -8, 16);
             Parcel p1 = new Parcel(new Capitol(c1, this));
@@ -175,19 +176,19 @@ public enum Alliance {
             Parcel p15 = new Parcel(new Supply(c15, this));
             setup.put(c15, p15);
             Coords c16 = new Coords(-8, -4, 12);
-            Parcel p16 = new Parcel(new General(c16, 1, this, 0));
+            Parcel p16 = new Parcel(generals.get(0).createNewNew(c16, 1, this));
             setup.put(c16, p16);
             Coords c17 = new Coords(-7, -5, 12);
-            Parcel p17 = new Parcel(new General(c17, 2, this, 0));
+            Parcel p17 = new Parcel(generals.get(1).createNewNew(c17, 2, this));
             setup.put(c17, p17);
             Coords c18 = new Coords(-6, -6, 12);
-            Parcel p18 = new Parcel(new General(c18, 3, this, 0));
+            Parcel p18 = new Parcel(generals.get(2).createNewNew(c18, 3, this));
             setup.put(c18, p18);
             Coords c19 = new Coords(-5, -7, 12);
-            Parcel p19 = new Parcel(new General(c19, 4, this, 0));
+            Parcel p19 = new Parcel(generals.get(3).createNewNew(c19, 4, this));
             setup.put(c19, p19);
             Coords c20 = new Coords(-4, -8, 12);
-            Parcel p20 = new Parcel(new General(c20, 5, this, 0));
+            Parcel p20 = new Parcel(generals.get(4).createNewNew(c20, 5, this));
             setup.put(c20, p20);
             return setup;
         }
@@ -223,7 +224,7 @@ public enum Alliance {
         }
 
         @Override
-        public HashMap<Coords, Parcel> getInitialSetup(){
+        public HashMap<Coords, Parcel> getInitialSetup(List<General> generals){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(-8, 16, -8);
             Parcel p1 = new Parcel(new Capitol(c1, this));
@@ -271,19 +272,19 @@ public enum Alliance {
             Parcel p15 = new Parcel(new Supply(c15, this));
             setup.put(c15, p15);
             Coords c16 = new Coords(-4, 12, -8);
-            Parcel p16 = new Parcel(new General(c16, 1, this, 0));
+            Parcel p16 = new Parcel(generals.get(0).createNewNew(c16, 1, this));
             setup.put(c16, p16);
             Coords c17 = new Coords(-5, 12, -7);
-            Parcel p17 = new Parcel(new General(c17, 2, this, 0));
+            Parcel p17 = new Parcel(generals.get(1).createNewNew(c17, 2, this));
             setup.put(c17, p17);
             Coords c18 = new Coords(-6, 12, -6);
-            Parcel p18 = new Parcel(new General(c18, 3, this, 0));
+            Parcel p18 = new Parcel(generals.get(2).createNewNew(c18, 3, this));
             setup.put(c18, p18);
             Coords c19 = new Coords(-7, 12, -5);
-            Parcel p19 = new Parcel(new General(c19, 4, this, 0));
+            Parcel p19 = new Parcel(generals.get(3).createNewNew(c19, 4, this));
             setup.put(c19, p19);
             Coords c20 = new Coords(-8, 12, -4);
-            Parcel p20 = new Parcel(new General(c20, 5, this, 0));
+            Parcel p20 = new Parcel(generals.get(4).createNewNew(c20, 5, this));
             setup.put(c20, p20);
             return setup;
         }
@@ -318,7 +319,7 @@ public enum Alliance {
         }
 
         @Override
-        public HashMap<Coords, Parcel> getInitialSetup(){
+        public HashMap<Coords, Parcel> getInitialSetup(List<General> generals){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(8, -16, 8);
             Parcel p1 = new Parcel(new Capitol(c1, this));
@@ -366,19 +367,19 @@ public enum Alliance {
             Parcel p15 = new Parcel(new Supply(c15, this));
             setup.put(c15, p15);
             Coords c16 = new Coords(4, -12, 8);
-            Parcel p16 = new Parcel(new General(c16, 1, this, 0));
+            Parcel p16 = new Parcel(generals.get(0).createNewNew(c16, 1, this));
             setup.put(c16, p16);
             Coords c17 = new Coords(5, -12, 7);
-            Parcel p17 = new Parcel(new General(c17, 2, this, 0));
+            Parcel p17 = new Parcel(generals.get(1).createNewNew(c17, 2, this));
             setup.put(c17, p17);
             Coords c18 = new Coords(6, -12, 6);
-            Parcel p18 = new Parcel(new General(c18, 3, this, 0));
+            Parcel p18 = new Parcel(generals.get(2).createNewNew(c18, 3, this));
             setup.put(c18, p18);
             Coords c19 = new Coords(7, -12, 5);
-            Parcel p19 = new Parcel(new General(c19, 4, this, 0));
+            Parcel p19 = new Parcel(generals.get(3).createNewNew(c19, 4, this));
             setup.put(c19, p19);
             Coords c20 = new Coords(8, -12, 4);
-            Parcel p20 = new Parcel(new General(c20, 5, this, 0));
+            Parcel p20 = new Parcel(generals.get(4).createNewNew(c20, 5, this));
             setup.put(c20, p20);
             return setup;
         }
@@ -414,7 +415,7 @@ public enum Alliance {
         }
 
         @Override
-        public HashMap<Coords, Parcel> getInitialSetup(){
+        public HashMap<Coords, Parcel> getInitialSetup(List<General> generals){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(-16, 8, 8);
             Parcel p1 = new Parcel(new Capitol(c1, this));
@@ -462,19 +463,19 @@ public enum Alliance {
             Parcel p15 = new Parcel(new Supply(c15, this));
             setup.put(c15, p15);
             Coords c16 = new Coords(-12, 8, 4);
-            Parcel p16 = new Parcel(new General(c16, 1,  this, 0));
+            Parcel p16 = new Parcel(generals.get(0).createNewNew(c16, 1, this));
             setup.put(c16, p16);
             Coords c17 = new Coords(-12, 7, 5);
-            Parcel p17 = new Parcel(new General(c17,2,  this, 0));
+            Parcel p17 = new Parcel(generals.get(1).createNewNew(c17, 2, this));
             setup.put(c17, p17);
             Coords c18 = new Coords(-12, 6, 6);
-            Parcel p18 = new Parcel(new General(c18,3,  this, 0));
+            Parcel p18 = new Parcel(generals.get(2).createNewNew(c18, 3, this));
             setup.put(c18, p18);
             Coords c19 = new Coords(-12, 5, 7);
-            Parcel p19 = new Parcel(new General(c19,4,  this, 0));
+            Parcel p19 = new Parcel(generals.get(3).createNewNew(c19, 4, this));
             setup.put(c19, p19);
             Coords c20 = new Coords(-12, 4, 8);
-            Parcel p20 = new Parcel(new General(c20, 5, this, 0));
+            Parcel p20 = new Parcel(generals.get(4).createNewNew(c20, 5, this));
             setup.put(c20, p20);
             return setup;
         }
@@ -508,7 +509,7 @@ public enum Alliance {
         }
 
         @Override
-        public HashMap<Coords, Parcel> getInitialSetup(){
+        public HashMap<Coords, Parcel> getInitialSetup(List<General> generals){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(8, 8, -16);
             Parcel p1 = new Parcel(new Capitol(c1, this));
@@ -556,19 +557,19 @@ public enum Alliance {
             Parcel p15 = new Parcel(new Supply(c15,this));
             setup.put(c15, p15);
             Coords c16 = new Coords(8, 4, -12);
-            Parcel p16 = new Parcel(new General(c16, 1,this, 0));
+            Parcel p16 = new Parcel(generals.get(0).createNewNew(c16, 1, this));
             setup.put(c16, p16);
             Coords c17 = new Coords(7, 5, -12);
-            Parcel p17 = new Parcel(new General(c17, 2,this, 0));
+            Parcel p17 = new Parcel(generals.get(1).createNewNew(c17, 2, this));
             setup.put(c17, p17);
             Coords c18 = new Coords(6, 6, -12);
-            Parcel p18 = new Parcel(new General(c18, 3,this, 0));
+            Parcel p18 = new Parcel(generals.get(2).createNewNew(c18, 3, this));
             setup.put(c18, p18);
             Coords c19 = new Coords(5, 7, -12);
-            Parcel p19 = new Parcel(new General(c19, 4,this, 0));
+            Parcel p19 = new Parcel(generals.get(3).createNewNew(c19, 4, this));
             setup.put(c19, p19);
             Coords c20 = new Coords(4, 8, -12);
-            Parcel p20 = new Parcel(new General(c20, 5,this, 0));
+            Parcel p20 = new Parcel(generals.get(4).createNewNew(c20, 5, this));
             setup.put(c20, p20);
             return setup;
         }
@@ -591,7 +592,7 @@ public enum Alliance {
         }
 
         @Override
-        public HashMap<Coords, Parcel> getInitialSetup(){
+        public HashMap<Coords, Parcel> getInitialSetup(List<General> generals){
             HashMap<Coords, Parcel> setup = new HashMap<>();
             Coords c1 = new Coords(-4, -4, 8);
             Parcel p1 = new Parcel(new Town(c1,this));
@@ -641,7 +642,7 @@ public enum Alliance {
 
     public abstract boolean inMyTerritory(Coords c);
 
-    public abstract HashMap<Coords, Parcel> getInitialSetup();
+    public abstract HashMap<Coords, Parcel> getInitialSetup(List<General> generals);
 
     public abstract int getDataCode();
 

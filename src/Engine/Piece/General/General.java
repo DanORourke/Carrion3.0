@@ -9,25 +9,28 @@ import Engine.Piece.Town;
 import GUI.Coords;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Random;
 
 public class General extends Piece {
-    private final int name;
-    private final int troops;
-    private final int movementPoints;
-    private final boolean hasChief;
-    private final boolean wantsChief;
-    private final boolean exposed;
-    private final boolean lines;
-    private final Coords launchPoint;
-    private final boolean dropAfterWin;
-    private final Coords iAmAssisting;
-    private final ArrayList<Coords> assistingMe = new ArrayList<>();
+    final String name;
+    final int troops;
+    final int movementPoints;
+    final boolean hasChief;
+    final boolean wantsChief;
+    final boolean exposed;
+    final boolean lines;
+    final Coords launchPoint;
+    final boolean dropAfterWin;
+    final Coords iAmAssisting;
+    final ArrayList<Coords> assistingMe = new ArrayList<>();
 
-    public General(Coords coords, int type, Alliance alliance, int name){
-        super(coords, type, alliance);
+    public General(String name){
+        super(new Coords(0, 0, 0), 1, Alliance.UNOCCUPIED);
         this.name = name;
         this.troops = 1;
-        this.movementPoints = 5;
+        this.movementPoints = calcMovementPoints();
         this.hasChief = false;
         this.wantsChief = false;
         this.exposed = false;
@@ -38,7 +41,7 @@ public class General extends Piece {
 
     }
 
-    private General(Coords coords, int type, Alliance alliance, int name, int troops,
+    public General(Coords coords, int type, Alliance alliance, String name, int troops,
                    int movementPoints, boolean hasChief, boolean wantsChief, boolean exposed, boolean lines,
                    Coords launchPoint, boolean dropAfterWin,
                     Coords iAmAssisting, ArrayList<Coords> assistingMe){
@@ -59,6 +62,12 @@ public class General extends Piece {
     @Override
     public Piece copy(){
         return new General(getCoords(), getType(), getAlliance(), name,
+                troops, movementPoints, hasChief, wantsChief, exposed, lines,
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+    }
+
+    public General createNewNew(Coords c, int type, Alliance alliance){
+        return new General(c, type, alliance, name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
@@ -145,7 +154,7 @@ public class General extends Piece {
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
-    public int getName() {
+    public String getName() {
         return name;
     }
 
@@ -205,7 +214,7 @@ public class General extends Piece {
         return troops > 1;
     }
 
-    private int calcMovementPoints(){
+    public int calcMovementPoints(){
         if (troops < 6){
             return 5;
         }else if (troops < 11){
@@ -342,39 +351,37 @@ public class General extends Piece {
         return troops > casualties;
     }
 
-    public int getAttackCasualties(Board board, General defender){
+    public int getStandardCasualties(Board board, General g){
         int casualties = (int)Math.ceil((double)troops / 2);
         casualties += addAssistingCasualties(board);
         return casualties;
+    }
+
+    public int getAttackCasualties(Board board, General defender){
+        return getStandardCasualties(board, defender);
     }
 
     public int getDefendCasualties(Board board, General attacker){
-        int casualties = (int)Math.ceil((double)troops / 2);
-        casualties += addAssistingCasualties(board);
-        return casualties;
+        return getStandardCasualties(board, attacker);
     }
 
     public int getAttackDefendedTownCasualties(Board board, General defender, Town t){
-        int casualties = (int)Math.ceil((double)troops / 2);
-        casualties += addAssistingCasualties(board);
-        return casualties;
+        return getStandardCasualties(board, defender);
     }
 
     public int getDefendTownCasualties(Board board, General attacker, Town t){
-        int casualties = (int)Math.ceil((double)troops / 2);
-        casualties += addAssistingCasualties(board);
+        int casualties = getStandardCasualties(board, attacker);
         casualties += t.getCasualties(attacker);
         return casualties;
     }
 
     public int getDefendCapitalCasualties(Board board, General attacker, Capitol cap){
-        int casualties = (int)Math.ceil((double)troops / 2);
-        casualties += addAssistingCasualties(board);
+        int casualties = getStandardCasualties(board, attacker);
         casualties += cap.getCasualties(attacker);
         return casualties;
     }
 
-    private int addAssistingCasualties(Board board){
+    public int addAssistingCasualties(Board board){
         int casualties = 0;
         for (Coords c : assistingMe){
             General ag = board.getAssistingGeneral(c, getAlliance());
@@ -389,5 +396,54 @@ public class General extends Piece {
 
     public boolean canSufferCasualties(int casualties){
         return troops > casualties;
+    }
+
+    public static ArrayList<General> createNewGenerals(int gameType){
+        ArrayList<General> generals = new ArrayList<>();
+        ArrayList<String> allPossibleG = createAllPossibleG();
+        if (gameType < 3){
+            gameType = 10;
+        }else{
+            gameType = gameType * 5;
+        }
+        while (generals.size() < gameType){
+            if (allPossibleG.isEmpty()){
+                allPossibleG = createAllPossibleG();
+            }
+            String name = allPossibleG.get(new Random().nextInt(allPossibleG.size()));
+            allPossibleG.remove(name);
+            generals.add(makeFromName(name));
+        }
+        return generals;
+    }
+
+    public static ArrayList<General> createGenerals(ArrayList<String> moves){
+        ArrayList<General> generals = new ArrayList<>();
+        int gameType = Integer.valueOf(moves.get(1));
+        if (gameType < 3){
+            gameType = 10;
+        }else{
+            gameType = gameType * 5;
+        }
+        int i = 2;
+        while (i < 2 + gameType){
+            String name = moves.get(i);
+            i++;
+            generals.add(makeFromName(name));
+        }
+        return generals;
+    }
+
+    private static ArrayList<String> createAllPossibleG(){
+        ArrayList<String> allPossibleG = new ArrayList<>();
+        Collections.addAll(allPossibleG, "Ramses");
+        return allPossibleG;
+    }
+
+    private static General makeFromName(String name){
+        if (name.equals("Ramses")){
+            return new Ramses();
+        }
+        return new General("General");
     }
 }

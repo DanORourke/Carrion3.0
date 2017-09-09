@@ -10,6 +10,7 @@ import GUI.GameData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class Board {
@@ -18,11 +19,11 @@ public class Board {
     private HashMap<Coords, Parcel> board;
     private HashMap<Coords, GameData> changeData = new HashMap<>();
 
-    Board(int gameType, int mapRadius){
+    Board(int gameType, int mapRadius, ArrayList<General> generals){
         //this.gameType = gameType;
         //this.mapRadius = mapRadius;
         createBoard(mapRadius);
-        populateBoard(gameType);
+        populateBoard(gameType, generals);
     }
 
     Board(Board board1){
@@ -61,7 +62,7 @@ public class Board {
         return board;
     }
 
-    private void populateBoard(int gameType){
+    private void populateBoard(int gameType, ArrayList<General> generals){
         setUnoccupiedTowns();
         ArrayList<Alliance>  players = new ArrayList<>();
         if (gameType == 0){
@@ -96,8 +97,10 @@ public class Board {
             players.add(Alliance.BLUE);
             players.add(Alliance.PURPLE);
         }
+        int i = 0;
         for (Alliance a : players){
-            setPlayer(a);
+            setPlayer(a, generals.subList((i*5), ((i*5)+5)));
+            i++;
         }
     }
 
@@ -116,12 +119,12 @@ public class Board {
     }
 
     private void setUnoccupiedTowns(){
-        HashMap<Coords, Parcel> parcels = Alliance.UNOCCUPIED.getInitialSetup();
+        HashMap<Coords, Parcel> parcels = Alliance.UNOCCUPIED.getInitialSetup(null);
         updateMap(parcels);
     }
 
-    private void setPlayer(Alliance a){
-        HashMap<Coords, Parcel> parcels = a.getInitialSetup();
+    private void setPlayer(Alliance a, List<General> generals){
+        HashMap<Coords, Parcel> parcels = a.getInitialSetup(generals);
         for (Coords c : board.keySet()){
             if (a.inMyTerritory(c)){
                 if (parcels.containsKey(c)){

@@ -35,15 +35,29 @@ public class Engine {
         ArrayList<String> moves = new ArrayList<>(Arrays.asList(encodedBoard.split(",")));
         mapRadius = Integer.valueOf(moves.get(0));
         gameType = Integer.valueOf(moves.get(1));
-        initializeEngine(moves);
+        ArrayList<General> generals = initializeGenerals(moves);
+        System.out.println(generals.size());
+        initializeEngine(moves, generals);
     }
 
+    private ArrayList<General> initializeGenerals(ArrayList<String> moves){
+        if (moves.size() == 2){
+            return General.createNewGenerals(gameType);
+        }else{
+            return General.createGenerals(moves);
+        }
+    }
 
-    private void initializeEngine(ArrayList<String> moves){
+    private void initializeEngine(ArrayList<String> moves, ArrayList<General> generals){
         initializeTurn();
-        board = new Board(gameType, mapRadius);
-        addStartHistory();
+        board = new Board(gameType, mapRadius, generals);
+        addStartHistory(generals);
         int i = 2;
+        if (gameType < 3){
+            i += 10;
+        }else{
+            i += gameType * 5;
+        }
         while(i < moves.size()){
             String moveType = moves.get(i);
             if (moveType.equals("next")){
@@ -122,8 +136,11 @@ public class Engine {
         System.out.println("history size: " + history.size());
     }
 
-    private void addStartHistory(){
+    private void addStartHistory(ArrayList<General> generals){
         String startEncoded = String.valueOf(mapRadius) + "," + String.valueOf(gameType);
+        for (General g : generals){
+            startEncoded += "," + g.getName();
+        }
         history.add(new GameState(board, null, playerTurn, turnStage, startEncoded));
         histIndex++;
     }

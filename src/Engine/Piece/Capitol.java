@@ -1,6 +1,7 @@
 package Engine.Piece;
 
 import Engine.Alliance;
+import Engine.Piece.General.General;
 import GUI.Coords;
 
 public class Capitol extends Piece{
@@ -55,14 +56,14 @@ public class Capitol extends Piece{
         return troops;
     }
 
-    public int getAttackBonus() {
+    public int getDefendBonus(General g) {
         if (hasChief()){
             return 4;
         }
         return 2;
     }
 
-    public int getCasualties(){
+    public int getCasualties(General g){
         if (hasChief()){
             return 2;
         }

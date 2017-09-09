@@ -1,6 +1,7 @@
 package Engine.Piece;
 
 import Engine.Alliance;
+import Engine.Piece.General.General;
 import GUI.Coords;
 
 public class Town extends Piece {
@@ -33,11 +34,11 @@ public class Town extends Piece {
         return haveTroop;
     }
 
-    public int getAttackBonus() {
+    public int getDefendBonus(General g) {
         return 1;
     }
 
-    public int getCasualties(){
+    public int getCasualties(General g){
         return 1;
     }
 }

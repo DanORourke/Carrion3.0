@@ -236,7 +236,7 @@ public class General extends Piece {
         int bonus = 0;
         for (Coords c : assistingMe){
             General ag = board.getAssistingGeneral(c, getAlliance());
-            bonus += ag.getAssistBonus();
+            bonus += ag.getAssistBonus(this);
         }
         return bonus;
     }
@@ -248,14 +248,14 @@ public class General extends Piece {
         return 0;
     }
 
-    public int getAttackBonus(Board board){
+    public int getAttackBonus(Board board, General defender){
         int bonus = troops;
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
-    public int getDefendBonus(Board board){
+    public int getDefendBonus(Board board, General attacker){
         int bonus = troops;
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
@@ -270,47 +270,47 @@ public class General extends Piece {
         return bonus;
     }
 
-    public int getAttackDefendedTownBonus(Board board, Town t){
+    public int getAttackDefendedTownBonus(Board board, General defender, Town t){
         int bonus = troops;
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
-    public int getDefendTownBonus(Board board, Town t){
+    public int getDefendTownBonus(Board board, General attacker, Town t){
         int bonus = troops;
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus += addDistractedBonus();
         if (getAlliance().equals(t.getAlliance())){
-            bonus += t.getAttackBonus();
+            bonus += t.getDefendBonus(attacker);
         }
         return bonus;
     }
 
-    public int getAttackCapitolBonus(Board board){
+    public int getAttackCapitolBonus(Board board, Capitol cap){
         return getAttackTownBonus(board);
     }
 
-    public int getAttackDefendedCapitolBonus(Board board, Capitol cap){
+    public int getAttackDefendedCapitolBonus(Board board, General defender, Capitol cap){
         int bonus = troops;
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
-    public int getDefendCapitolBonus(Board board, Capitol cap){
+    public int getDefendCapitolBonus(Board board, General attacker, Capitol cap){
         int bonus = troops;
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus += addDistractedBonus();
         if (getAlliance().equals(cap.getAlliance())){
-            bonus += cap.getAttackBonus();
+            bonus += cap.getDefendBonus(attacker);
         }
         return bonus;
     }
 
-    public int getAssistBonus(){
+    public int getAssistBonus(General assisting){
         return (int)Math.ceil((double)troops / 2);
     }
 
@@ -342,54 +342,48 @@ public class General extends Piece {
         return troops > casualties;
     }
 
-    public int getCasualties(Board board){
+    public int getAttackCasualties(Board board, General defender){
         int casualties = (int)Math.ceil((double)troops / 2);
+        casualties += addAssistingCasualties(board);
+        return casualties;
+    }
+
+    public int getDefendCasualties(Board board, General attacker){
+        int casualties = (int)Math.ceil((double)troops / 2);
+        casualties += addAssistingCasualties(board);
+        return casualties;
+    }
+
+    public int getAttackDefendedTownCasualties(Board board, General defender, Town t){
+        int casualties = (int)Math.ceil((double)troops / 2);
+        casualties += addAssistingCasualties(board);
+        return casualties;
+    }
+
+    public int getDefendTownCasualties(Board board, General attacker, Town t){
+        int casualties = (int)Math.ceil((double)troops / 2);
+        casualties += addAssistingCasualties(board);
+        casualties += t.getCasualties(attacker);
+        return casualties;
+    }
+
+    public int getDefendCapitalCasualties(Board board, General attacker, Capitol cap){
+        int casualties = (int)Math.ceil((double)troops / 2);
+        casualties += addAssistingCasualties(board);
+        casualties += cap.getCasualties(attacker);
+        return casualties;
+    }
+
+    private int addAssistingCasualties(Board board){
+        int casualties = 0;
         for (Coords c : assistingMe){
             General ag = board.getAssistingGeneral(c, getAlliance());
-            casualties += ag.getAssistCasualties();
+            casualties += ag.getAssistCasualties(this);
         }
         return casualties;
     }
 
-    public int getAttackDefendedTownCasualties(Board board, Town t){
-        int casualties = (int)Math.ceil((double)troops / 2);
-        for (Coords c : assistingMe){
-            General ag = board.getAssistingGeneral(c, getAlliance());
-            casualties += ag.getAssistCasualties();
-        }
-        return casualties;
-    }
-
-    public int getDefendTownCasualties(Board board, Town t){
-        int casualties = (int)Math.ceil((double)troops / 2);
-        for (Coords c : assistingMe){
-            General ag = board.getAssistingGeneral(c, getAlliance());
-            casualties += ag.getAssistCasualties();
-        }
-        casualties += t.getCasualties();
-        return casualties;
-    }
-
-    public int getAttackDefendedCapitolCasualties(Board board, Capitol cap){
-        int casualties = (int)Math.ceil((double)troops / 2);
-        for (Coords c : assistingMe){
-            General ag = board.getAssistingGeneral(c, getAlliance());
-            casualties += ag.getAssistCasualties();
-        }
-        return casualties;
-    }
-
-    public int getDefendCapitalCasualties(Board board, Capitol cap){
-        int casualties = (int)Math.ceil((double)troops / 2);
-        for (Coords c : assistingMe){
-            General ag = board.getAssistingGeneral(c, getAlliance());
-            casualties += ag.getAssistCasualties();
-        }
-        casualties += cap.getCasualties();
-        return casualties;
-    }
-
-    public int getAssistCasualties(){
+    private int getAssistCasualties(General assisted){
         return (int)Math.ceil((double)troops / 4);
     }
 

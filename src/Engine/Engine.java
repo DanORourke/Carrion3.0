@@ -160,6 +160,7 @@ public class Engine {
     }
 
     public void nextPhase(){
+        clearFutureHistory();
         histIndex = history.size() - 1;
         setState();
         rotatePhase();
@@ -243,8 +244,8 @@ public class Engine {
 
         if (parcel.isFieldBattle()){
             General gd = (General)p;
-            int aBonus = ga.getAttackBonus(board);
-            int dBonus = gd.getDefendBonus(board);
+            int aBonus = ga.getAttackBonus(board, gd);
+            int dBonus = gd.getDefendBonus(board, ga);
             Random rand = new Random();
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = dBonus + rand.nextInt(20) + 1;
@@ -259,8 +260,8 @@ public class Engine {
         }else if (parcel.isDefendedTownBattle()){
             Town t = parcel.getTown();
             General gd = (General)p;
-            int aBonus = ga.getAttackDefendedTownBonus(board, t);
-            int dBonus = gd.getDefendTownBonus(board, t);
+            int aBonus = ga.getAttackDefendedTownBonus(board, gd, t);
+            int dBonus = gd.getDefendTownBonus(board, ga, t);
             Random rand = new Random();
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = dBonus + rand.nextInt(20) + 1;
@@ -275,8 +276,8 @@ public class Engine {
         }else if (parcel.isDefendedCapitolBattle()){
             Capitol cap = parcel.getCapitol();
             General gd = (General)p;
-            int aBonus = ga.getAttackDefendedCapitolBonus(board, cap);
-            int dBonus = gd.getDefendCapitolBonus(board, cap);
+            int aBonus = ga.getAttackDefendedCapitolBonus(board, gd, cap);
+            int dBonus = gd.getDefendCapitolBonus(board, ga, cap);
             Random rand = new Random();
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = dBonus + rand.nextInt(20) + 1;
@@ -289,7 +290,7 @@ public class Engine {
         }else if (parcel.isTownBattle()){
             int aBonus = ga.getAttackTownBonus(board);
             Town t = (Town) p;
-            int tBonus = t.getAttackBonus();
+            int tBonus = t.getDefendBonus(ga);
             Random rand = new Random();
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = tBonus + rand.nextInt(20) + 1;
@@ -302,9 +303,9 @@ public class Engine {
             }
 
         }else if (parcel.isCapitolBattle()){
-            int aBonus = ga.getAttackCapitolBonus(board);
             Capitol cap = (Capitol) p;
-            int capBonus = cap.getAttackBonus();
+            int aBonus = ga.getAttackCapitolBonus(board, cap);
+            int capBonus = cap.getDefendBonus(ga);
             Random rand = new Random();
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = capBonus + rand.nextInt(20) + 1;
@@ -327,7 +328,7 @@ public class Engine {
         if (parcel.isFieldBattle()){
             General gd = (General) p;
             if (attackerWon == 1){
-                int casualties = ga.getCasualties(board);
+                int casualties = ga.getAttackCasualties(board, gd);
                 if (gd.canSufferCasualties(casualties) && retreat != null){
                     board.injureGeneral(gd, casualties);
                     gd = board.get(battleField).getAllianceGeneral(gd.getAlliance());
@@ -345,7 +346,7 @@ public class Engine {
                     board.dropSupply(ga);
                 }
             }else{
-                int casualties = gd.getCasualties(board);
+                int casualties = gd.getDefendCasualties(board, ga);
                 board.stopAssisting(gd);
                 if (ga.canSufferCasualties(casualties) && retreat != null){
                     board.injureGeneral(ga, casualties);
@@ -367,7 +368,7 @@ public class Engine {
             if (attackerWon == 1){
                 board.razeTown(ga);
                 ga = board.get(battleField).getAllianceGeneral(ga.getAlliance());
-                int casualties = ga.getAttackDefendedTownCasualties(board, t);
+                int casualties = ga.getAttackDefendedTownCasualties(board, gd, t);
                 if (gd.canSufferCasualties(casualties) && retreat != null){
                     board.injureGeneral(gd, casualties);
                     gd = board.get(battleField).getAllianceGeneral(gd.getAlliance());
@@ -386,7 +387,7 @@ public class Engine {
                 }
 
             }else{
-                int casualties = gd.getDefendTownCasualties(board, t);
+                int casualties = gd.getDefendTownCasualties(board, ga, t);
                 board.stopAssisting(gd);
                 if (ga.canSufferCasualties(casualties) && retreat != null){
                     board.injureGeneral(ga, casualties);
@@ -417,7 +418,7 @@ public class Engine {
                 }
 
             }else{
-                int casualties = gd.getDefendCapitalCasualties(board, cap);
+                int casualties = gd.getDefendCapitalCasualties(board, ga, cap);
                 board.stopAssisting(gd);
                 if (ga.canSufferCasualties(casualties) && retreat != null){
                     board.injureGeneral(ga, casualties);
@@ -443,8 +444,8 @@ public class Engine {
                 }
             }else{
                 Town t = (Town)p;
-                if (ga.canLoseToTown(t.getCasualties()) && retreat != null){
-                    board.injureGeneral(ga, t.getCasualties());
+                if (ga.canLoseToTown(t.getCasualties(ga)) && retreat != null){
+                    board.injureGeneral(ga, t.getCasualties(ga));
                     ga = board.get(battleField).getFirstGeneral();
                     board.moveGeneral(ga, retreat);
                 }else{
@@ -470,8 +471,8 @@ public class Engine {
                     board.occupyTown(ga);
                 }
             }else{
-                if (ga.canLoseToCap(cap.getCasualties()) && retreat != null){
-                    board.injureGeneral(ga, cap.getCasualties());
+                if (ga.canLoseToCap(cap.getCasualties(ga)) && retreat != null){
+                    board.injureGeneral(ga, cap.getCasualties(ga));
                     ga = board.get(battleField).getFirstGeneral();
                     board.moveGeneral(ga, retreat);
                 }else{

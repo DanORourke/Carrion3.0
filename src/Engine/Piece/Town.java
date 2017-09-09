@@ -41,4 +41,20 @@ public class Town extends Piece {
     public int getCasualties(General g){
         return 1;
     }
+
+    public String getAllocateString(Alliance turnTeam){
+        String s = "";
+        if (getAlliance().equals(Alliance.UNOCCUPIED)){
+            s = "Town is unoccupied\n\n";
+        }else if (!getAlliance().equals(turnTeam)){
+            s = getAlliance().toString() + " Town.\n\n";
+        }else if (getAlliance().equals(turnTeam)){
+            if (hasTroop()){
+                s = getAlliance().toString() + " Town has " + 1 +" unassigned troop.\n\n";
+            }else {
+                s = getAlliance().toString() + " Town has " + 0 +" unassigned troops.\n\n";
+            }
+        }
+        return s;
+    }
 }

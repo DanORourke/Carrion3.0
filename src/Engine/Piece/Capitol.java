@@ -69,4 +69,27 @@ public class Capitol extends Piece{
         }
         return 1;
     }
+
+
+
+    public String getAllocateString(Alliance turnTeam){
+        String s = "";
+        if (!getAlliance().equals(turnTeam)){
+            s = getAlliance().toString() + " Capitol";
+            if (hasChief()){
+                s+= " has the Chief of Staff.\n\n";
+            }else {
+                s+= ".\n\n";
+            }
+        }else if (getAlliance().equals(turnTeam)){
+            if (getTroops() == 2){
+                s = getAlliance().toString() + " Capitol has " + 2 +" unassigned troops.\n\n";
+            }else if (getTroops() == 1){
+                s = getAlliance().toString() + " Capitol has " + 1 +" unassigned troop.\n\n";
+            }else {
+                s = getAlliance().toString() + " Capitol has " + 0 +" unassigned troops.\n\n";
+            }
+        }
+        return s;
+    }
 }

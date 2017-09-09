@@ -6,10 +6,10 @@ import Engine.Piece.Capitol;
 import Engine.Piece.Piece;
 import Engine.Board;
 import Engine.Piece.Town;
+import Engine.Player;
 import GUI.Coords;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Random;
 
@@ -390,7 +390,7 @@ public class General extends Piece {
         return casualties;
     }
 
-    private int getAssistCasualties(General assisted){
+    public int getAssistCasualties(General assisted){
         return (int)Math.ceil((double)troops / 4);
     }
 
@@ -445,5 +445,66 @@ public class General extends Piece {
             return new Ramses();
         }
         return new General("General");
+    }
+
+    public String getDescription(){
+        return "Boring old plain general here.  If you are reading this something has gone wrong.";
+    }
+
+    private String getStringFirstLine(boolean user){
+        String s = getAlliance().toString() + " General ";
+        if (exposed || user){
+            s+= name + " has:\n";
+        }else {
+            s+= getType() + " has:\n";
+        }
+        if (exposed && user){
+            s+= "Been exposed.\n";
+        }
+        if (troops == 1){
+            s+= troops + " troop under his command.\n";
+        }else {
+            s+= troops + " troops under his command.\n";
+        }
+        if (hasChief){
+            s+= "The assistance of the Chief of Staff.\n";
+        }
+        return s;
+    }
+
+    private String getStringLastLine(boolean user){
+        String s = "\n";
+        if (exposed || user){
+            s+= getDescription();
+            return s;
+        }else {
+            return s;
+        }
+    }
+
+    public String getAllocateStringOnlyUser() {
+        String s = getStringFirstLine(true);
+        s+= getStringLastLine(true);
+        return s;
+    }
+
+    public String getAllocateStringOnlyTurn(Player player) {
+        String s = getStringFirstLine(false);
+        s+= player.getUnassisgnedTroops(this) + " unassigned troops he is connected to.\n";
+        s+= getStringLastLine(false);
+        return s;
+    }
+
+    public String getAllocateStringBoth(Player player) {
+        String s = getStringFirstLine(true);
+        s+= player.getUnassisgnedTroops(this) + " unassigned troops he is connected to.\n";
+        s+= getStringLastLine(true);
+        return s;
+    }
+
+    public String getAllocateStringNeither() {
+        String s = getStringFirstLine(false);
+        s+= getStringLastLine(false);
+        return s;
     }
 }

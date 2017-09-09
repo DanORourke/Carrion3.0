@@ -245,11 +245,13 @@ public class Engine {
         for (General g : generals){
             board.setExposedGeneral(g);
         }
-        histIndex = history.size() - 1;
-        String oldEncoded = history.get(histIndex).getEncodedBoard();
-        history.add(new GameState(board, activeCoords, playerTurn, turnStage, oldEncoded));
-        histIndex ++;
-        setState();
+        if (!generals.isEmpty()){
+            histIndex = history.size() - 1;
+            String oldEncoded = history.get(histIndex).getEncodedBoard();
+            history.add(new GameState(board, activeCoords, playerTurn, turnStage, oldEncoded));
+            histIndex ++;
+            setState();
+        }
     }
 
     private void playoutBattles(){
@@ -572,6 +574,15 @@ public class Engine {
         return null;
     }
 
+    private Alliance getTurnTeam(){
+        for (Alliance a : players.keySet()){
+            if (a.getDataCode() == playerTurn){
+                return a;
+            }
+        }
+        return null;
+    }
+
     private void fillPlayers(){
         players = new HashMap<>();
         HashMap<Coords, Parcel> totalBoard = board.getTotalBoard();
@@ -652,73 +663,23 @@ public class Engine {
     }
 
     public String hoverTileInfo(Coords c){
-        //Board board = getBoard();
-        String s = "";
+        setState();
         Parcel activeParcel = board.get(c);
         Alliance userTeam = getUserTeam();
-        fillPlayers();
-        if (turnStage == 0){
-            if (activeParcel.hasTown() && activeParcel.getTown().getAlliance().equals(userTeam)){
-                s = userTeam.toString() + " town has troop to give: " + activeParcel.getTown().hasTroop() + "\n";
-            }
-            if (activeParcel.hasCapitol() && activeParcel.getCapitol().getAlliance().equals(userTeam)){
-                s = userTeam.toString() + " capitol has " + activeParcel.getCapitol().getTroops() + " troops to give.\n";
-            }
-            if (activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
-                s += userTeam.toString() + " General " + activeParcel.getFirstGeneral().getType() + " has:\n" +
-                        activeParcel.getFirstGeneral().getTroops() + " troops under his command.\n" +
-                        players.get(userTeam).getUnassisgnedTroops(activeParcel.getFirstGeneral()) +
-                        " unassigned troops he is connected to.";
-            }
-            if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
-                s = activeParcel.getFirstGeneral().getAlliance().toString() + " General " +
-                        activeParcel.getFirstGeneral().getType() + " has:\n" +
-                        activeParcel.getFirstGeneral().getTroops() + " troops under his command.";
+        Alliance turnTeam = getTurnTeam();
+        if (histIndex <= indexOfNoChange){
+            if (turnStage == 0){
+                return activeParcel.getOldAllocateString(turnTeam, userTeam, players);
+            }else{
+                return activeParcel.getOldMoveString(turnTeam, userTeam, players);
             }
         }else{
-            if (activeParcel.isTownBattle()){
-                General g = activeParcel.getFirstGeneral();
-                Town t = activeParcel.getTown();
-                s = g.getAlliance().toString() + " General " + g.getType() + " attacking " +
-                        t.getAlliance().toString() + " town with " +
-                        g.getTroops() + " troops under his command.\n";
-                if (!g.getAssistingMe().isEmpty()){
-                    for (Coords cords : g.getAssistingMe()){
-                        General assisting = board.get(cords).getAllianceGeneral(g.getAlliance());
-                        s += "Receiving assistance from  " + assisting.getAlliance().toString() +
-                                " General " + assisting.getType() + "\n";
-                    }
-                }
-            }
-            else if(activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
-                General g = activeParcel.getFirstGeneral();
-                s = userTeam.toString() + " General " + g.getType() + " has:\n" +
-                        g.getTroops() + " troops under his command.\n" + g.getMovementPoints() + " movement points.\n";
-                if (g.getiAmAssisting() != null){
-                    General assisted = board.get(g.getiAmAssisting()).getAllianceGeneral(g.getAlliance());
-                    s+= "Orders to assist " + userTeam.toString() + " General " + assisted.getType() + "\n";
-                }
-                if (!g.getAssistingMe().isEmpty()){
-                    for (Coords cords : g.getAssistingMe()){
-                        General assisting = board.get(cords).getAllianceGeneral(g.getAlliance());
-                        s += "Orders to receive assistance from  " + userTeam.toString() +
-                                " General " + assisting.getType() + "\n";
-                    }
-                }
-                if (g.hasChief()){
-                    s += "The Chief of Staff.\n";
-                }
-                if (g.wantsChief()){
-                    s += "Orders to receive the Chief of Staff.\n";
-                }
-            }
-            else if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
-                General g = activeParcel.getFirstGeneral();
-                s = g.getAlliance().toString() + " General " + g.getType() + " has:\n" +
-                        g.getTroops() + " troops under his command.";
+            if (turnStage == 0){
+                return activeParcel.getActiveAllocateString(userTeam, players);
+            }else{
+                return activeParcel.getActiveMoveString(turnTeam, userTeam, players);
             }
         }
-        return s;
     }
 
     public HashMap<Coords, GameData> click(Coords c, boolean leftClick){

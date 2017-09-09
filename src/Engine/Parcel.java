@@ -5,6 +5,7 @@ import Engine.Piece.General.General;
 import Engine.Piece.Piece;
 import Engine.Piece.Supply;
 import Engine.Piece.Town;
+import GUI.Coords;
 import GUI.GameData;
 
 import java.util.HashMap;
@@ -285,4 +286,124 @@ public class Parcel {
             return pieces.containsKey(7) ? pieces.get(7): new Piece();
         }
     }
+
+
+    String getOldAllocateString(Alliance turnTeam, Alliance userTeam, HashMap<Alliance, Player> players){
+        if (turnTeam.equals(userTeam)){
+            return getActiveAllocateString(userTeam, players);
+        }
+        String s = "";
+        Player player = players.get(turnTeam);
+        if (hasSupplyLine()){
+            s = getSupply().getAlliance().toString() + " Supply Line.\n\n";
+        }else if (hasTown()){
+            s = getTown().getAllocateString(turnTeam);
+        }else if (hasCapitol()){
+            s = getCapitol().getAllocateString(turnTeam);
+        }
+        if (hasSingleGeneral()){
+            General g = getFirstGeneral();
+            if (g.getAlliance().equals(userTeam)){
+                s+= g.getAllocateStringOnlyUser();
+            }else if (g.getAlliance().equals(turnTeam)){
+                s+= g.getAllocateStringOnlyTurn(player);
+            }else{
+                s+= g.getAllocateStringNeither();
+            }
+        }
+        return s;
+    }
+
+    String getActiveAllocateString(Alliance userTeam, HashMap<Alliance, Player> players){
+        String s = "";
+        Player player = players.get(userTeam);
+        if (hasSupplyLine()){
+            s = getSupply().getAlliance().toString() + " Supply Line.\n\n";
+        }else if (hasTown()){
+            s = getTown().getAllocateString(userTeam);
+        }else if (hasCapitol()){
+            s = getCapitol().getAllocateString(userTeam);
+        }
+        if (hasSingleGeneral()){
+            General g = getFirstGeneral();
+            if (g.getAlliance().equals(userTeam)){
+                s+= g.getAllocateStringBoth(player);
+            }else{
+                s+= g.getAllocateStringNeither();
+            }
+        }
+        return s;
+    }
+
+    String getOldMoveString(Alliance turnTeam, Alliance userTeam, HashMap<Alliance, Player> players){
+        String s = "";
+        return s;
+    }
+
+    String getActiveMoveString(Alliance turnTeam, Alliance userTeam, HashMap<Alliance, Player> players){
+        String s = "";
+        return s;
+    }
+
+//        if (turnStage == 0){
+//        if (activeParcel.hasTown() && activeParcel.getTown().getAlliance().equals(userTeam)){
+//            s = userTeam.toString() + " town has troop to give: " + activeParcel.getTown().hasTroop() + "\n";
+//        }
+//        if (activeParcel.hasCapitol() && activeParcel.getCapitol().getAlliance().equals(userTeam)){
+//            s = userTeam.toString() + " capitol has " + activeParcel.getCapitol().getTroops() + " troops to give.\n";
+//        }
+//        if (activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
+//            s += userTeam.toString() + " General " + activeParcel.getFirstGeneral().getType() + " has:\n" +
+//                    activeParcel.getFirstGeneral().getTroops() + " troops under his command.\n" +
+//                    players.get(userTeam).getUnassisgnedTroops(activeParcel.getFirstGeneral()) +
+//                    " unassigned troops he is connected to.";
+//        }
+//        if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
+//            s = activeParcel.getFirstGeneral().getAlliance().toString() + " General " +
+//                    activeParcel.getFirstGeneral().getType() + " has:\n" +
+//                    activeParcel.getFirstGeneral().getTroops() + " troops under his command.";
+//        }
+//    }else{
+//        if (activeParcel.isTownBattle()){
+//            General g = activeParcel.getFirstGeneral();
+//            Town t = activeParcel.getTown();
+//            s = g.getAlliance().toString() + " General " + g.getType() + " attacking " +
+//                    t.getAlliance().toString() + " town with " +
+//                    g.getTroops() + " troops under his command.\n";
+//            if (!g.getAssistingMe().isEmpty()){
+//                for (Coords cords : g.getAssistingMe()){
+//                    General assisting = board.get(cords).getAllianceGeneral(g.getAlliance());
+//                    s += "Receiving assistance from  " + assisting.getAlliance().toString() +
+//                            " General " + assisting.getType() + "\n";
+//                }
+//            }
+//        }
+//        else if(activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
+//            General g = activeParcel.getFirstGeneral();
+//            s = userTeam.toString() + " General " + g.getType() + " has:\n" +
+//                    g.getTroops() + " troops under his command.\n" + g.getMovementPoints() + " movement points.\n";
+//            if (g.getiAmAssisting() != null){
+//                General assisted = board.get(g.getiAmAssisting()).getAllianceGeneral(g.getAlliance());
+//                s+= "Orders to assist " + userTeam.toString() + " General " + assisted.getType() + "\n";
+//            }
+//            if (!g.getAssistingMe().isEmpty()){
+//                for (Coords cords : g.getAssistingMe()){
+//                    General assisting = board.get(cords).getAllianceGeneral(g.getAlliance());
+//                    s += "Orders to receive assistance from  " + userTeam.toString() +
+//                            " General " + assisting.getType() + "\n";
+//                }
+//            }
+//            if (g.hasChief()){
+//                s += "The Chief of Staff.\n";
+//            }
+//            if (g.wantsChief()){
+//                s += "Orders to receive the Chief of Staff.\n";
+//            }
+//        }
+//        else if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
+//            General g = activeParcel.getFirstGeneral();
+//            s = g.getAlliance().toString() + " General " + g.getType() + " has:\n" +
+//                    g.getTroops() + " troops under his command.";
+//        }
+//    }
 }

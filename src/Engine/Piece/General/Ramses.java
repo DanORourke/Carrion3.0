@@ -132,6 +132,12 @@ public class Ramses extends General{
     }
 
     @Override
+    public String getDescription(){
+        return "Pro:  Ramses can move 1 more space than a normal general.\n\n" +
+                "Con:  Ramses inflicts a third fewer casualties than a normal general.";
+    }
+
+    @Override
     public int calcMovementPoints(){
         if (exposed){
             //faster

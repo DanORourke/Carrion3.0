@@ -175,8 +175,8 @@ public class Board {
     }
 
     private void removePiece(Piece p){
-        Coords init = p.getCoords();
-        Parcel op = board.get(init);
+        Coords c = p.getCoords();
+        Parcel op = board.get(c);
         HashMap<Integer, Piece> oPieces = op.getPieces();
         HashMap<Integer, Piece> nPieces = new HashMap<>();
         for (int t : oPieces.keySet()){
@@ -186,13 +186,13 @@ public class Board {
             }
         }
         Parcel np =  new Parcel(op.getTerritory(), nPieces);
-        board.put(init,np);
-        changeData.put(init, np.getGD());
+        board.put(c,np);
+        changeData.put(c, np.getGD());
     }
 
     private void addPiece(Piece p){
-        Coords init = p.getCoords();
-        Parcel op = board.get(init);
+        Coords c = p.getCoords();
+        Parcel op = board.get(c);
         HashMap<Integer, Piece> oPieces = op.getPieces();
         HashMap<Integer, Piece> nPieces = new HashMap<>();
         for (int t : oPieces.keySet()){
@@ -205,17 +205,18 @@ public class Board {
                 nPieces.put(2, p.copy());
             }
             //why dont i need to worry about this?????
-//            else if (op.hasGeneral()){
-//                //if have a general in the second position
-//                //did it this way so new generals go where they came from
-//                nPieces.put(1, p.copy());
-//            }
+            //i do, but only when exposing generals before battles????
+            else if (op.hasGeneral()){
+                //if have a general in the second position
+                //did it this way so new generals go where they came from
+                nPieces.put(1, p.copy());
+            }
         }else{
             nPieces.put(p.getType(), p.copy());
         }
         Parcel np =  new Parcel(op.getTerritory(), nPieces);
-        board.put(init,np);
-        changeData.put(init, np.getGD());
+        board.put(c,np);
+        changeData.put(c, np.getGD());
     }
 
     void occupyTown(General g){

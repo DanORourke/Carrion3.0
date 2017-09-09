@@ -436,27 +436,29 @@ public class General extends Piece {
 
     private static ArrayList<String> createAllPossibleG(){
         ArrayList<String> allPossibleG = new ArrayList<>();
-        Collections.addAll(allPossibleG, "Ramses", "Charlemagne", "Frederick", "Oda", "Alexander");
+        Collections.addAll(allPossibleG, "Ramses II", "Charlemagne", "Frederick of Prussia",
+                "Oda Nobunaga", "Alexander of Macedon");
         return allPossibleG;
     }
 
     private static General makeFromName(String name){
-        if (name.equals("Ramses")){
+        if (name.equals("Ramses II")){
             return new Ramses();
         }else if (name.equals("Charlemagne")){
             return new Charlemagne();
-        }else if (name.equals("Frederick")){
+        }else if (name.equals("Frederick of Prussia")){
             return new Frederick();
-        }else if (name.equals("Oda")){
+        }else if (name.equals("Oda Nobunaga")){
             return new Oda();
-        }else if (name.equals("Alexander")){
+        }else if (name.equals("Alexander of Macedon")){
             return new Alexander();
         }
         return new General("General");
     }
 
     public String getDescription(){
-        return "Boring old plain general here.  If you are reading this something has gone wrong.";
+        return "Boring old plain general here.  If you are reading this something has gone wrong. " +
+                "Although he is the super";
     }
 
     private String getStringFirstLine(boolean user){
@@ -513,6 +515,64 @@ public class General extends Piece {
     public String getAllocateStringNeither() {
         String s = getStringFirstLine(false);
         s+= getStringLastLine(false);
+        return s;
+    }
+
+
+
+    public String getMoveStringOnlyUser(Board board) {
+        String s = getStringFirstLine(true);
+        s+= getMoveMiddleString(true, false, board);
+        s+= getStringLastLine(true);
+        return s;
+    }
+
+    public String getMoveStringOnlyTurn(Board board) {
+        String s = getStringFirstLine(false);
+        s+= getMoveMiddleString(false, true, board);
+        s+= getStringLastLine(false);
+        return s;
+    }
+
+    public String getMoveStringBoth(Board board) {
+        String s = getStringFirstLine(true);
+        s+= getMoveMiddleString(true, true, board);
+        s+= getStringLastLine(true);
+        return s;
+    }
+
+    public String getMoveStringNeither(Board board) {
+        String s = getStringFirstLine(false);
+        s+= getMoveMiddleString(false, false, board);
+        s+= getStringLastLine(false);
+        return s;
+    }
+
+    private String getMoveMiddleString(boolean user, boolean turn, Board board){
+        String s = "";
+        if (turn){
+            if (movementPoints == 1){
+                s += movementPoints + " movement point.\n";
+            }else{
+                s += movementPoints + " movement points.\n";
+            }
+        }
+        if (user){
+            if (wantsChief){
+                s+= "Orders to receive the Chief of Staff.\n";
+            }
+            if (iAmAssisting != null){
+                General assisted = board.get(iAmAssisting).getAllianceGeneral(getAlliance());
+                s+= "Orders to assist " + assisted.getAlliance().toString() + " General " + assisted.getName() + "\n";
+            }
+            if (!assistingMe.isEmpty()){
+                for (Coords cords : assistingMe){
+                    General assisting = board.get(cords).getAllianceGeneral(getAlliance());
+                    s += "Orders to receive assistance from  " + assisting.getAlliance().toString() +
+                            " General " + assisting.getName() + "\n";
+                }
+            }
+        }
         return s;
     }
 }

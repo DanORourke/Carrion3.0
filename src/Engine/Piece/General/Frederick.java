@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Frederick extends General {
 
     Frederick(){
-        super("Frederick");
+        super("Frederick of Prussia");
     }
 
     private Frederick(Coords coords, int type, Alliance alliance, String name, int troops,

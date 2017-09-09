@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class Ramses extends General{
 
     Ramses(){
-        super("Ramses");
+        super("Ramses II");
     }
 
     private Ramses(Coords coords, int type, Alliance alliance, String name, int troops,

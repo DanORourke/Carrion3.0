@@ -57,4 +57,12 @@ public class Town extends Piece {
         }
         return s;
     }
+
+    public String getMoveString(){
+        if (getAlliance().equals(Alliance.UNOCCUPIED)){
+            return "Town is unoccupied\n\n";
+        }else{
+            return getAlliance().toString() + " Town.\n\n";
+        }
+    }
 }

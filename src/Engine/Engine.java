@@ -245,6 +245,7 @@ public class Engine {
         for (General g : generals){
             board.setExposedGeneral(g);
         }
+        //battle will lock it in, otherwise empty click
         if (!generals.isEmpty()){
             histIndex = history.size() - 1;
             String oldEncoded = history.get(histIndex).getEncodedBoard();
@@ -671,13 +672,13 @@ public class Engine {
             if (turnStage == 0){
                 return activeParcel.getOldAllocateString(turnTeam, userTeam, players);
             }else{
-                return activeParcel.getOldMoveString(turnTeam, userTeam, players);
+                return activeParcel.getOldMoveString(turnTeam, userTeam, board);
             }
         }else{
             if (turnStage == 0){
                 return activeParcel.getActiveAllocateString(userTeam, players);
             }else{
-                return activeParcel.getActiveMoveString(userTeam, players);
+                return activeParcel.getActiveMoveString(userTeam, board);
             }
         }
     }

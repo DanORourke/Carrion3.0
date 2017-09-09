@@ -208,7 +208,7 @@ public class Parcel {
         return pieces.containsKey(7);
     }
 
-    General getAllianceGeneral(Alliance a){
+    public General getAllianceGeneral(Alliance a){
         General g1 = getFirstGeneral();
         if (g1 != null && g1.getAlliance().equals(a)){
             return g1;
@@ -335,17 +335,60 @@ public class Parcel {
         return s;
     }
 
-    String getOldMoveString(Alliance turnTeam, Alliance userTeam, HashMap<Alliance, Player> players){
-        if (turnTeam.equals(userTeam)){
-            return getActiveMoveString(userTeam, players);
+    String getOldMoveString(Alliance turnTeam, Alliance userTeam, Board board){
+        if (isBattle()){
+            return getOldBattleString(turnTeam, userTeam, board);
         }
         String s = "";
+        if (hasSupplyLine()){
+            s = getSupply().getAlliance().toString() + " Supply Line.\n\n";
+        }else if (hasTown()){
+            s = getTown().getMoveString();
+        }else if (hasCapitol()){
+            s = getCapitol().getMoveString();
+        }
+        if (hasSingleGeneral()){
+            General g = getFirstGeneral();
+            if (g.getAlliance().equals(userTeam)){
+                s+= g.getMoveStringOnlyUser(board);
+            }else if (g.getAlliance().equals(turnTeam)){
+                s+= g.getMoveStringOnlyTurn(board);
+            }else{
+                s+= g.getMoveStringNeither(board);
+            }
+        }
         return s;
     }
 
-    String getActiveMoveString(Alliance userTeam, HashMap<Alliance, Player> players){
+    String getActiveMoveString(Alliance userTeam, Board board){
+        if (isBattle()){
+            return getActiveBattleString(userTeam, board);
+        }
         String s = "";
+        if (hasSupplyLine()){
+            s = getSupply().getAlliance().toString() + " Supply Line.\n\n";
+        }else if (hasTown()){
+            s = getTown().getMoveString();
+        }else if (hasCapitol()){
+            s = getCapitol().getMoveString();
+        }
+        if (hasSingleGeneral()){
+            General g = getFirstGeneral();
+            if (g.getAlliance().equals(userTeam)){
+                s+= g.getMoveStringBoth(board);
+            }else{
+                s+= g.getMoveStringNeither(board);
+            }
+        }
         return s;
+    }
+
+    private String getOldBattleString(Alliance turnTeam, Alliance userTeam, Board board){
+        return "OldBattle";
+    }
+
+    private String getActiveBattleString(Alliance userTeam, Board board){
+        return "ActiveBattle";
     }
 
 //        if (turnStage == 0){

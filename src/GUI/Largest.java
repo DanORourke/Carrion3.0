@@ -273,6 +273,7 @@ public class Largest {
         JTextArea hoverArea = new JTextArea("hoverArea");
         hoverArea.setEditable(false);
         hoverArea.setLineWrap(true);
+        hoverArea.setFont(new Font("Times New Roman", Font.PLAIN, 16));
         drawingPanel.setHoverArea(hoverArea);
         return hoverArea;
     }

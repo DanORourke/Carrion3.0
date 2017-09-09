@@ -95,4 +95,15 @@ public class Capitol extends Piece{
         }
         return s;
     }
+
+    public String getMoveString(){
+        String s = getAlliance().toString() + " Capitol";
+        if (hasChief()){
+            s+= " has the Chief of Staff.\n\n";
+        }else {
+            s+= ".\n\n";
+        }
+
+        return s;
+    }
 }

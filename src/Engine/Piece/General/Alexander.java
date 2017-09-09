@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Alexander extends General{
 
     Alexander(){
-        super("Alexander");
+        super("Alexander of Macedon");
     }
 
     private Alexander(Coords coords, int type, Alliance alliance, String name, int troops,

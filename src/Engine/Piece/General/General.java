@@ -235,7 +235,7 @@ public class General extends Piece {
         Parcel p = board.get(getCoords());
         if (p.getTerritory().equals(getAlliance())){
             bonus++;
-        }else if (!p.getTerritory().equals(getAlliance()) && p.getTerritory().equals(Alliance.UNOCCUPIED)){
+        }else if (!p.getTerritory().equals(getAlliance()) && !p.getTerritory().equals(Alliance.UNOCCUPIED)){
             bonus --;
         }
         return bonus;
@@ -292,7 +292,7 @@ public class General extends Piece {
         bonus += addTerritoryBonus(board);
         bonus += addDistractedBonus();
         if (getAlliance().equals(t.getAlliance())){
-            bonus += t.getDefendBonus(attacker);
+            bonus += t.getDefendedBonus(attacker, this);
         }
         return bonus;
     }
@@ -518,8 +518,6 @@ public class General extends Piece {
         return s;
     }
 
-
-
     public String getMoveStringOnlyUser(Board board) {
         String s = getStringFirstLine(true);
         s+= getMoveMiddleString(true, false, board);
@@ -574,5 +572,75 @@ public class General extends Piece {
             }
         }
         return s;
+    }
+
+    public String getOldBattleString(Board board, Piece p, int typeCode, boolean attacker){
+        //typeCode, 1 = field, 2 = defended town, 3 = defended cap, 4 = town, 5 = cap
+        if (typeCode == 1){
+            return "OldBattle";
+        }else if (typeCode == 2){
+            return "OldBattle";
+
+        }else if (typeCode == 3){
+            return "OldBattle";
+
+        }else if (typeCode == 4){
+            Town t = (Town)p;
+            //not always user, but will be exposed if not yet
+            String s = getStringFirstLine(true);
+            for (Coords c : assistingMe){
+                General ag = board.getAssistingGeneral(c);
+                s+= "+" + ag.getAssistBonus(this) + " assist bonus from " + ag.getName() + "\n";
+            }
+            s+= "+" + addTerritoryBonus(board) + " territory bonus.\n";
+            s+= "+" + getAttackTownBonus(board) + " total attack bonus.\n";
+
+            if (dropAfterWin){
+                s+= "Orders to occupy the town after securing victory.\n";
+            }else {
+                s+= "Orders to raze the town after securing victory.\n";
+            }
+            return s;
+
+        }else if (typeCode == 5){
+            return "OldBattle";
+        }
+        return "OldBattle";
+    }
+
+
+
+    public String getActiveBattleString(Board board, Piece p, int typeCode, boolean attacker){
+        //typeCode, 1 = field, 2 = defended town, 3 = defended cap, 4 = town, 5 = cap
+        if (typeCode == 1){
+            return "ActiveBattle";
+        }else if (typeCode == 2){
+            return "ActiveBattle";
+
+        }else if (typeCode == 3){
+            return "ActiveBattle";
+
+        }else if (typeCode == 4){
+            Town t = (Town)p;
+            //not always user, but will be exposed if not yet
+            String s = getStringFirstLine(true);
+            for (Coords c : assistingMe){
+                General ag = board.getAssistingGeneral(c);
+                s+= "+" + ag.getAssistBonus(this) + " assist bonus from " + ag.getName() + "\n";
+            }
+            s+= "+" + addTerritoryBonus(board) + " territory bonus.\n";
+            s+= "+" + getAttackTownBonus(board) + " total fight bonus.\n";
+
+            if (dropAfterWin){
+                s+= "Orders to occupy the town after securing victory.\n";
+            }else {
+                s+= "Orders to raze the town after securing victory.\n";
+            }
+            return s;
+
+        }else if (typeCode == 5){
+            return "ActiveBattle";
+        }
+        return "ActiveBattle";
     }
 }

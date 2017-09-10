@@ -1,6 +1,7 @@
 package Engine.Piece;
 
 import Engine.Alliance;
+import Engine.Board;
 import Engine.Piece.General.General;
 import GUI.Coords;
 
@@ -34,8 +35,25 @@ public class Town extends Piece {
         return haveTroop;
     }
 
-    public int getDefendBonus(General g) {
+    public int getDefendedBonus(General attacker, General defender){
         return 1;
+    }
+
+    public int getDefendAloneBonus(Board board, General attacker) {
+        int bonus = 1;
+        bonus += addTerritoryBonus(board, attacker);
+        return bonus;
+    }
+
+    private int addTerritoryBonus(Board board, General attacker){
+        if (!board.get(getCoords()).getTerritory().equals(attacker.getAlliance()) &&
+                !board.get(getCoords()).getTerritory().equals(Alliance.UNOCCUPIED) ){
+            return 1;
+        }else if (board.get(getCoords()).getTerritory().equals(attacker.getAlliance())){
+            return -1;
+        }else {
+            return 0;
+        }
     }
 
     public int getCasualties(General g){
@@ -64,5 +82,11 @@ public class Town extends Piece {
         }else{
             return getAlliance().toString() + " Town.\n\n";
         }
+    }
+
+    public String getBattleString(Board board, General g){
+        return getAlliance().toString() + " Town\n+" + addTerritoryBonus(board, g) + " territory bonus.\n+" +
+                getDefendAloneBonus(board, g) + " total fight bonus.\n+" +
+                + getCasualties(g) + " expected inflicted casualties.\n\n";
     }
 }

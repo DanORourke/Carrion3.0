@@ -60,7 +60,7 @@ public class Capitol extends Piece{
         if (hasChief()){
             return 4;
         }
-        return 2;
+        return 3;
     }
 
     public int getCasualties(General g){

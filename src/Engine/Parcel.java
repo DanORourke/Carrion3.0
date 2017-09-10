@@ -332,7 +332,7 @@ public class Parcel {
 
     String getOldMoveString(Alliance turnTeam, Alliance userTeam, Board board){
         if (isBattle()){
-            return getOldBattleString(turnTeam, userTeam, board);
+            return getOldBattleString(board);
         }
         String s = "";
         if (hasSupplyLine()){
@@ -378,73 +378,42 @@ public class Parcel {
         return s;
     }
 
-    private String getOldBattleString(Alliance turnTeam, Alliance userTeam, Board board){
+    private String getOldBattleString(Board board){
+        //typeCode, 1 = field, 2 = defended town, 3 = defended cap, 4 = town, 5 = cap
+        if (isFieldBattle()){
+
+        }else if (isDefendedTownBattle()){
+
+        }else if (isDefendedCapitolBattle()){
+
+        }else if (isTownBattle()){
+            General ag = getFirstGeneral();
+            Town dt = getTown();
+            String s = dt.getBattleString(board, ag);
+            s += ag.getOldBattleString(board, dt, 4, true);
+            return s;
+        }else if (isCapitolBattle()){
+
+        }
         return "OldBattle";
     }
 
     private String getActiveBattleString(Alliance userTeam, Board board){
+        if (isFieldBattle()){
+
+        }else if (isDefendedTownBattle()){
+
+        }else if (isDefendedCapitolBattle()){
+
+        }else if (isTownBattle()){
+            General ag = getFirstGeneral();
+            Town dt = getTown();
+            String s = dt.getBattleString(board, ag);
+            s += ag.getActiveBattleString(board, dt, 4, true);
+            return s;
+        }else if (isCapitolBattle()){
+
+        }
         return "ActiveBattle";
     }
-
-//        if (turnStage == 0){
-//        if (activeParcel.hasTown() && activeParcel.getTown().getAlliance().equals(userTeam)){
-//            s = userTeam.toString() + " town has troop to give: " + activeParcel.getTown().hasTroop() + "\n";
-//        }
-//        if (activeParcel.hasCapitol() && activeParcel.getCapitol().getAlliance().equals(userTeam)){
-//            s = userTeam.toString() + " capitol has " + activeParcel.getCapitol().getTroops() + " troops to give.\n";
-//        }
-//        if (activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
-//            s += userTeam.toString() + " General " + activeParcel.getFirstGeneral().getType() + " has:\n" +
-//                    activeParcel.getFirstGeneral().getTroops() + " troops under his command.\n" +
-//                    players.get(userTeam).getUnassisgnedTroops(activeParcel.getFirstGeneral()) +
-//                    " unassigned troops he is connected to.";
-//        }
-//        if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
-//            s = activeParcel.getFirstGeneral().getAlliance().toString() + " General " +
-//                    activeParcel.getFirstGeneral().getType() + " has:\n" +
-//                    activeParcel.getFirstGeneral().getTroops() + " troops under his command.";
-//        }
-//    }else{
-//        if (activeParcel.isTownBattle()){
-//            General g = activeParcel.getFirstGeneral();
-//            Town t = activeParcel.getTown();
-//            s = g.getAlliance().toString() + " General " + g.getType() + " attacking " +
-//                    t.getAlliance().toString() + " town with " +
-//                    g.getTroops() + " troops under his command.\n";
-//            if (!g.getAssistingMe().isEmpty()){
-//                for (Coords cords : g.getAssistingMe()){
-//                    General assisting = board.get(cords).getAllianceGeneral(g.getAlliance());
-//                    s += "Receiving assistance from  " + assisting.getAlliance().toString() +
-//                            " General " + assisting.getType() + "\n";
-//                }
-//            }
-//        }
-//        else if(activeParcel.hasSingleGeneral() && activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
-//            General g = activeParcel.getFirstGeneral();
-//            s = userTeam.toString() + " General " + g.getType() + " has:\n" +
-//                    g.getTroops() + " troops under his command.\n" + g.getMovementPoints() + " movement points.\n";
-//            if (g.getiAmAssisting() != null){
-//                General assisted = board.get(g.getiAmAssisting()).getAllianceGeneral(g.getAlliance());
-//                s+= "Orders to assist " + userTeam.toString() + " General " + assisted.getType() + "\n";
-//            }
-//            if (!g.getAssistingMe().isEmpty()){
-//                for (Coords cords : g.getAssistingMe()){
-//                    General assisting = board.get(cords).getAllianceGeneral(g.getAlliance());
-//                    s += "Orders to receive assistance from  " + userTeam.toString() +
-//                            " General " + assisting.getType() + "\n";
-//                }
-//            }
-//            if (g.hasChief()){
-//                s += "The Chief of Staff.\n";
-//            }
-//            if (g.wantsChief()){
-//                s += "Orders to receive the Chief of Staff.\n";
-//            }
-//        }
-//        else if (activeParcel.hasSingleGeneral() && !activeParcel.getFirstGeneral().getAlliance().equals(userTeam)){
-//            General g = activeParcel.getFirstGeneral();
-//            s = g.getAlliance().toString() + " General " + g.getType() + " has:\n" +
-//                    g.getTroops() + " troops under his command.";
-//        }
-//    }
 }

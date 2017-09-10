@@ -315,7 +315,7 @@ public class Engine {
         }else if (parcel.isTownBattle()){
             int aBonus = ga.getAttackTownBonus(board);
             Town t = (Town) p;
-            int tBonus = t.getDefendBonus(ga);
+            int tBonus = t.getDefendAloneBonus(board, ga);
             Random rand = new Random();
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = tBonus + rand.nextInt(20) + 1;

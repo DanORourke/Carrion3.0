@@ -98,7 +98,7 @@ public class Parcel {
             hold[j] = getSecondGeneral().getAlliance().getDataCode();
             j++;
         }else{
-            //make towns first
+            //make towns and Capitols first
             for (int t : pieces.keySet()){
                 Piece p = pieces.get(t);
                 if (p.isTown()){
@@ -106,24 +106,28 @@ public class Parcel {
                     j++;
                     hold[j] = p.getAlliance().getDataCode();
                     j++;
-                }
-            }
-            for (int t : pieces.keySet()){
-                Piece p = pieces.get(t);
-                if (!p.isTown()){
+                }else if (p.isCapitol()){
                     hold[j] = p.getType();
                     j++;
                     hold[j] = p.getAlliance().getDataCode();
                     j++;
-                    if (p.isCapitol()){
-                        Capitol c = (Capitol) p;
-                        if (c.hasChief()){
-                            hold[j] = 8;
-                            j++;
-                            hold[j] = c.getAlliance().getDataCode();
-                            j++;
-                        }
-                    }else if (p.isGeneral()){
+                    Capitol c = (Capitol) p;
+                    if (c.hasChief()){
+                        hold[j] = 8;
+                        j++;
+                        hold[j] = c.getAlliance().getDataCode();
+                        j++;
+                    }
+                }
+            }
+            for (int t : pieces.keySet()){
+                Piece p = pieces.get(t);
+                if (!p.isTown() && !p.isCapitol()){
+                    hold[j] = p.getType();
+                    j++;
+                    hold[j] = p.getAlliance().getDataCode();
+                    j++;
+                    if (p.isGeneral()){
                         General g = (General)p;
                         if (g.hasChief()){
                             hold[j] = 8;

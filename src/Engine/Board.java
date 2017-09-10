@@ -374,6 +374,36 @@ public class Board {
         addPiece(ng);
     }
 
+    boolean exposeBattle(General g, Piece p){
+        boolean remember = false;
+        for (Coords c : g.getAssistingMe()){
+            General ag = get(c).getAllianceGeneral(g.getAlliance());
+            if (!ag.isExposed()){
+                setExposedGeneral(ag);
+                remember = true;
+            }
+        }
+        if (!g.isExposed()){
+            setExposedGeneral(g);
+            remember = true;
+        }
+        if (p.isGeneral()){
+            General dg = (General)p;
+            for (Coords c : dg.getAssistingMe()){
+                General ag = get(c).getAllianceGeneral(dg.getAlliance());
+                if (!ag.isExposed()){
+                    setExposedGeneral(ag);
+                    remember = true;
+                }
+            }
+            if (!dg.isExposed()){
+                setExposedGeneral(dg);
+                remember = true;
+            }
+        }
+        return remember;
+    }
+
     void resetGeneralMove(General g){
         General ng = g.resetGeneralMove();
         removePiece(g);

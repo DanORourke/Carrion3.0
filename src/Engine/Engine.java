@@ -348,23 +348,15 @@ public class Engine {
         //attackerWon == 1 equals true, 0 equals false
         Parcel parcel = board.get(battleField);
         General ga = parcel.getAttacker();
-        System.out.println("afterBattle");
-        if (!ga.isExposed()){
-            System.out.println("afterBattle ga");
-            board.setExposedGeneral(ga);
-            addToHistory("");
-            parcel = board.get(battleField);
-            ga = parcel.getAttacker();
-        }
         Piece p = parcel.getDefender();
-        if (p.isGeneral() && !((General)p).isExposed()){
-            System.out.println("afterBattle p");
-            board.setExposedGeneral((General)p);
+        boolean remember = board.exposeBattle(ga, p);
+        if (remember){
             addToHistory("");
             parcel = board.get(battleField);
             ga = parcel.getAttacker();
             p = parcel.getDefender();
         }
+
 
         if (parcel.isFieldBattle()){
             General gd = (General) p;

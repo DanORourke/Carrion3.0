@@ -563,13 +563,13 @@ public class General extends Piece {
             }
             if (iAmAssisting != null){
                 General assisted = board.get(iAmAssisting).getAllianceGeneral(getAlliance());
-                s+= "Orders to assist " + assisted.getAlliance().toString() + " General " + assisted.getName() + "\n";
+                s+= "Orders to assist " + assisted.getAlliance().toString() + " General " + assisted.getName() + ".\n";
             }
             if (!assistingMe.isEmpty()){
                 for (Coords cords : assistingMe){
                     General assisting = board.get(cords).getAllianceGeneral(getAlliance());
                     s += "Orders to receive assistance from  " + assisting.getAlliance().toString() +
-                            " General " + assisting.getName() + "\n";
+                            " General " + assisting.getName() + ".\n";
                 }
             }
         }

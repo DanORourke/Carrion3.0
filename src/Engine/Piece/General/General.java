@@ -252,7 +252,7 @@ public class General extends Piece {
 
     private int addDistractedBonus(){
         if (iAmAssisting != null){
-            return ((int)Math.ceil((double)troops / 4) * -1);
+            return ((int)Math.ceil((double)troops / 4));
         }
         return 0;
     }
@@ -268,7 +268,7 @@ public class General extends Piece {
         int bonus = troops;
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
-        bonus += addDistractedBonus();
+        bonus -= addDistractedBonus();
         return bonus;
     }
 
@@ -290,7 +290,7 @@ public class General extends Piece {
         int bonus = troops;
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
-        bonus += addDistractedBonus();
+        bonus -= addDistractedBonus();
         if (getAlliance().equals(t.getAlliance())){
             bonus += t.getDefendedBonus(attacker, this);
         }
@@ -312,7 +312,7 @@ public class General extends Piece {
         int bonus = troops;
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
-        bonus += addDistractedBonus();
+        bonus -= addDistractedBonus();
         if (getAlliance().equals(cap.getAlliance())){
             bonus += cap.getDefendBonus(attacker);
         }
@@ -577,7 +577,33 @@ public class General extends Piece {
     public String getOldBattleString(Board board, Piece p, int typeCode, boolean attacker){
         //typeCode, 1 = field, 2 = defended town, 3 = defended cap, 4 = town, 5 = cap
         if (typeCode == 1){
-            return "OldBattle";
+            General other = (General)p;
+            String s = getStringFirstLine(true);
+            for (Coords c : assistingMe){
+                General ag = board.getAssistingGeneral(c);
+                s+= "+" + ag.getAssistBonus(this) + " assist bonus from " + ag.getName() + "\n";
+            }
+            s+= "+" + addTerritoryBonus(board) + " territory bonus.\n";
+            if (attacker){
+                s+= "+" + getAttackBonus(board, other) + " total attack bonus.\n";
+            }else{
+                s+= "-" + addDistractedBonus() + " distracted penalty.\n";
+                s+= "+" + getDefendBonus(board, other) + " total attack bonus.\n";
+            }
+            for (Coords c : assistingMe){
+                General ag = board.getAssistingGeneral(c);
+                s+= "+" + ag.getAssistCasualties(this) + " inflicted casualties from " + ag.getName() + "\n";
+            }
+            if (attacker){
+                s+= "+" + getAttackCasualties(board, other) + " total inflicted casualties.\n";
+            }else{
+                s+= "+" + getDefendCasualties(board, other) + " total inflicted casualties.\n";
+            }
+            if (dropAfterWin){
+                s+= "Orders to drop a supply line after securing victory.\n";
+            }
+            return s;
+
         }else if (typeCode == 2){
             return "OldBattle";
 

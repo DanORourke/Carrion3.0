@@ -381,6 +381,11 @@ public class Parcel {
     private String getOldBattleString(Board board){
         //typeCode, 1 = field, 2 = defended town, 3 = defended cap, 4 = town, 5 = cap
         if (isFieldBattle()){
+            General dg = getFirstGeneral();
+            General ag = getSecondGeneral();
+            String s = "Defending " + dg.getOldBattleString(board, ag, 1, false);
+            s += "\nAttacking " + ag.getOldBattleString(board, dg, 1, true);
+            return s;
 
         }else if (isDefendedTownBattle()){
 
@@ -409,7 +414,7 @@ public class Parcel {
             General ag = getFirstGeneral();
             Town dt = getTown();
             String s = dt.getBattleString(board, ag);
-            s += ag.getActiveBattleString(board, dt, 4, true);
+            s += "Attacking " + ag.getActiveBattleString(board, dt, 4, true);
             return s;
         }else if (isCapitolBattle()){
 

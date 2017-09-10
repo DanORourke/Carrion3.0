@@ -261,6 +261,8 @@ public class Board {
     }
 
     void killGeneral(General g){
+        removeHelpFromGeneralIAmAssisting(g);
+        removeAssistingFromGeneralsAssistingMe(g);
         removePiece(g);
     }
 

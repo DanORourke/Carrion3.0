@@ -261,6 +261,15 @@ public class Engine {
         setState();
     }
 
+    private void silentlyAddToHistory(){
+        histIndex = history.size() - 1;
+        String oldEncoded = history.get(histIndex).getEncodedBoard();
+        history.remove(histIndex);
+        history.add(new GameState(new Board(board), null,  playerTurn, turnStage, oldEncoded));
+        histIndex = history.size() - 1;
+        setState();
+    }
+
     private void battle(Coords c){
         // get attacker and defender
         Parcel parcel = board.get(c);
@@ -351,7 +360,8 @@ public class Engine {
         Piece p = parcel.getDefender();
         boolean remember = board.exposeBattle(ga, p);
         if (remember){
-            addToHistory("");
+            //addToHistory("");
+            silentlyAddToHistory();
             parcel = board.get(battleField);
             ga = parcel.getAttacker();
             p = parcel.getDefender();

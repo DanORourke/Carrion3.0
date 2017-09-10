@@ -85,8 +85,8 @@ public class Town extends Piece {
     }
 
     public String getBattleString(Board board, General g){
-        return getAlliance().toString() + " Town\n+" + addTerritoryBonus(board, g) + " territory bonus.\n+" +
+        return "Defending " + getAlliance().toString() + " Town\n+" + addTerritoryBonus(board, g) + " territory bonus.\n+" +
                 getDefendAloneBonus(board, g) + " total fight bonus.\n+" +
-                + getCasualties(g) + " expected inflicted casualties.\n\n";
+                + getCasualties(g) + " total inflicted casualties.\n\n";
     }
 }

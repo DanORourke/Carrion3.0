@@ -186,6 +186,7 @@ public class Board {
             }
         }
         Parcel np =  new Parcel(op.getTerritory(), nPieces);
+        HashMap<Integer, Piece> wht = np.getPieces();
         board.put(c,np);
         changeData.put(c, np.getGD());
     }
@@ -206,6 +207,7 @@ public class Board {
             }
             //why dont i need to worry about this?????
             //i do, but only when exposing generals before battles????
+            //should be fixed
             else if (op.hasGeneral()){
                 //if have a general in the second position
                 //did it this way so new generals go where they came from
@@ -217,6 +219,11 @@ public class Board {
         Parcel np =  new Parcel(op.getTerritory(), nPieces);
         board.put(c,np);
         changeData.put(c, np.getGD());
+    }
+
+    void dropAttackerDown(General g){
+        removePiece(g);
+        addPiece(g.copy());
     }
 
     void occupyTown(General g){

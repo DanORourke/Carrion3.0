@@ -219,7 +219,7 @@ public class Engine {
         condenseAllocateHistory();
         histIndex = history.size() - 1;
         //do stuff if battles need to happen
-        exposeBattles();
+        //exposeBattles();
         playoutBattles();
         //move the chief if someone else wants him and he is connected
         moveChief();
@@ -244,14 +244,6 @@ public class Engine {
         ArrayList<General> generals = board.getBattleExpose();
         for (General g : generals){
             board.setExposedGeneral(g);
-        }
-        //battle will lock it in, otherwise empty click
-        if (!generals.isEmpty()){
-            histIndex = history.size() - 1;
-            String oldEncoded = history.get(histIndex).getEncodedBoard();
-            history.add(new GameState(board, activeCoords, playerTurn, turnStage, oldEncoded));
-            histIndex ++;
-            setState();
         }
     }
 
@@ -356,7 +348,23 @@ public class Engine {
         //attackerWon == 1 equals true, 0 equals false
         Parcel parcel = board.get(battleField);
         General ga = parcel.getAttacker();
+        System.out.println("afterBattle");
+        if (!ga.isExposed()){
+            System.out.println("afterBattle ga");
+            board.setExposedGeneral(ga);
+            addToHistory("");
+            parcel = board.get(battleField);
+            ga = parcel.getAttacker();
+        }
         Piece p = parcel.getDefender();
+        if (p.isGeneral() && !((General)p).isExposed()){
+            System.out.println("afterBattle p");
+            board.setExposedGeneral((General)p);
+            addToHistory("");
+            parcel = board.get(battleField);
+            ga = parcel.getAttacker();
+            p = parcel.getDefender();
+        }
 
         if (parcel.isFieldBattle()){
             General gd = (General) p;
@@ -375,6 +383,8 @@ public class Engine {
                         board.killPlayer(killed, ga.getAlliance());
                     }
                 }
+                board.dropAttackerDown(ga);
+                ga = board.get(battleField).getFirstGeneral();
                 if (ga.getDropAfterWin()){
                     board.dropSupply(ga);
                 }
@@ -415,6 +425,8 @@ public class Engine {
                         board.killPlayer(killed, ga.getAlliance());
                     }
                 }
+                board.dropAttackerDown(ga);
+                ga = board.get(battleField).getFirstGeneral();
                 if (ga.getDropAfterWin()){
                     board.occupyTown(ga);
                 }
@@ -446,6 +458,8 @@ public class Engine {
                 System.out.println("kill player " + gd.getAlliance().toString());
                 board.killPlayer(killed, ga.getAlliance());
                 ga = board.get(battleField).getAllianceGeneral(ga.getAlliance());
+                board.dropAttackerDown(ga);
+                ga = board.get(battleField).getFirstGeneral();
                 if (ga.getDropAfterWin()){
                     board.occupyTown(ga);
                 }

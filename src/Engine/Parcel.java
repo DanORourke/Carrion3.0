@@ -5,7 +5,6 @@ import Engine.Piece.General.General;
 import Engine.Piece.Piece;
 import Engine.Piece.Supply;
 import Engine.Piece.Town;
-import GUI.Coords;
 import GUI.GameData;
 
 import java.util.HashMap;
@@ -22,8 +21,8 @@ public class Parcel {
 
     Parcel(Alliance home, HashMap<Integer, Piece> ps){
         this.territory = home;
-        for (int p : ps.keySet()){
-            addPiece(ps.get(p));
+        for (int t : ps.keySet()){
+            addPiece(t, ps.get(t).copy());
         }
     }
 
@@ -31,7 +30,7 @@ public class Parcel {
         this.territory = oldParcel.getTerritory();
         HashMap<Integer, Piece> oPieces = oldParcel.getPieces();
         for (int t : oPieces.keySet()){
-            addPiece(oPieces.get(t).copy());
+            addPiece(t, oPieces.get(t).copy());
         }
     }
 
@@ -41,19 +40,15 @@ public class Parcel {
 
     Parcel(Piece p){
         this.territory = Alliance.UNOCCUPIED;
-        addPiece(p);
+        if (p.isGeneral()){
+            addPiece(1, p);
+        }else{
+            addPiece(p.getType(), p);
+        }
     }
 
-    private void addPiece(Piece p){
-        if (p.isGeneral()){
-            if (!pieces.containsKey(1)){
-                pieces.put(1, p);
-            }else {
-                pieces.put(2, p);
-            }
-        }else{
-            pieces.put(p.getType(), p);
-        }
+    private void addPiece(int key, Piece p){
+        pieces.put(key, p);
     }
 
     boolean isEmpty() {
@@ -120,20 +115,20 @@ public class Parcel {
                     j++;
                     hold[j] = p.getAlliance().getDataCode();
                     j++;
-                    if (p.isGeneral()){
-                        General g = (General)p;
-                        if (g.hasChief()){
-                            hold[j] = 8;
-                            j++;
-                            hold[j] = g.getAlliance().getDataCode();
-                            j++;
-                        }
-                    }else if (p.isCapitol()){
+                    if (p.isCapitol()){
                         Capitol c = (Capitol) p;
                         if (c.hasChief()){
                             hold[j] = 8;
                             j++;
                             hold[j] = c.getAlliance().getDataCode();
+                            j++;
+                        }
+                    }else if (p.isGeneral()){
+                        General g = (General)p;
+                        if (g.hasChief()){
+                            hold[j] = 8;
+                            j++;
+                            hold[j] = g.getAlliance().getDataCode();
                             j++;
                         }
                     }

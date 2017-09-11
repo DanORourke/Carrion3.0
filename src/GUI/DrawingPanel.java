@@ -313,9 +313,12 @@ public class DrawingPanel extends JPanel{
                 Color c = getColor(color);
                 g2.setColor(c);
                 if (type == 0){
+//                    Ellipse2D.Double circle =
+//                            new Ellipse2D.Double(x - x1 + thickness, y - y2 + thickness +thickness,
+//                                    (x1 - thickness) *2, (y2-thickness-thickness)*2);
                     Ellipse2D.Double circle =
-                            new Ellipse2D.Double(x - x1 + thickness, y - y2 + thickness +thickness,
-                                    (x1 - thickness) *2, (y2-thickness-thickness)*2);
+                            new Ellipse2D.Double(x + (thickness*-2), y+ (thickness*-2),
+                                    thickness*4, thickness*4);
                     g2.draw(circle);
                 }else if(type == 1){
                     g2.drawLine(x+x1-thickness-thickness, y + y1, x-x1+thickness+thickness, y + y1);

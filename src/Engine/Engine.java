@@ -990,7 +990,7 @@ public class Engine {
             else if (clickedParcel.hasTown() && clickedParcel.getPieces().size() == 1 &&
                     !clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
                     !clickedParcel.getTown().getAlliance().equals(a) &&
-                    activeGeneral.canMove(true))
+                    activeGeneral.canMove(true) && activeGeneral.getTroops() > 1)
             {
                 board.moveGeneral(activeGeneral, c);
                 activeGeneral = board.get(c).getAllianceGeneral(a);

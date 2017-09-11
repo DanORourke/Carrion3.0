@@ -35,12 +35,19 @@ public class Town extends Piece {
         return haveTroop;
     }
 
+    private int standardFightAndCasualties(){
+        if (!getAlliance().equals(Alliance.UNOCCUPIED)){
+            return 1;
+        }
+        return 0;
+    }
+
     public int getDefendedBonus(General attacker, General defender){
-        return 1;
+        return standardFightAndCasualties();
     }
 
     public int getDefendAloneBonus(Board board, General attacker) {
-        int bonus = 1;
+        int bonus = standardFightAndCasualties();
         bonus += addTerritoryBonus(board, attacker);
         return bonus;
     }
@@ -57,7 +64,7 @@ public class Town extends Piece {
     }
 
     public int getCasualties(General g){
-        return 1;
+        return standardFightAndCasualties();
     }
 
     public String getAllocateString(Alliance turnTeam){

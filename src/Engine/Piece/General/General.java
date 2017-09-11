@@ -630,6 +630,11 @@ public class General extends Piece {
             }
             if (attacker){
                 s+= "+" + getAttackDefendedTownCasualties(board, other, t) + " total inflicted casualties.\n";
+                if (dropAfterWin){
+                    s+= "Orders to occupy the town after securing victory.\n";
+                }else {
+                    s+= "Orders to raze the town after securing victory.\n";
+                }
             }else{
                 s+= "+" + t.getCasualties(other) + " inflicted casualties from the town.\n";
                 s+= "+" + getDefendTownCasualties(board, other, t) + " total inflicted casualties.\n";
@@ -663,7 +668,7 @@ public class General extends Piece {
                 }
             }else{
                 s+= "+" + cap.getCasualties(other) + " inflicted casualties from the town.\n";
-                s+= "+" + getDefendCasualties(board, other) + " total inflicted casualties.\n";
+                s+= "+" + getDefendCapitalCasualties(board, other, cap) + " total inflicted casualties.\n";
             }
             return s;
         }else if (typeCode == 4){
@@ -733,6 +738,11 @@ public class General extends Piece {
                     s+= "+" + ag.getAssistCasualties(this) + " inflicted casualties from " + ag.getName() + "\n";
                 }
                 s+= "+" + getAttackDefendedTownCasualties(board, other, t) + " total inflicted casualties.\n";
+                if (dropAfterWin){
+                    s+= "Orders to occupy the town after securing victory.\n";
+                }else {
+                    s+= "Orders to raze the town after securing victory.\n";
+                }
                 return s;
             }else {
                 String s = t.getBattleString(board, other);

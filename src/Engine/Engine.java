@@ -118,7 +118,7 @@ public class Engine {
                         launch = new Coords(ql, rl, sl);
                         i+=8;
                     }
-                    afterBattle(c, wonEnc, launch);
+                    afterBattle(c, wonEnc, launch, true);
                 }else{
                     int qc = Integer.valueOf(moves.get(i));
                     int rc = Integer.valueOf(moves.get(i+1));
@@ -285,10 +285,10 @@ public class Engine {
             int defence = dBonus + rand.nextInt(20) + 1;
             if (attack > defence) {
                 Coords retreat = board.calcRetreat(c, gd.getLaunchPoint(), gd.getAlliance(), true);
-                afterBattle(c, 1, retreat);
+                afterBattle(c, 1, retreat, false);
             }else{
                 Coords retreat = board.calcRetreat(c, ga.getLaunchPoint(), ga.getAlliance(), false);
-                afterBattle(c, 0, retreat);
+                afterBattle(c, 0, retreat, false);
             }
 
         }else if (parcel.isDefendedTownBattle()){
@@ -301,10 +301,10 @@ public class Engine {
             int defence = dBonus + rand.nextInt(20) + 1;
             if (attack > defence) {
                 Coords retreat = board.calcRetreat(c, gd.getLaunchPoint(), gd.getAlliance(), true);
-                afterBattle(c, 1, retreat);
+                afterBattle(c, 1, retreat, false);
             }else{
                 Coords retreat = board.calcRetreat(c, ga.getLaunchPoint(), ga.getAlliance(), false);
-                afterBattle(c, 0, retreat);
+                afterBattle(c, 0, retreat, false);
             }
 
         }else if (parcel.isDefendedCapitolBattle()){
@@ -316,10 +316,10 @@ public class Engine {
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = dBonus + rand.nextInt(20) + 1;
             if (attack > defence) {
-                afterBattle(c, 1, null);
+                afterBattle(c, 1, null, false);
             }else{
                 Coords retreat = board.calcRetreat(c, ga.getLaunchPoint(), ga.getAlliance(), false);
-                afterBattle(c, 0, retreat);
+                afterBattle(c, 0, retreat, false);
             }
         }else if (parcel.isTownBattle()){
             int aBonus = ga.getAttackTownBonus(board);
@@ -329,11 +329,11 @@ public class Engine {
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = tBonus + rand.nextInt(20) + 1;
             if (attack > defence){
-                afterBattle(c, 1, null);
+                afterBattle(c, 1, null, false);
             }else{
                 //defence wins
                 Coords retreat = board.calcRetreat(c, ga.getLaunchPoint(), ga.getAlliance(), false);
-                afterBattle(c, 0, retreat);
+                afterBattle(c, 0, retreat, false);
             }
 
         }else if (parcel.isCapitolBattle()){
@@ -344,16 +344,16 @@ public class Engine {
             int attack = aBonus + rand.nextInt(20) + 1;
             int defence = capBonus + rand.nextInt(20) + 1;
             if (attack > defence){
-                afterBattle(c, 1, null);
+                afterBattle(c, 1, null, false);
             }else{
                 //defence wins
                 Coords retreat = board.calcRetreat(c, ga.getLaunchPoint(), ga.getAlliance(), false);
-                afterBattle(c, 0, retreat);
+                afterBattle(c, 0, retreat, false);
             }
         }
     }
 
-    private void afterBattle(Coords battleField, int attackerWon, Coords retreat){
+    private void afterBattle(Coords battleField, int attackerWon, Coords retreat, boolean encoded){
         //attackerWon == 1 equals true, 0 equals false
         Parcel parcel = board.get(battleField);
         General ga = parcel.getAttacker();
@@ -362,11 +362,10 @@ public class Engine {
         if (remember){
             //addToHistory("");
             silentlyAddToHistory();
-            parcel = board.get(battleField);
-            ga = parcel.getAttacker();
-            p = parcel.getDefender();
         }
-
+        parcel = board.get(battleField);
+        ga = parcel.getAttacker();
+        p = parcel.getDefender();
 
         if (parcel.isFieldBattle()){
             General gd = (General) p;
@@ -541,7 +540,9 @@ public class Engine {
             re = retreat.toString();
         }
         addToHistory(",battle," + battleField.toString() + "," + String.valueOf(attackerWon) + "," + re);
-        playoutBattles();
+        if (!encoded){
+            playoutBattles();
+        }
     }
 
     private void moveChief(){

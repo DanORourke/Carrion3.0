@@ -378,6 +378,9 @@ public class Board {
 
     boolean exposeBattle(General g, Piece p){
         boolean remember = false;
+        if (g == null){
+            System.out.println("null exposeBattle g");
+        }
         for (Coords c : g.getAssistingMe()){
             General ag = get(c).getAllianceGeneral(g.getAlliance());
             if (!ag.isExposed()){

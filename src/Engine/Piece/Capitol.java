@@ -1,6 +1,7 @@
 package Engine.Piece;
 
 import Engine.Alliance;
+import Engine.Board;
 import Engine.Piece.General.General;
 import GUI.Coords;
 
@@ -104,6 +105,18 @@ public class Capitol extends Piece{
             s+= ".\n\n";
         }
 
+        return s;
+    }
+
+    public String getBattleString(General g){
+        String s = "Defending " + getAlliance().toString() + " Capitol";
+        if (hasChief()){
+            s+= " has the Chief of Staff.\n";
+        }else {
+            s+= ".\n+";
+        }
+        s+= getDefendBonus(g) + " total fight bonus.\n+" +
+                + getCasualties(g) + " total inflicted casualties.\n\n";
         return s;
     }
 }

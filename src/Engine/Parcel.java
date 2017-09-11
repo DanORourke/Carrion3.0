@@ -237,7 +237,7 @@ public class Parcel {
         return null;
     }
 
-    Capitol getCapitol(){
+    public Capitol getCapitol(){
         //return second capitol
         if (pieces.containsKey(7)){
             return (Capitol) pieces.get(7);
@@ -246,7 +246,7 @@ public class Parcel {
         return null;
     }
 
-    Town getTown(){
+    public Town getTown(){
         if (pieces.containsKey(6)){
             return (Town) pieces.get(6);
         }
@@ -361,7 +361,7 @@ public class Parcel {
 
     String getActiveMoveString(Alliance userTeam, Board board){
         if (isBattle()){
-            return getActiveBattleString(userTeam, board);
+            return getActiveBattleString(board);
         }
         String s = "";
         if (hasSupplyLine()){
@@ -392,8 +392,18 @@ public class Parcel {
             return s;
 
         }else if (isDefendedTownBattle()){
+            General dg = getFirstGeneral();
+            General ag = getSecondGeneral();
+            String s = "Defending " + dg.getOldBattleString(board, ag, 2, false);
+            s += "\nAttacking " + ag.getOldBattleString(board, dg, 2, true);
+            return s;
 
         }else if (isDefendedCapitolBattle()){
+            General dg = getFirstGeneral();
+            General ag = getSecondGeneral();
+            String s = "Defending " + dg.getOldBattleString(board, ag, 3, false);
+            s += "\nAttacking " + ag.getOldBattleString(board, dg, 3, true);
+            return s;
 
         }else if (isTownBattle()){
             General ag = getFirstGeneral();
@@ -402,18 +412,34 @@ public class Parcel {
             s += ag.getOldBattleString(board, dt, 4, true);
             return s;
         }else if (isCapitolBattle()){
-
+            General ag = getFirstGeneral();
+            Capitol cap = getCapitol();
+            String s = cap.getBattleString(ag);
+            s += ag.getOldBattleString(board, cap, 5, true);
+            return s;
         }
         return "OldBattle";
     }
 
-    private String getActiveBattleString(Alliance userTeam, Board board){
+    private String getActiveBattleString(Board board){
         if (isFieldBattle()){
-
+            General dg = getFirstGeneral();
+            General ag = getSecondGeneral();
+            String s = "Defending " + dg.getActiveBattleString(board, ag, 1, false);
+            s += "\nAttacking " + ag.getActiveBattleString(board, dg, 1, true);
+            return s;
         }else if (isDefendedTownBattle()){
-
+            General dg = getFirstGeneral();
+            General ag = getSecondGeneral();
+            String s = dg.getActiveBattleString(board, ag, 2, false);
+            s += "\nAttacking " + ag.getActiveBattleString(board, dg, 2, true);
+            return s;
         }else if (isDefendedCapitolBattle()){
-
+            General dg = getFirstGeneral();
+            General ag = getSecondGeneral();
+            String s = dg.getActiveBattleString(board, ag, 3, false);
+            s += "\nAttacking " + ag.getActiveBattleString(board, dg, 3, true);
+            return s;
         }else if (isTownBattle()){
             General ag = getFirstGeneral();
             Town dt = getTown();
@@ -421,7 +447,11 @@ public class Parcel {
             s += "Attacking " + ag.getActiveBattleString(board, dt, 4, true);
             return s;
         }else if (isCapitolBattle()){
-
+            General ag = getFirstGeneral();
+            Capitol cap = getCapitol();
+            String s = cap.getBattleString(ag);
+            s += "Attacking " + ag.getActiveBattleString(board, cap, 5, true);
+            return s;
         }
         return "ActiveBattle";
     }

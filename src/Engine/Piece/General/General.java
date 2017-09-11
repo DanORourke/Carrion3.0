@@ -279,7 +279,7 @@ public class General extends Piece {
         return bonus;
     }
 
-    public int getAttackDefendedTownBonus(Board board, General defender, Town t){
+    public int getAttackDefendedTownBonus(Board board, General defender){
         int bonus = troops;
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
@@ -297,7 +297,7 @@ public class General extends Piece {
         return bonus;
     }
 
-    public int getAttackCapitolBonus(Board board, Capitol cap){
+    public int getAttackCapitolBonus(Board board){
         return getAttackTownBonus(board);
     }
 
@@ -574,10 +574,43 @@ public class General extends Piece {
         return s;
     }
 
+    public String getAllBattleString(General other, Board board, boolean attacker){
+        String s = getStringFirstLine(true);
+        for (Coords c : assistingMe){
+            General ag = board.getAssistingGeneral(c);
+            s+= "+" + ag.getAssistBonus(this) + " assist bonus from " + ag.getName() + "\n";
+        }
+        s+= "+" + addTerritoryBonus(board) + " territory bonus.\n";
+        if (attacker){
+            s+= "+" + getAttackBonus(board, other) + " total attack bonus.\n";
+        }else{
+            s+= "-" + addDistractedBonus() + " distracted penalty.\n";
+            s+= "+" + getDefendBonus(board, other) + " total attack bonus.\n";
+        }
+        for (Coords c : assistingMe){
+            General ag = board.getAssistingGeneral(c);
+            s+= "+" + ag.getAssistCasualties(this) + " inflicted casualties from " + ag.getName() + "\n";
+        }
+        if (attacker){
+            s+= "+" + getAttackCasualties(board, other) + " total inflicted casualties.\n";
+        }else{
+            s+= "+" + getDefendCasualties(board, other) + " total inflicted casualties.\n";
+        }
+        return s;
+    }
+
     public String getOldBattleString(Board board, Piece p, int typeCode, boolean attacker){
         //typeCode, 1 = field, 2 = defended town, 3 = defended cap, 4 = town, 5 = cap
         if (typeCode == 1){
             General other = (General)p;
+            String s = getAllBattleString(other, board, attacker);
+            if (dropAfterWin){
+                s+= "Orders to drop a supply line after securing victory.\n";
+            }
+            return s;
+        }else if (typeCode == 2){
+            General other = (General)p;
+            Town t = board.get(getCoords()).getTown();
             String s = getStringFirstLine(true);
             for (Coords c : assistingMe){
                 General ag = board.getAssistingGeneral(c);
@@ -585,33 +618,55 @@ public class General extends Piece {
             }
             s+= "+" + addTerritoryBonus(board) + " territory bonus.\n";
             if (attacker){
-                s+= "+" + getAttackBonus(board, other) + " total attack bonus.\n";
+                s+= "+" + getAttackDefendedTownBonus(board, other) + " total attack bonus.\n";
             }else{
                 s+= "-" + addDistractedBonus() + " distracted penalty.\n";
-                s+= "+" + getDefendBonus(board, other) + " total attack bonus.\n";
+                s+= "+" + t.getDefendedBonus(other, this) + " town fight bonus.\n";
+                s+= "+" + getDefendTownBonus(board, other, t) + " total attack bonus.\n";
             }
             for (Coords c : assistingMe){
                 General ag = board.getAssistingGeneral(c);
                 s+= "+" + ag.getAssistCasualties(this) + " inflicted casualties from " + ag.getName() + "\n";
             }
             if (attacker){
-                s+= "+" + getAttackCasualties(board, other) + " total inflicted casualties.\n";
+                s+= "+" + getAttackDefendedTownCasualties(board, other, t) + " total inflicted casualties.\n";
             }else{
-                s+= "+" + getDefendCasualties(board, other) + " total inflicted casualties.\n";
-            }
-            if (dropAfterWin){
-                s+= "Orders to drop a supply line after securing victory.\n";
+                s+= "+" + t.getCasualties(other) + " inflicted casualties from the town.\n";
+                s+= "+" + getDefendTownCasualties(board, other, t) + " total inflicted casualties.\n";
             }
             return s;
-
-        }else if (typeCode == 2){
-            return "OldBattle";
-
         }else if (typeCode == 3){
-            return "OldBattle";
-
+            General other = (General)p;
+            Capitol cap = board.get(getCoords()).getCapitol();
+            String s = getStringFirstLine(true);
+            for (Coords c : assistingMe){
+                General ag = board.getAssistingGeneral(c);
+                s+= "+" + ag.getAssistBonus(this) + " assist bonus from " + ag.getName() + "\n";
+            }
+            s+= "+" + addTerritoryBonus(board) + " territory bonus.\n";
+            if (attacker){
+                s+= "+" + getAttackCapitolBonus(board) + " total attack bonus.\n";
+            }else{
+                s+= "-" + addDistractedBonus() + " distracted penalty.\n";
+                s+= "+" + cap.getDefendBonus(other) + " capitol fight bonus.\n";
+                s+= "+" + getDefendCapitolBonus(board, other, cap) + " total attack bonus.\n";
+            }
+            for (Coords c : assistingMe){
+                General ag = board.getAssistingGeneral(c);
+                s+= "+" + ag.getAssistCasualties(this) + " inflicted casualties from " + ag.getName() + "\n";
+            }
+            if (attacker){
+                if (dropAfterWin){
+                    s+= "Orders to occupy the town after securing victory.\n";
+                }else {
+                    s+= "Orders to raze the town after securing victory.\n";
+                }
+            }else{
+                s+= "+" + cap.getCasualties(other) + " inflicted casualties from the town.\n";
+                s+= "+" + getDefendCasualties(board, other) + " total inflicted casualties.\n";
+            }
+            return s;
         }else if (typeCode == 4){
-            Town t = (Town)p;
             //not always user, but will be exposed if not yet
             String s = getStringFirstLine(true);
             for (Coords c : assistingMe){
@@ -629,26 +684,91 @@ public class General extends Piece {
             return s;
 
         }else if (typeCode == 5){
-            return "OldBattle";
+            String s = getStringFirstLine(true);
+            for (Coords c : assistingMe){
+                General ag = board.getAssistingGeneral(c);
+                s+= "+" + ag.getAssistBonus(this) + " assist bonus from " + ag.getName() + "\n";
+            }
+            s+= "+" + addTerritoryBonus(board) + " territory bonus.\n";
+            s+= "+" + getAttackCapitolBonus(board) + " total attack bonus.\n";
+
+            if (dropAfterWin){
+                s+= "Orders to occupy the town after securing victory.\n";
+            }else {
+                s+= "Orders to raze the town after securing victory.\n";
+            }
+            return s;
         }
         return "OldBattle";
     }
 
-
-
     public String getActiveBattleString(Board board, Piece p, int typeCode, boolean attacker){
         //typeCode, 1 = field, 2 = defended town, 3 = defended cap, 4 = town, 5 = cap
         if (typeCode == 1){
-            return "ActiveBattle";
+            General other = (General)p;
+            //attacker must be user team
+            if (attacker){
+                String s = getAllBattleString(other, board, attacker);
+                if (dropAfterWin){
+                    s+= "Orders to drop a supply line after securing victory.\n";
+                }
+                return s;
+            }else {
+                return getStringFirstLine(false);
+            }
+
         }else if (typeCode == 2){
-            return "ActiveBattle";
-
+            General other = (General)p;
+            Town t = board.get(getCoords()).getTown();
+            if (attacker){
+                String s = getStringFirstLine(true);
+                for (Coords c : assistingMe){
+                    General ag = board.getAssistingGeneral(c);
+                    s+= "+" + ag.getAssistBonus(this) + " assist bonus from " + ag.getName() + "\n";
+                }
+                s+= "+" + addTerritoryBonus(board) + " territory bonus.\n";
+                    s+= "+" + getAttackDefendedTownBonus(board, other) + " total attack bonus.\n";
+                for (Coords c : assistingMe){
+                    General ag = board.getAssistingGeneral(c);
+                    s+= "+" + ag.getAssistCasualties(this) + " inflicted casualties from " + ag.getName() + "\n";
+                }
+                s+= "+" + getAttackDefendedTownCasualties(board, other, t) + " total inflicted casualties.\n";
+                return s;
+            }else {
+                String s = t.getBattleString(board, other);
+                s += "Defending " + getStringFirstLine(false);
+                return s;
+            }
         }else if (typeCode == 3){
-            return "ActiveBattle";
+            General other = (General)p;
+            Capitol cap = board.get(getCoords()).getCapitol();
+            if (attacker){
+                String s = getStringFirstLine(true);
+                for (Coords c : assistingMe){
+                    General ag = board.getAssistingGeneral(c);
+                    s+= "+" + ag.getAssistBonus(this) + " assist bonus from " + ag.getName() + "\n";
+                }
+                s+= "+" + addTerritoryBonus(board) + " territory bonus.\n";
+                s+= "+" + getAttackCapitolBonus(board) + " total attack bonus.\n";
 
+                for (Coords c : assistingMe){
+                    General ag = board.getAssistingGeneral(c);
+                    s+= "+" + ag.getAssistCasualties(this) + " inflicted casualties from " + ag.getName() + "\n";
+                }
+                if (dropAfterWin){
+                    s+= "Orders to occupy the town after securing victory.\n";
+                }else {
+                    s+= "Orders to raze the town after securing victory.\n";
+                }
+
+                return s;
+            }else {
+                String s = cap.getBattleString(other);
+                s +=  "Defending " + getStringFirstLine(false);
+                return s;
+            }
         }else if (typeCode == 4){
             Town t = (Town)p;
-            //not always user, but will be exposed if not yet
             String s = getStringFirstLine(true);
             for (Coords c : assistingMe){
                 General ag = board.getAssistingGeneral(c);
@@ -665,8 +785,20 @@ public class General extends Piece {
             return s;
 
         }else if (typeCode == 5){
-            return "ActiveBattle";
-        }
+            String s = getStringFirstLine(true);
+            for (Coords c : assistingMe){
+                General ag = board.getAssistingGeneral(c);
+                s+= "+" + ag.getAssistBonus(this) + " assist bonus from " + ag.getName() + "\n";
+            }
+            s+= "+" + addTerritoryBonus(board) + " territory bonus.\n";
+            s+= "+" + getAttackCapitolBonus(board) + " total attack bonus.\n";
+
+            if (dropAfterWin){
+                s+= "Orders to occupy the town after securing victory.\n";
+            }else {
+                s+= "Orders to raze the town after securing victory.\n";
+            }
+            return s;        }
         return "ActiveBattle";
     }
 }

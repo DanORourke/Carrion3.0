@@ -294,7 +294,7 @@ public class Engine {
         }else if (parcel.isDefendedTownBattle()){
             Town t = parcel.getTown();
             General gd = (General)p;
-            int aBonus = ga.getAttackDefendedTownBonus(board, gd, t);
+            int aBonus = ga.getAttackDefendedTownBonus(board, gd);
             int dBonus = gd.getDefendTownBonus(board, ga, t);
             Random rand = new Random();
             int attack = aBonus + rand.nextInt(20) + 1;
@@ -338,7 +338,7 @@ public class Engine {
 
         }else if (parcel.isCapitolBattle()){
             Capitol cap = (Capitol) p;
-            int aBonus = ga.getAttackCapitolBonus(board, cap);
+            int aBonus = ga.getAttackCapitolBonus(board);
             int capBonus = cap.getDefendBonus(ga);
             Random rand = new Random();
             int attack = aBonus + rand.nextInt(20) + 1;

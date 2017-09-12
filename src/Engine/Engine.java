@@ -913,12 +913,24 @@ public class Engine {
                 board.setFightingGeneral(activeGeneral, activeCoords, false);
                 rememberClick = true;
             }
-            //attack town general
+            //attack occupied town general
             else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasTown() &&
                     clickedParcel.getPieces().size() == 2 &&
                     !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
                     !clickedParcel.getTown().getAlliance().equals(a) &&
                     activeGeneral.canMove(true))
+            {
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.setFightingGeneral(activeGeneral, activeCoords, false);
+                rememberClick = true;
+            }
+            //attack unnoccupied town general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasTown() &&
+                    clickedParcel.getPieces().size() == 2 &&
+                    !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
+                    !clickedParcel.getTown().getAlliance().equals(a) &&
+                    activeGeneral.canMove(false))
             {
                 board.moveGeneral(activeGeneral, c);
                 activeGeneral = board.get(c).getAllianceGeneral(a);

@@ -147,8 +147,8 @@ public class Leonidas extends General{
 
     @Override
     public String getDescription(){
-        return "Pro:  If Leonidas is outnumbered, " +
-                "main enemy generals will fight and kill as though they only have as many troops as Leonidas.\n\n" +
+        return "Pro:  If Leonidas is defending outnumbered, " +
+                "main enemy generals will fight as though they only have as many troops as Leonidas, but kill like normal.\n\n" +
                 "Con:  Leonidas can command a maximum of 10 troops.  If he has more than 10 troops when he is exposed without the Chief of Staff or the Chief of Staff changes posts, Leonidas will instantly lose command of all troops in excess of 10.";
     }
 

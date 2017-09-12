@@ -266,6 +266,13 @@ public class General extends Piece {
     public int getStandardAttackBonus(General other){
         if (other != null && other.getName().equals("Oda Nobunaga") && other.isExposed() && !other.hasChief()){
             return (int)Math.ceil(((double)troops * 4) / 3);
+        }
+        return troops;
+    }
+
+    public int getStandardDefendBonus(General other){
+        if (other != null && other.getName().equals("Oda Nobunaga") && other.isExposed() && !other.hasChief()){
+            return (int)Math.ceil(((double)troops * 4) / 3);
         }else if (other != null && other.getName().equals("Leonidas") && other.isExposed() && other.getTroops() < troops){
             return other.getTroops();
         }
@@ -280,7 +287,7 @@ public class General extends Piece {
     }
 
     public int getDefendBonus(Board board, General attacker){
-        int bonus = getStandardAttackBonus(attacker);
+        int bonus = getStandardDefendBonus(attacker);
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus -= addDistractedBonus();
@@ -302,7 +309,7 @@ public class General extends Piece {
     }
 
     public int getDefendTownBonus(Board board, General attacker, Town t){
-        int bonus = getStandardAttackBonus(attacker);
+        int bonus = getStandardDefendBonus(attacker);
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus -= addDistractedBonus();
@@ -324,7 +331,7 @@ public class General extends Piece {
     }
 
     public int getDefendCapitolBonus(Board board, General attacker, Capitol cap){
-        int bonus = getStandardAttackBonus(attacker);
+        int bonus = getStandardDefendBonus(attacker);
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus -= addDistractedBonus();
@@ -369,8 +376,6 @@ public class General extends Piece {
     public int getStandardCasualties(Board board, General g){
         if (g.getName().equals("Charlemagne") && g.isExposed()){
             return (int)Math.ceil((double)troops / 3);
-        }else if (g.getName().equals("Leonidas") && g.isExposed() && g.getTroops() < troops){
-            return (int)Math.ceil((double)g.getTroops() / 2);
         }
         return (int)Math.ceil((double)troops / 2);
     }

@@ -176,15 +176,11 @@ public class Ramses extends General{
         if (hasChief){
             if (g.getName().equals("Charlemagne") && g.isExposed()){
                 return (int)Math.ceil((double)troops / 3);
-            }else if (g.getName().equals("Leonidas") && g.isExposed() && g.getTroops() < troops){
-                return (int)Math.ceil((double)g.getTroops() / 2);
             }
             return (int)Math.ceil((double)troops / 2);
         }else {
             if (g.getName().equals("Charlemagne") && g.isExposed()){
                 return (int)Math.ceil((double)troops / 4);
-            }else if (g.getName().equals("Leonidas") && g.isExposed() && g.getTroops() < troops){
-                return (int)Math.ceil((double)g.getTroops() / 3);
             }
             return (int)Math.ceil((double)troops / 3);
         }

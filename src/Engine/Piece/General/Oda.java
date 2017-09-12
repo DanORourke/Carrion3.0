@@ -149,8 +149,6 @@ public class Oda extends General{
     public int getStandardCasualties(Board board, General g){
         if (g.getName().equals("Charlemagne") && g.isExposed()){
             return (int)Math.ceil((double)troops / 2);
-        }else if (g.getName().equals("Leonidas") && g.isExposed() && g.getTroops() < troops){
-            return (int)Math.ceil(((double)g.getTroops() * 2) / 3);
         }
         return (int)Math.ceil(((double)troops * 2) / 3);
     }

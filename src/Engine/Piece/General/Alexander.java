@@ -87,6 +87,23 @@ public class Alexander extends General{
     }
 
     @Override
+    public General resetGeneralAllocate(){
+        return new Alexander(getCoords(), getType(), getAlliance(), name,
+                calcConTroops(), movementPoints, hasChief, wantsChief, exposed, lines,
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+    }
+
+    private int calcConTroops(){
+        System.out.println("alex con called");
+        if (isExposed() && !hasChief){
+            if (troops > 1){
+                return troops - 1;
+            }
+        }
+        return troops;
+    }
+
+    @Override
     public General createNewFighting(Coords launchPoint, boolean dropAfterWin){
         //keep iamassisting to tell if general is distracted
         return new Alexander(getCoords(), getType(), getAlliance(), name, troops, 0, hasChief, wantsChief,
@@ -136,5 +153,10 @@ public class Alexander extends General{
                 "Con:  Alexander will lose a troop at the beginning of every turn.\n" +
                 "If the Chief of Staff is stationed with Alexander when he loses a battle, " +
                 "Alexander will kill the Chief of Staff.";
+    }
+
+    @Override
+    public int getStandardAttackBonus(){
+        return (int)Math.ceil(((double)troops * 4) / 3);
     }
 }

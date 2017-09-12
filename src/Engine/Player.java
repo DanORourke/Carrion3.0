@@ -87,13 +87,12 @@ public class Player {
     boolean willMoveChief(){
         Piece[] movePieces = moveChief();
         if (movePieces.length != 2){
-            System.out.println("length != 2");
+            //System.out.println("length != 2");
             return false;
         }
         Piece hasChief = movePieces[0];
         Piece wantsChief = movePieces[1];
         return areConnected(hasChief, wantsChief);
-
     }
 
     Piece[] moveChief(){
@@ -163,11 +162,15 @@ public class Player {
     }
 
     void resetPlayerPiecesAllocate(Board board){
+        System.out.println("reset allocate");
         for (Piece p : pieces){
             if(p.isTown()){
                 board.resetTownAllocate((Town)p);
             }else if (p.isCapitol()){
                 board.resetCapAllocate((Capitol)p);
+            }else if (p.isGeneral()){
+                System.out.println("reset general allocate");
+                board.resetGeneralAllocate((General)p);
             }
         }
     }

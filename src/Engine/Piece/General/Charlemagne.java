@@ -87,6 +87,13 @@ public class Charlemagne extends General{
     }
 
     @Override
+    public General resetGeneralAllocate(){
+        return new Charlemagne(getCoords(), getType(), getAlliance(), name,
+                troops, movementPoints, hasChief, wantsChief, exposed, lines,
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+    }
+
+    @Override
     public General createNewFighting(Coords launchPoint, boolean dropAfterWin){
         //keep iamassisting to tell if general is distracted
         return new Charlemagne(getCoords(), getType(), getAlliance(), name, troops, 0, hasChief, wantsChief,

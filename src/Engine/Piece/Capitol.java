@@ -34,7 +34,7 @@ public class Capitol extends Piece{
     }
 
     public Capitol createNewHasChief(boolean hasChief){
-        return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, troops);
+        return new Capitol(getCoords(), getAlliance(), hasChief, false, troops);
     }
 
     public Capitol createNewTroops(int troopChange){

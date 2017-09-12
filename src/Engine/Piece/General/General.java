@@ -96,7 +96,7 @@ public class General extends Piece {
     }
 
     public General createNewHasChief(boolean hasChief){
-        return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
+        return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, false,
                 exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
@@ -114,6 +114,12 @@ public class General extends Piece {
         return new General(getCoords(), getType(), getAlliance(), name, troops, calcMovementPoints(),
                 hasChief, wantsChief, exposed, false, null,
                 false, null, new ArrayList<>());
+    }
+
+    public General resetGeneralAllocate(){
+        return new General(getCoords(), getType(), getAlliance(), name,
+                troops, movementPoints, hasChief, wantsChief, exposed, lines,
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     public General createNewFighting(Coords launchPoint, boolean dropAfterWin){
@@ -257,15 +263,19 @@ public class General extends Piece {
         return 0;
     }
 
+    public int getStandardAttackBonus(){
+        return troops;
+    }
+
     public int getAttackBonus(Board board, General defender){
-        int bonus = troops;
+        int bonus = getStandardAttackBonus();
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
     public int getDefendBonus(Board board, General attacker){
-        int bonus = troops;
+        int bonus = getStandardAttackBonus();
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus -= addDistractedBonus();
@@ -273,21 +283,21 @@ public class General extends Piece {
     }
 
     public int getAttackTownBonus(Board board){
-        int bonus = troops;
+        int bonus = getStandardAttackBonus();
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
     public int getAttackDefendedTownBonus(Board board, General defender){
-        int bonus = troops;
+        int bonus = getStandardAttackBonus();
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
     public int getDefendTownBonus(Board board, General attacker, Town t){
-        int bonus = troops;
+        int bonus = getStandardAttackBonus();
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus -= addDistractedBonus();
@@ -302,14 +312,14 @@ public class General extends Piece {
     }
 
     public int getAttackDefendedCapitolBonus(Board board, General defender, Capitol cap){
-        int bonus = troops;
+        int bonus = getStandardAttackBonus();
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
     public int getDefendCapitolBonus(Board board, General attacker, Capitol cap){
-        int bonus = troops;
+        int bonus = getStandardAttackBonus();
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus -= addDistractedBonus();

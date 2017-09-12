@@ -221,6 +221,7 @@ public class Engine {
         //do stuff if battles need to happen
         //exposeBattles();
         playoutBattles();
+        fillPlayers();
         //move the chief if someone else wants him and he is connected
         moveChief();
         boolean looking = true;
@@ -231,6 +232,7 @@ public class Engine {
             }
             //must be a better way to do this
             for (Alliance a : players.keySet()){
+                System.out.println(" playerTurn: " + playerTurn + " dataCode: " + a.getDataCode() + " looking: " + looking);
                 if (a.getDataCode() == playerTurn){
                     players.get(a).resetPlayerPiecesAllocate(board);
                     looking = false;

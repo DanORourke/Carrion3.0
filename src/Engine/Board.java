@@ -258,6 +258,9 @@ public class Board {
         General nG = g.createNewTroop(amount * -1);
         removePiece(g);
         addPiece(nG);
+        if (nG.getName().equals("Alexander of Macedon") && nG.hasChief()){
+            removeChief(nG);
+        }
     }
 
     void killGeneral(General g){
@@ -411,6 +414,12 @@ public class Board {
 
     void resetGeneralMove(General g){
         General ng = g.resetGeneralMove();
+        removePiece(g);
+        addPiece(ng);
+    }
+
+    void resetGeneralAllocate(General g){
+        General ng = g.resetGeneralAllocate();
         removePiece(g);
         addPiece(ng);
     }

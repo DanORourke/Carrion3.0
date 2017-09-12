@@ -365,6 +365,9 @@ public class General extends Piece {
     }
 
     public int getStandardCasualties(Board board, General g){
+        if (g.getName().equals("Charlemagne") && g.isExposed()){
+            return (int)Math.ceil((double)troops / 3);
+        }
         return (int)Math.ceil((double)troops / 2);
     }
 

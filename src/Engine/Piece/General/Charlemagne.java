@@ -82,8 +82,12 @@ public class Charlemagne extends General{
     @Override
     public General resetGeneralMove(){
         return new Charlemagne(getCoords(), getType(), getAlliance(), name, troops, calcMovementPoints(),
-                hasChief, wantsChief, exposed, false, null,
+                hasChief, wantsChief, exposed, calcLines(), null,
                 false, null, new ArrayList<>());
+    }
+
+    private boolean calcLines(){
+        return (movementPoints > 15 && isExposed() && !hasChief);
     }
 
     @Override
@@ -141,5 +145,30 @@ public class Charlemagne extends General{
     public String getDescription(){
         return "Pro:  Charlemagne suffers a third fewer casualties than a normal general.\n\n" +
                 "Con:  Charlemagne can move one fewer space than a normal general.";
+    }
+
+    @Override
+    public int calcMovementPoints(){
+        if (isExposed() && !hasChief){
+            if (getTroops() < 6){
+                return 4;
+            }else if (getTroops() < 11){
+                return 3;
+            }else if (getTroops() < 16){
+                return 2;
+            }else{
+                return 1;
+            }
+        }else{
+            if (getTroops() < 6){
+                return 5;
+            }else if (getTroops() < 11){
+                return 4;
+            }else if (getTroops() < 16){
+                return 3;
+            }else{
+                return 2;
+            }
+        }
     }
 }

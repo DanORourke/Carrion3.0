@@ -94,7 +94,6 @@ public class Alexander extends General{
     }
 
     private int calcConTroops(){
-        System.out.println("alex con called");
         if (isExposed() && !hasChief){
             if (troops > 1){
                 return troops - 1;
@@ -156,7 +155,10 @@ public class Alexander extends General{
     }
 
     @Override
-    public int getStandardAttackBonus(){
+    public int getStandardAttackBonus(General other){
+        if (other != null && other.getName().equals("Oda Nobunaga") && other.isExposed() && !other.hasChief()){
+            return (int)Math.ceil(((double)troops * 5) / 3);
+        }
         return (int)Math.ceil(((double)troops * 4) / 3);
     }
 }

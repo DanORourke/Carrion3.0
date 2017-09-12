@@ -2,6 +2,7 @@ package Engine.Piece.General;
 
 
 import Engine.Alliance;
+import Engine.Board;
 import Engine.Piece.Piece;
 import GUI.Coords;
 
@@ -143,4 +144,8 @@ public class Oda extends General{
         return "Pro:  Oda's troops kill like they are one third larger than they are.\n\n" +
                 "Con:  Enemy troops fight like they are one third larger than they are.";
     }
-}
+
+    @Override
+    public int getStandardCasualties(Board board, General g){
+        return (int)Math.ceil(((double)troops * 2) / 3);
+    }}

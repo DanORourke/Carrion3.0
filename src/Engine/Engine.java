@@ -232,7 +232,6 @@ public class Engine {
             }
             //must be a better way to do this
             for (Alliance a : players.keySet()){
-                System.out.println(" playerTurn: " + playerTurn + " dataCode: " + a.getDataCode() + " looking: " + looking);
                 if (a.getDataCode() == playerTurn){
                     players.get(a).resetPlayerPiecesAllocate(board);
                     looking = false;

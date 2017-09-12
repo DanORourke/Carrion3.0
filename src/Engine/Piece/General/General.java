@@ -263,19 +263,22 @@ public class General extends Piece {
         return 0;
     }
 
-    public int getStandardAttackBonus(){
+    public int getStandardAttackBonus(General other){
+        if (other != null && other.getName().equals("Oda Nobunaga") && other.isExposed() && !other.hasChief()){
+            return (int)Math.ceil(((double)troops * 4) / 3);
+        }
         return troops;
     }
 
     public int getAttackBonus(Board board, General defender){
-        int bonus = getStandardAttackBonus();
+        int bonus = getStandardAttackBonus(defender);
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
     public int getDefendBonus(Board board, General attacker){
-        int bonus = getStandardAttackBonus();
+        int bonus = getStandardAttackBonus(attacker);
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus -= addDistractedBonus();
@@ -283,21 +286,21 @@ public class General extends Piece {
     }
 
     public int getAttackTownBonus(Board board){
-        int bonus = getStandardAttackBonus();
+        int bonus = getStandardAttackBonus(null);
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
     public int getAttackDefendedTownBonus(Board board, General defender){
-        int bonus = getStandardAttackBonus();
+        int bonus = getStandardAttackBonus(defender);
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
     public int getDefendTownBonus(Board board, General attacker, Town t){
-        int bonus = getStandardAttackBonus();
+        int bonus = getStandardAttackBonus(attacker);
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus -= addDistractedBonus();
@@ -312,14 +315,14 @@ public class General extends Piece {
     }
 
     public int getAttackDefendedCapitolBonus(Board board, General defender, Capitol cap){
-        int bonus = getStandardAttackBonus();
+        int bonus = getStandardAttackBonus(defender);
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         return bonus;
     }
 
     public int getDefendCapitolBonus(Board board, General attacker, Capitol cap){
-        int bonus = getStandardAttackBonus();
+        int bonus = getStandardAttackBonus(attacker);
         bonus += addAssistingAttackBonus(board);
         bonus += addTerritoryBonus(board);
         bonus -= addDistractedBonus();
@@ -362,31 +365,29 @@ public class General extends Piece {
     }
 
     public int getStandardCasualties(Board board, General g){
-        int casualties = (int)Math.ceil((double)troops / 2);
-        casualties += addAssistingCasualties(board);
-        return casualties;
+        return (int)Math.ceil((double)troops / 2);
     }
 
     public int getAttackCasualties(Board board, General defender){
-        return getStandardCasualties(board, defender);
+        return getStandardCasualties(board, defender) + addAssistingCasualties(board);
     }
 
     public int getDefendCasualties(Board board, General attacker){
-        return getStandardCasualties(board, attacker);
+        return getStandardCasualties(board, attacker) + addAssistingCasualties(board);
     }
 
     public int getAttackDefendedTownCasualties(Board board, General defender, Town t){
-        return getStandardCasualties(board, defender);
+        return getStandardCasualties(board, defender) + addAssistingCasualties(board);
     }
 
     public int getDefendTownCasualties(Board board, General attacker, Town t){
-        int casualties = getStandardCasualties(board, attacker);
+        int casualties = getStandardCasualties(board, attacker) + addAssistingCasualties(board);
         casualties += t.getCasualties(attacker);
         return casualties;
     }
 
     public int getDefendCapitalCasualties(Board board, General attacker, Capitol cap){
-        int casualties = getStandardCasualties(board, attacker);
+        int casualties = getStandardCasualties(board, attacker) + addAssistingCasualties(board);
         casualties += cap.getCasualties(attacker);
         return casualties;
     }

@@ -162,14 +162,12 @@ public class Player {
     }
 
     void resetPlayerPiecesAllocate(Board board){
-        System.out.println("reset allocate");
         for (Piece p : pieces){
             if(p.isTown()){
                 board.resetTownAllocate((Town)p);
             }else if (p.isCapitol()){
                 board.resetCapAllocate((Capitol)p);
             }else if (p.isGeneral()){
-                System.out.println("reset general allocate");
                 board.resetGeneralAllocate((General)p);
             }
         }

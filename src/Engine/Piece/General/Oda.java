@@ -142,13 +142,15 @@ public class Oda extends General{
     @Override
     public String getDescription(){
         return "Pro:  Oda's troops kill like they are one third larger than they are.\n\n" +
-                "Con:  Enemy troops fight like they are one third larger than they are.";
+                "Con:  Main enemy troops fight like they are one third larger than they are.";
     }
 
     @Override
     public int getStandardCasualties(Board board, General g){
         if (g.getName().equals("Charlemagne") && g.isExposed()){
             return (int)Math.ceil((double)troops / 2);
+        }else if (g.getName().equals("Leonidas") && g.isExposed() && g.getTroops() < troops){
+            return (int)Math.ceil(((double)g.getTroops() * 2) / 3);
         }
         return (int)Math.ceil(((double)troops * 2) / 3);
     }

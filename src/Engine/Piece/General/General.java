@@ -266,6 +266,8 @@ public class General extends Piece {
     public int getStandardAttackBonus(General other){
         if (other != null && other.getName().equals("Oda Nobunaga") && other.isExposed() && !other.hasChief()){
             return (int)Math.ceil(((double)troops * 4) / 3);
+        }else if (other != null && other.getName().equals("Leonidas") && other.isExposed() && other.getTroops() < troops){
+            return other.getTroops();
         }
         return troops;
     }
@@ -367,6 +369,8 @@ public class General extends Piece {
     public int getStandardCasualties(Board board, General g){
         if (g.getName().equals("Charlemagne") && g.isExposed()){
             return (int)Math.ceil((double)troops / 3);
+        }else if (g.getName().equals("Leonidas") && g.isExposed() && g.getTroops() < troops){
+            return (int)Math.ceil((double)g.getTroops() / 2);
         }
         return (int)Math.ceil((double)troops / 2);
     }
@@ -450,7 +454,7 @@ public class General extends Piece {
 
     private static ArrayList<String> createAllPossibleG(){
         ArrayList<String> allPossibleG = new ArrayList<>();
-        Collections.addAll(allPossibleG, "Ramses II", "Charlemagne", "Frederick of Prussia",
+        Collections.addAll(allPossibleG, "Ramses II", "Charlemagne", "Leonidas",
                 "Oda Nobunaga", "Alexander of Macedon");
         return allPossibleG;
     }
@@ -460,8 +464,8 @@ public class General extends Piece {
             return new Ramses();
         }else if (name.equals("Charlemagne")){
             return new Charlemagne();
-        }else if (name.equals("Frederick of Prussia")){
-            return new Frederick();
+        }else if (name.equals("Leonidas")){
+            return new Leonidas();
         }else if (name.equals("Oda Nobunaga")){
             return new Oda();
         }else if (name.equals("Alexander of Macedon")){

@@ -158,6 +158,8 @@ public class Alexander extends General{
     public int getStandardAttackBonus(General other){
         if (other != null && other.getName().equals("Oda Nobunaga") && other.isExposed() && !other.hasChief()){
             return (int)Math.ceil(((double)troops * 5) / 3);
+        }else if (other != null && other.getName().equals("Leonidas") && other.isExposed() && other.getTroops() < troops){
+            return (int)Math.ceil(((double)other.getTroops() * 4) / 3);
         }
         return (int)Math.ceil(((double)troops * 4) / 3);
     }

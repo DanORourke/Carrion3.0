@@ -1,95 +1,102 @@
 package Engine.Piece.General;
 
 import Engine.Alliance;
-import Engine.Board;
 import Engine.Piece.Piece;
 import GUI.Coords;
 
 import java.util.ArrayList;
 
-public class Ramses extends General{
+public class Leonidas extends General{
 
-    Ramses(){
-        super("Ramses II");
+    Leonidas(){
+        super("Leonidas");
     }
 
-    private Ramses(Coords coords, int type, Alliance alliance, String name, int troops,
-                    int movementPoints, boolean hasChief, boolean wantsChief, boolean exposed, boolean lines,
-                    Coords launchPoint, boolean dropAfterWin,
-                    Coords iAmAssisting, ArrayList<Coords> assistingMe){
+    private Leonidas(Coords coords, int type, Alliance alliance, String name, int troops,
+                        int movementPoints, boolean hasChief, boolean wantsChief, boolean exposed, boolean lines,
+                        Coords launchPoint, boolean dropAfterWin,
+                        Coords iAmAssisting, ArrayList<Coords> assistingMe){
         super(coords, type, alliance, name, troops, movementPoints, hasChief, wantsChief, exposed, lines, launchPoint,
                 dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public Piece copy(){
-        return new Ramses(getCoords(), getType(), getAlliance(), name,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public General createNewNew(Coords c, int type, Alliance alliance){
-        return new Ramses(c, type, alliance, name,
+        return new Leonidas(c, type, alliance, name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public General createNewMoved(Coords c, int n){
-        return new Ramses(c, getType(), getAlliance(), getName(), troops, movementPoints - n,
+        return new Leonidas(c, getType(), getAlliance(), getName(), troops, movementPoints - n,
                 hasChief, wantsChief, exposed, lines, launchPoint, dropAfterWin,
                 null, new ArrayList<>());
     }
 
     @Override
     public General createNewStuck(){
-        return new Ramses(getCoords(), getType(), getAlliance(), name,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name,
                 troops, 0, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public General createNewTroop(int addedTroops){
-        return new Ramses(getCoords(), getType(), getAlliance(), getName(), troops + addedTroops,
+        return new Leonidas(getCoords(), getType(), getAlliance(), getName(), troops + addedTroops,
                 movementPoints, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public General createNewWantsChief(boolean wantsChief){
-        return new Ramses(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
                 exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public General createNewHasChief(boolean hasChief){
-        return new Ramses(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name, calcConTroops(exposed, hasChief), movementPoints, hasChief, wantsChief,
                 exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public General createNewExposed(boolean exposed){
-        return new Ramses(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name, calcConTroops(exposed, hasChief), movementPoints, hasChief, wantsChief,
                 exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+
+    }
+
+    private int calcConTroops(boolean exposed, boolean hasChief){
+        if (troops > 10 && exposed && !hasChief){
+            return 10;
+        }
+        return troops;
     }
 
     @Override
     public General createNewLines(){
-        return new Ramses(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
                 exposed, true, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public General resetGeneralMove(){
-        return new Ramses(getCoords(), getType(), getAlliance(), name, troops, calcMovementPoints(),
+        return new Leonidas(getCoords(), getType(), getAlliance(), name, troops, calcMovementPoints(),
                 hasChief, wantsChief, exposed, false, null,
                 false, null, new ArrayList<>());
     }
 
     @Override
     public General resetGeneralAllocate(){
-        return new Ramses(getCoords(), getType(), getAlliance(), name,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
@@ -97,13 +104,13 @@ public class Ramses extends General{
     @Override
     public General createNewFighting(Coords launchPoint, boolean dropAfterWin){
         //keep iamassisting to tell if general is distracted
-        return new Ramses(getCoords(), getType(), getAlliance(), name, troops, 0, hasChief, wantsChief,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name, troops, 0, hasChief, wantsChief,
                 exposed,true, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public General createNewAssisting(Coords iAmAssisting){
-        return new Ramses(getCoords(), getType(), getAlliance(), name,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints - 1, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
@@ -111,14 +118,14 @@ public class Ramses extends General{
     @Override
     public General createNewAssisted(Coords assistingGeneral){
         assistingMe.add(assistingGeneral);
-        return new Ramses(getCoords(), getType(), getAlliance(), name,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public General createNewClearAssisting(){
-        return new Ramses(getCoords(), getType(), getAlliance(), name,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, null, assistingMe);
     }
@@ -126,67 +133,30 @@ public class Ramses extends General{
     @Override
     public General createNewRemoveAssistingMe(Coords assistingGeneral){
         assistingMe.remove(assistingGeneral);
-        return new Ramses(getCoords(), getType(), getAlliance(), name,
+        return new Leonidas(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public General createNewTraitor(Alliance alliance){
-        return new Ramses(getCoords(), getType(), alliance, name,
+        return new Leonidas(getCoords(), getType(), alliance, name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
                 launchPoint, dropAfterWin, iAmAssisting, assistingMe);
     }
 
     @Override
     public String getDescription(){
-        return "Pro:  Ramses can move 1 more space than a normal general.\n\n" +
-                "Con:  Ramses inflicts a third fewer casualties than a normal general fighting as the main general.";
+        return "Pro:  If Leonidas is outnumbered, " +
+                "main enemy generals will fight and kill as though they only have as many troops as Leonidas.\n\n" +
+                "Con:  Leonidas can command a maximum of 10 troops.  If he has more than 10 troops when he is exposed without the Chief of Staff or the Chief of Staff changes posts, Leonidas will instantly lose command of all troops in excess of 10.";
     }
 
     @Override
-    public int calcMovementPoints(){
-        if (exposed){
-            //faster
-            if (getTroops() < 6){
-                return 6;
-            }else if (getTroops() < 11){
-                return 5;
-            }else if (getTroops() < 16){
-                return 4;
-            }else{
-                return 3;
-            }
-        }else{
-            if (getTroops() < 6){
-                return 5;
-            }else if (getTroops() < 11){
-                return 4;
-            }else if (getTroops() < 16){
-                return 3;
-            }else{
-                return 2;
-            }
+    public boolean canAdd(){
+        if (!isExposed() || hasChief){
+            return troops < 20;
         }
-    }
-
-    @Override
-    public int getStandardCasualties(Board board, General g){
-        //kills at two thirds normal, doesn't apply when assisting
-        if (hasChief){
-            if (g.getName().equals("Charlemagne") && g.isExposed()){
-                return (int)Math.ceil((double)troops / 3);
-            }else if (g.getName().equals("Leonidas") && g.isExposed() && g.getTroops() < troops){
-                return (int)Math.ceil((double)g.getTroops() / 2);
-            }
-            return (int)Math.ceil((double)troops / 2);
-        }else {
-            if (g.getName().equals("Charlemagne") && g.isExposed()){
-                return (int)Math.ceil((double)troops / 4);
-            }else if (g.getName().equals("Leonidas") && g.isExposed() && g.getTroops() < troops){
-                return (int)Math.ceil((double)g.getTroops() / 3);
-            }
-            return (int)Math.ceil((double)troops / 3);
-        }
+        return troops < 10;
     }
 }

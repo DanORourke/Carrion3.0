@@ -444,20 +444,6 @@ public class DrawingPanel extends JPanel{
                     sendHoverInfo(infoC);
                 }
             }
-//            int x = e.getX();
-//            int y = e.getY();
-//            Coords c = getClosestHex(x, y);
-//            Tile tile = map.get(c);
-//            GameData gd = tile.getGd();
-//            if (gd.isBorder()){
-//                return;
-//            }
-//            if (gd.getData().length != 0){
-//                return;
-//            }
-//            map.put(c, new Tile(tile.getX(), tile.getY(), new GameData(6)));
-//            revalidate();
-//            repaint();
         }
         public void mouseDragged(MouseEvent e) {
             //move the view around the engine

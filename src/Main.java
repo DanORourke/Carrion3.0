@@ -1,8 +1,12 @@
-import GUI.Largest;
+import GUI.Entry;
 
 public class Main {
     public static void main(String[] args) {
-        new Largest("21,3");
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new Entry();
+            }
+        });
     }
 }
 

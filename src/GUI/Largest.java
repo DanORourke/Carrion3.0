@@ -1,19 +1,18 @@
 package GUI;
 import Engine.Engine;
-import Engine.Alliance;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class Largest {
+class Largest {
     private final Engine engine;
     private final DrawingPanel drawingPanel;
     private final JFrame frame;
     private final JTextArea hoverArea;
     private JPanel topPanel;
 
-    public Largest(String encodedBoard){
+    Largest(String encodedBoard){
         //TODO test encoded before giving to engine
         this.engine = new Engine(encodedBoard);
         this.drawingPanel = new DrawingPanel(engine);
@@ -24,8 +23,8 @@ public class Largest {
     }
 
     private void setFrame(){
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(1000, 600);
+        //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setSize(1200, 600);
         frame.setResizable(true);
         frame.setLocationRelativeTo( null );
         frame.setVisible(true);
@@ -40,7 +39,7 @@ public class Largest {
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scroll, tabbed);
         split.setOneTouchExpandable(true);
         split.setResizeWeight(0.66);
-        split.setDividerLocation(600);
+        split.setDividerLocation(800);
         frame.add(split);
         frame.revalidate();
         scroll.getViewport().setViewPosition(new Point(drawingPanel.getPreferredSize().width/2 -
@@ -127,6 +126,12 @@ public class Largest {
 
         topPanel.add(turnLabel, c);
 
+        if (turnStage == 0){
+            hoverArea.setText(getAllocateText());
+        }else{
+            hoverArea.setText(getMoveText());
+        }
+
         if (canAct == 0){
             frame.revalidate();
             frame.repaint();
@@ -179,7 +184,6 @@ public class Largest {
         });
         return next;
     }
-
 
     private JButton createExposeButton(){
         JButton expose = new JButton("Expose General");
@@ -315,5 +319,19 @@ public class Largest {
             }
         });
         return current;
+    }
+
+    private String getMoveText() {
+        return "Left click on a general to give him an order. " +
+                "Left click on a neighboring tile to order the general to move to that tile.\n\n" +
+                "Right click on a general to order him to drop a supply line or occupy a town in the tile he is in. " +
+                "Right click on a neighboring tile to order a general to move and drop or move and occupy.";
+    }
+
+    private String getAllocateText() {
+        return "Left click on a general to order a troop to his command.\n\n" +
+                "Right click on a general to order him to release a troop. " +
+                "That troop will only leave if they are connected to a town, " +
+                "and will not be available for another general to use.";
     }
 }

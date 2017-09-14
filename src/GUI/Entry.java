@@ -31,10 +31,13 @@ public class Entry {
 
     private JTabbedPane createTabbed(){
         JTabbedPane tabbed = new JTabbedPane();
+        JPanel online = createOnlinePanel();
+        tabbed.addTab("Online", online);
         JPanel offline = createOfflinePanel();
         tabbed.addTab("Offline", offline);
         tabbed.setOpaque(true);
         tabbed.setBackground(Colors.BACKGROUND);
+        tabbed.setForeground(Colors.RED);
         return tabbed;
     }
 
@@ -126,5 +129,11 @@ public class Entry {
         });
         offline.add(play);
         return offline;
+    }
+
+    private JPanel createOnlinePanel(){
+        JPanel online = new JPanel();
+        online.setBackground(Colors.BACKGROUND);
+        return online;
     }
 }

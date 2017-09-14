@@ -82,7 +82,6 @@ public class Engine {
                 }
             }else{
                 //turnstage == 1
-                //q, r, s (of active coords)  ,q, r, s (of clicked coords) , boolean leftclick(0=false, 1=true)
                 if (moveType.equals("chief")){
                     int q = Integer.valueOf(moves.get(i+1));
                     int r = Integer.valueOf(moves.get(i+2));
@@ -90,8 +89,10 @@ public class Engine {
                     int leftClick = Integer.valueOf(moves.get(i+4));
                     settingChief = true;
                     setChiefOrders(new Coords(q, r, s), leftClick == 1);
+                    settingChief = false;
                     i+= 5;
-                }else if (moveType.equals("assist")){
+                }
+                else if (moveType.equals("assist")){
                     int q = Integer.valueOf(moves.get(i+1));
                     int r = Integer.valueOf(moves.get(i+2));
                     int s = Integer.valueOf(moves.get(i+3));
@@ -120,6 +121,7 @@ public class Engine {
                     }
                     afterBattle(c, wonEnc, launch, true);
                 }else{
+                    //q, r, s (of active coords)  ,q, r, s (of clicked coords) , boolean leftclick(0=false, 1=true)
                     int qc = Integer.valueOf(moves.get(i));
                     int rc = Integer.valueOf(moves.get(i+1));
                     int sc = Integer.valueOf(moves.get(i+2));
@@ -235,6 +237,7 @@ public class Engine {
         playoutBattles();
         fillPlayers();
         //move the chief if someone else wants him and he is connected
+        System.out.println("movechief");
         moveChief();
         boolean looking = true;
         while(looking){
@@ -690,10 +693,11 @@ public class Engine {
         setState();
         Parcel activeParcel = board.get(c);
         Alliance userTeam = getUserTeam();
+        Alliance turnTeam = getTurnTeam();
         if (turnStage == -1){
             userTeam = Alliance.UNOCCUPIED;
+            turnTeam = Alliance.UNOCCUPIED;
         }
-        Alliance turnTeam = getTurnTeam();
         if (histIndex <= indexOfNoChange){
             if (turnStage == 0){
                 return activeParcel.getOldAllocateString(turnTeam, userTeam, players);

@@ -335,7 +335,7 @@ class Largest {
     private String getAllocateText() {
         return "Left click on a general to order a troop to his command.\n\n" +
                 "Right click on a general to order him to release a troop. " +
-                "That troop will only leave if they are connected to a town, " +
+                "That troop will only leave if it is connected to a town or capitol, " +
                 "and will not be available for another general to use.";
     }
 

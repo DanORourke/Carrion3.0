@@ -87,6 +87,7 @@ public class Charlemagne extends General{
     }
 
     private boolean calcLines(){
+        System.out.println("calcLines called");
         return (movementPoints > 15 && isExposed() && !hasChief);
     }
 

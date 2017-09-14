@@ -180,28 +180,32 @@ public class Engine {
         clearFutureHistory();
         histIndex = history.size() - 1;
         setState();
-        rotatePhase(isEncoded);
-        String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
-        String encoded = nextEncoded(oldEncoded);
-        history.add(new GameState(new Board(board), null,  playerTurn, turnStage, encoded));
-        histIndex = history.size() - 1;
-        System.out.println("hist size: " + history.size() + " histIndex: " + histIndex);
+        if (turnStage == -1){
+            rotatePhase(isEncoded);
+            silentlyAddToHistory();
+        }else {
+            rotatePhase(isEncoded);
+            addNextToHistory();
+        }
+
     }
 
-    private String nextEncoded(String oldEncoded){
-        //thinking of condensing the allocate clicks
+    private void addNextToHistory(){
+        String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
         if (turnStage == 0){
-            return oldEncoded + ",next";
+            oldEncoded += ",next";
 
         }else {
-            return oldEncoded + ",next";
+            oldEncoded += ",next";
         }
+        history.add(new GameState(new Board(board), null,  playerTurn, turnStage, oldEncoded));
+        histIndex = history.size() - 1;
+        System.out.println("hist size: " + history.size() + " histIndex: " + histIndex);
     }
 
     private void rotatePhase(boolean isEncoded){
         if (turnStage == -1){
             turnStage = 0;
-            silentlyAddToHistory();
         }else if (turnStage == 0){
             turnStage = 1;
             Player active = getActivePlayer();

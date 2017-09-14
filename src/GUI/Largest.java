@@ -128,8 +128,10 @@ class Largest {
 
         if (turnStage == 0){
             hoverArea.setText(getAllocateText());
-        }else{
+        }else if (turnStage == 1){
             hoverArea.setText(getMoveText());
+        }else if (turnStage == -1){
+            hoverArea.setText(getWaitingText());
         }
 
         if (canAct == 0){
@@ -177,7 +179,7 @@ class Largest {
         next.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                engine.nextPhase();
+                engine.nextPhase(false);
                 drawingPanel.updateMap();
                 updateTopPanel();
             }
@@ -244,6 +246,8 @@ class Largest {
             return "Allocate";
         }else if (turnOrders == 1){
             return "Move";
+        }else if (turnOrders == -1){
+            return "Ready?";
         }else{
             return "?";
         }
@@ -333,5 +337,9 @@ class Largest {
                 "Right click on a general to order him to release a troop. " +
                 "That troop will only leave if they are connected to a town, " +
                 "and will not be available for another general to use.";
+    }
+
+    private String getWaitingText() {
+        return "Click Next when ready to play.";
     }
 }

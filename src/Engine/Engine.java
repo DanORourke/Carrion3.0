@@ -61,7 +61,7 @@ public class Engine {
         while(i < moves.size()){
             String moveType = moves.get(i);
             if (moveType.equals("next")){
-                nextPhase();
+                nextPhase(true);
                 i++;
             }else if (turnStage == 0){
                 if (moveType.equals("expose")){
@@ -176,15 +176,16 @@ public class Engine {
         }
     }
 
-    public void nextPhase(){
+    public void nextPhase(boolean isEncoded){
         clearFutureHistory();
         histIndex = history.size() - 1;
         setState();
-        rotatePhase();
+        rotatePhase(isEncoded);
         String oldEncoded = history.get(history.size() - 1).getEncodedBoard();
         String encoded = nextEncoded(oldEncoded);
         history.add(new GameState(new Board(board), null,  playerTurn, turnStage, encoded));
         histIndex = history.size() - 1;
+        System.out.println("hist size: " + history.size() + " histIndex: " + histIndex);
     }
 
     private String nextEncoded(String oldEncoded){
@@ -197,8 +198,11 @@ public class Engine {
         }
     }
 
-    private void rotatePhase(){
-        if (turnStage == 0){
+    private void rotatePhase(boolean isEncoded){
+        if (turnStage == -1){
+            turnStage = 0;
+            silentlyAddToHistory();
+        }else if (turnStage == 0){
             turnStage = 1;
             Player active = getActivePlayer();
             if (active != null){
@@ -206,7 +210,11 @@ public class Engine {
             }
         }else if (turnStage == 1){
             rotatePlayer();
-            turnStage = 0;
+            if (isEncoded){
+                turnStage = 0;
+            }else{
+                turnStage = -1;
+            }
         }
 
         settingChief = false;
@@ -239,13 +247,6 @@ public class Engine {
             }
         }
         indexOfNoChange = histIndex;
-    }
-
-    private void exposeBattles(){
-        ArrayList<General> generals = board.getBattleExpose();
-        for (General g : generals){
-            board.setExposedGeneral(g);
-        }
     }
 
     private void playoutBattles(){
@@ -685,6 +686,9 @@ public class Engine {
         setState();
         Parcel activeParcel = board.get(c);
         Alliance userTeam = getUserTeam();
+        if (turnStage == -1){
+            userTeam = Alliance.UNOCCUPIED;
+        }
         Alliance turnTeam = getTurnTeam();
         if (histIndex <= indexOfNoChange){
             if (turnStage == 0){

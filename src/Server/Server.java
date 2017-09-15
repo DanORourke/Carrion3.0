@@ -25,11 +25,14 @@ public class Server {
     }
 
     private void listen(){
+        System.out.println("listening");
         while(true){
             try {
                 Socket socket = listener.accept();
+                System.out.println("New Listener");
                 Talker talker = new Talker(db, socket);
-                talker.run();
+                Thread thread = new Thread(talker);
+                thread.start();
             } catch (IOException e) {
                 e.printStackTrace();
             }

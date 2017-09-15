@@ -39,6 +39,7 @@ class Talker implements Runnable{
     private void listen(){
         try {
             String input = in.readLine();
+            System.out.println(input);
             ArrayList<String> ask = new ArrayList<>(Arrays.asList(input.split(",")));
             processAsk(ask);
         } catch (IOException e) {

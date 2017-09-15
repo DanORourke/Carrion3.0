@@ -1,5 +1,7 @@
 package GUI;
 
+import Server.Client;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -109,7 +111,6 @@ public class Entry {
                         type = t;
                     }
                 }
-
                 if (type == neighbors){
                     new Largest("21,0");
                 }else if(type == angle) {
@@ -132,8 +133,212 @@ public class Entry {
     }
 
     private JPanel createOnlinePanel(){
-        JPanel online = new JPanel();
+        JPanel online = new JPanel(new GridBagLayout());
         online.setBackground(Colors.BACKGROUND);
+
+        JLabel nameLabel = new JLabel("Username");
+        nameLabel.setBackground(Colors.BACKGROUND);
+        nameLabel.setForeground(Colors.YELLOW);
+
+        JTextField name = new JTextField();
+
+        JLabel passLabel = new JLabel("Password");
+        passLabel.setBackground(Colors.BACKGROUND);
+        passLabel.setForeground(Colors.YELLOW);
+
+        JPasswordField pass = new JPasswordField();
+
+        JLabel repeatLabel = new JLabel("<html>Repeat Password</html>");
+        repeatLabel.setBackground(Colors.BACKGROUND);
+        repeatLabel.setForeground(Colors.YELLOW);
+
+        JPasswordField repeatPass = new JPasswordField();
+
+        JLabel info = new JLabel("<html>Enter Ipv4 and Port of Server. " +
+                "Official server is initially entered.</html>");
+        info.setBackground(Colors.BACKGROUND);
+        info.setForeground(Colors.YELLOW);
+
+        JLabel ipLabel = new JLabel("Ipv4");
+        JTextField ip = new JTextField("127.0.0.1");
+        ipLabel.setBackground(Colors.BACKGROUND);
+        ipLabel.setForeground(Colors.YELLOW);
+
+        JLabel portLabel = new JLabel("Port");
+        JTextField port = new JTextField("54445");
+        portLabel.setBackground(Colors.BACKGROUND);
+        portLabel.setForeground(Colors.YELLOW);
+
+        JLabel flag = new JLabel();
+        flag.setBackground(Colors.BACKGROUND);
+        flag.setForeground(Colors.RED);
+
+        JButton signIn = createSignIn(name, pass, ip, port, flag);
+        JButton newUser = createNewUser(name, pass, repeatPass, ip, port, flag);
+
+        GridBagConstraints c  = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 0.25;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(10, 10, 5, 5);
+        online.add(nameLabel, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 0;
+        c.weightx = 0.75;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(10, 5, 5, 10);
+        online.add(name, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 1;
+        c.weightx = 0.25;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 10, 5, 5);
+        online.add(passLabel, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 1;
+        c.weightx = 0.75;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 5, 10);
+        online.add(pass, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 2;
+        c.weightx = 0.75;
+        c.weighty = 0.125;
+        c.anchor = GridBagConstraints.EAST;
+        c.insets = new Insets(5, 5, 5, 10);
+        online.add(signIn, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 3;
+        c.weightx = 0.25;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 10, 5, 5);
+        online.add(repeatLabel, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 3;
+        c.weightx = 0.75;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 5, 10);
+        online.add(repeatPass, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 4;
+        c.weightx = 0.75;
+        c.weighty = 0.125;
+        c.anchor = GridBagConstraints.EAST;
+        c.insets = new Insets(5, 5, 5, 10);
+        online.add(newUser, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 5;
+        c.gridwidth = 2;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 10, 5, 5);
+        online.add(info, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 6;
+        c.weightx = 0.25;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 10, 5, 5);
+        online.add(ipLabel, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 6;
+        c.weightx = 0.75;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 5, 10);
+        online.add(ip, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 7;
+        c.weightx = 0.25;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 10, 10, 5);
+        online.add(portLabel, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 7;
+        c.weightx = 0.75;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 10, 10);
+        online.add(port, c);
+
+        c  = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 8;
+        c.gridwidth = 2;
+        c.weighty = 0.125;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 10, 10);
+        online.add(flag, c);
+
         return online;
+    }
+
+    private JButton createSignIn(JTextField name, JPasswordField pass, JTextField ip, JTextField port, JLabel flag){
+        JButton signIn = new JButton("Sign In");
+        signIn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String status = new Client(name.getText(), new String(pass.getPassword()),
+                        ip.getText(), port.getText()).signIn();
+                if (status.equals("INVALID")){
+                    flag.setText("INVALID");
+                }
+                else {
+                    new Lobby(status);
+                }
+            }
+        });
+        return signIn;
+    }
+
+    private JButton createNewUser(JTextField name, JPasswordField pass, JPasswordField repeatPass,
+                                  JTextField ip, JTextField port, JLabel flag){
+        JButton newUser = new JButton("New User");
+        newUser.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String status = new Client(name.getText(), new String(pass.getPassword()),
+                        ip.getText(), port.getText()).newUser(new String(repeatPass.getPassword()));
+                if (status.equals("INVALID")){
+                    flag.setText("INVALID");
+                }
+                else {
+                    new Lobby(status);
+                }
+            }
+        });
+        return newUser;
     }
 }

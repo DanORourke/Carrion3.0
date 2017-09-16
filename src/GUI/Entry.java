@@ -20,7 +20,7 @@ public class Entry {
     private void setFrame(){
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(300, 400);
-        frame.setResizable(true);
+        frame.setResizable(false);
         frame.setLocationRelativeTo( null );
         frame.setVisible(true);
     }
@@ -44,31 +44,37 @@ public class Entry {
     }
 
     private JPanel createOfflinePanel(){
-        JPanel offline = new JPanel(new GridLayout(0, 1));
-        offline.setOpaque(true);
+        JPanel offline = new JPanel(new GridBagLayout());
         offline.setBackground(Colors.BACKGROUND);
-        ArrayList<JRadioButton> buttons = new ArrayList<>();
 
+        JLabel sign = new JLabel("New Game");
+        sign.setBackground(Colors.BACKGROUND);
+        sign.setForeground(Colors.YELLOW);
+        Font bigFont = new Font("Serif", Font.BOLD, 23);
+        sign.setFont(bigFont);
+
+        ArrayList<JRadioButton> buttons = new ArrayList<>();
         ButtonGroup group = new ButtonGroup();
 
         JRadioButton neighbors = new JRadioButton("2 Player Neighbors");
         neighbors.setBackground(Colors.BACKGROUND);
         neighbors.setForeground(Colors.YELLOW);
-        offline.add(neighbors);
+        Font littleFont = new Font("Serif", Font.BOLD, 17);
+        neighbors.setFont(littleFont);
         group.add(neighbors);
         buttons.add(neighbors);
 
         JRadioButton angle = new JRadioButton("2 Player Angle");
         angle.setBackground(Colors.BACKGROUND);
         angle.setForeground(Colors.YELLOW);
-        offline.add(angle);
+        angle.setFont(littleFont);
         group.add(angle);
         buttons.add(angle);
 
         JRadioButton two = new JRadioButton("2 Player");
         two.setBackground(Colors.BACKGROUND);
         two.setForeground(Colors.YELLOW);
-        offline.add(two);
+        two.setFont(littleFont);
         group.add(two);
         buttons.add(two);
 
@@ -76,28 +82,28 @@ public class Entry {
         three.setSelected(true);
         three.setBackground(Colors.BACKGROUND);
         three.setForeground(Colors.YELLOW);
-        offline.add(three);
+        three.setFont(littleFont);
         group.add(three);
         buttons.add(three);
 
         JRadioButton four = new JRadioButton("4 Player");
         four.setBackground(Colors.BACKGROUND);
         four.setForeground(Colors.YELLOW);
-        offline.add(four);
+        four.setFont(littleFont);
         group.add(four);
         buttons.add(four);
 
         JRadioButton five = new JRadioButton("5 Player");
         five.setBackground(Colors.BACKGROUND);
         five.setForeground(Colors.YELLOW);
-        offline.add(five);
+        five.setFont(littleFont);
         group.add(five);
         buttons.add(five);
 
         JRadioButton six = new JRadioButton("6 Player");
         six.setBackground(Colors.BACKGROUND);
         six.setForeground(Colors.YELLOW);
-        offline.add(six);
+        six.setFont(littleFont);
         group.add(six);
         buttons.add(six);
 
@@ -128,7 +134,90 @@ public class Entry {
                 }
             }
         });
-        offline.add(play);
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridwidth = 2;
+        c.weighty = 0.2;
+        //c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.CENTER;
+        c.insets = new Insets(10, 10, 5, 10);
+        offline.add(sign, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 1;
+        c.weightx = 0.5;
+        c.weighty = 0.2;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 10, 5, 5);
+        offline.add(neighbors, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 2;
+        c.weightx = 0.5;
+        c.weighty = 0.2;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 10, 5, 5);
+        offline.add(angle, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 3;
+        c.weightx = 0.5;
+        c.weighty = 0.2;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 10, 5, 5);
+        offline.add(two, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 4;
+        c.weightx = 0.5;
+        c.weighty = 0.2;
+        //c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(5, 10, 10, 5);
+        offline.add(play, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 1;
+        c.weightx = 0.5;
+        c.weighty = 0.2;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 5, 10);
+        offline.add(three, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 2;
+        c.weightx = 0.5;
+        c.weighty = 0.2;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 5, 10);
+        offline.add(four, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 3;
+        c.weightx = 0.5;
+        c.weighty = 0.2;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 5, 10);
+        offline.add(five, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 4;
+        c.weightx = 0.5;
+        c.weighty = 0.2;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 5, 10, 10);
+        offline.add(six, c);
+
         return offline;
     }
 
@@ -148,7 +237,7 @@ public class Entry {
 
         JPasswordField pass = new JPasswordField();
 
-        JLabel repeatLabel = new JLabel("<html>Repeat Password</html>");
+        JLabel repeatLabel = new JLabel("Password");
         repeatLabel.setBackground(Colors.BACKGROUND);
         repeatLabel.setForeground(Colors.YELLOW);
 
@@ -316,8 +405,10 @@ public class Entry {
                     flag.setText("INVALID");
                 }
                 else {
-                    new Lobby(status);
+                    new Lobby(name.getText(), new String(pass.getPassword()), ip.getText(), port.getText(), status);
                 }
+                name.setText("");
+                pass.setText("");
             }
         });
         return signIn;
@@ -335,8 +426,11 @@ public class Entry {
                     flag.setText("INVALID");
                 }
                 else {
-                    new Lobby(status);
+                    new Lobby(name.getText(), new String(pass.getPassword()), ip.getText(), port.getText(), status);
                 }
+                name.setText("");
+                pass.setText("");
+                repeatPass.setText("");
             }
         });
         return newUser;

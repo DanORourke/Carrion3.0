@@ -59,7 +59,7 @@ class Talker implements Runnable{
                 ask.remove(0);
                 String request = ask.get(0);
                 if (request.equals("status")){
-
+                    send("Empty");
                 }else if (request.equals("newGame")){
 
                 }else if (request.equals("submitOrders")){

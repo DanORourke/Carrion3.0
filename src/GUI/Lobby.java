@@ -31,8 +31,8 @@ class Lobby {
     }
 
     private void setFrame(){
-        frame.setSize(700, 400);
-        frame.setResizable(false);
+        frame.setSize(900, 600);
+        frame.setResizable(true);
         frame.setLocationRelativeTo( null );
         frame.setVisible(true);
     }
@@ -43,6 +43,8 @@ class Lobby {
         JPanel title = createTitlePanel();
         createActiveGames();
         JScrollPane scroll = new JScrollPane(activeGames);
+        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.getVerticalScrollBar().setUnitIncrement(10);
         JPanel newGame = createNewGamePanel();
 
         GridBagConstraints c = new GridBagConstraints();
@@ -145,30 +147,41 @@ class Lobby {
         return title;
     }
 
-    private JPanel createActiveGames(){
-        activeGames = new JPanel(new GridLayout(0, 1));
+    private void createActiveGames(){
+        activeGames = new JPanel(new GridLayout(0, 1, 0, 50));
         activeGames.setBackground(Colors.BACKGROUND);
         if (status.equals("Empty")){
+            JPanel panel= new JPanel(new GridBagLayout());
+            panel.setBackground(Colors.BACKGROUND);
             JLabel sign = new JLabel(username + " is a coward");
             sign.setBackground(Colors.BACKGROUND);
             sign.setForeground(Colors.YELLOW);
-            activeGames.add(sign);
-            return activeGames;
+            sign.setFont(new Font("Serif", Font.BOLD, 23));
+            GridBagConstraints c = new GridBagConstraints();
+            c.anchor = GridBagConstraints.CENTER;
+            panel.add(sign, c);
+            activeGames.add(panel);
+            return;
         }
-        JLabel sign = new JLabel("Battles:");
+        JPanel signPanel= new JPanel(new GridBagLayout());
+        signPanel.setBackground(Colors.BACKGROUND);
+        JLabel sign = new JLabel(" Battles");
         sign.setBackground(Colors.BACKGROUND);
         sign.setForeground(Colors.YELLOW);
-        activeGames.add(sign);
+        sign.setFont(new Font("Serif", Font.BOLD, 23));
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.CENTER;
+        signPanel.add(sign, c);
+        activeGames.add(signPanel);
 
-        ArrayList<String> info =  new ArrayList<>(Arrays.asList(status.split(",")));
+        ArrayList<String> info =  new ArrayList<>(Arrays.asList(status.split(";")));
         int i = 0;
-        while (i > info.size()){
+        while (i < info.size()){
             int gameId = Integer.parseInt(info.get(i));
-            String gameStatus = info.get(i+1);
+            int gameStatus = Integer.parseInt(info.get(i+1));
             int gameType = Integer.parseInt(info.get(i+2));
             int myColor = Integer.parseInt(info.get(i+3));
-            int activeColor = Integer.parseInt(info.get(i+4));
-            i+=5;
+            i+=4;
             int numberOfPlayers = convertTypeToNumber(gameType);
             int total = i + numberOfPlayers;
             ArrayList<String> players = new ArrayList<>();
@@ -178,19 +191,122 @@ class Lobby {
             }
             String encodedBoard = info.get(i);
             i++;
-            JPanel panel = createSingleGamePanel(gameId, gameStatus, gameType, myColor,
-                    activeColor, players, encodedBoard);
+            JPanel panel = createSingleGamePanel(gameId, gameStatus, gameType, myColor, players, encodedBoard);
             activeGames.add(panel);
         }
-        return activeGames;
     }
 
-    private JPanel createSingleGamePanel(int gameId, String gameStatus, int gameType, int myColor,
-                                         int activeColor, ArrayList<String> players, String encodedBoard){
+    private JPanel createSingleGamePanel(int gameId, int gameStatus, int gameType, int myColor,
+                                         ArrayList<String> players, String encodedBoard){
 
-        JPanel gamePanel = new JPanel(new GridBagLayout());
+        JPanel gamePanel = new JPanel(new GridLayout(1, 0));
         gamePanel.setBackground(Colors.BACKGROUND);
+
+        JPanel gameInfo = new JPanel(new GridLayout(0, 1));
+        colorPanel(gameInfo);
+        JLabel id = new JLabel("Game ID: " + gameId);
+        colorLabel(id);
+        gameInfo.add(id);
+        JLabel gStatus = new JLabel("Game Status: " + convertGameStatus(gameStatus));
+        colorLabel(gStatus);
+        gameInfo.add(gStatus);
+        JLabel gType = new JLabel("Game Type: " + convertNumberToType(gameType));
+        colorLabel(gType);
+        gameInfo.add(gType);
+        gamePanel.add(gameInfo);
+
+        JPanel colorInfo = new JPanel(new GridLayout(0, 1));
+        colorPanel(colorInfo);
+        JLabel myLabel = new JLabel("My Color: " + convertNumberToColor(myColor));
+        colorLabel(myLabel);
+        colorInfo.add(myLabel);
+        JLabel activeLabel = new JLabel("Active Color: " + convertActiveGameStatus(gameStatus));
+        colorLabel(activeLabel);
+        colorInfo.add(activeLabel);
+        gamePanel.add(colorInfo);
+
+        JPanel playerInfo = new JPanel(new GridLayout(0, 1));
+        colorPanel(playerInfo);
+        JLabel playerLabel = new JLabel("Other Players: ");
+        colorLabel(playerLabel);
+        playerInfo.add(playerLabel);
+        for (String playerName : players){
+            JLabel nameLabel = new JLabel(playerName);
+            colorLabel(nameLabel);
+            playerInfo.add(nameLabel);
+        }
+        gamePanel.add(playerInfo);
+
+        JPanel buttonPanel = new JPanel(new GridBagLayout());
+        colorPanel(buttonPanel);
+        JButton play = new JButton("Open");
+        play.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new Largest(encodedBoard);
+            }
+        });
+        GridBagConstraints c = new GridBagConstraints();
+        c.anchor = GridBagConstraints.CENTER;
+        buttonPanel.add(play, c);
+        gamePanel.add(buttonPanel);
+
         return gamePanel;
+    }
+
+    private String convertActiveGameStatus(int gameStatus){
+        if (gameStatus > 0 && gameStatus < 7){
+            return convertNumberToColor(gameStatus);
+        }else {
+            return "NA";
+        }
+    }
+
+    private String convertGameStatus(int gameStatus){
+        if (gameStatus == 0){
+            return "Impending";
+        }else if (gameStatus == 7){
+            return "Complete";
+        }else{
+            return "Active";
+        }
+    }
+
+    private String convertNumberToColor(int number){
+        if (number == 1){
+            return "Red";
+        }else if (number == 2){
+            return "Orange";
+        }else if (number == 3){
+            return "Yellow";
+        }else if (number == 4){
+            return "Green";
+        }else if (number == 5){
+            return "Blue";
+        }else{
+            //number == 6
+            return "Purple";
+        }
+    }
+
+    private void colorPanel(JPanel panel){
+        panel.setBackground(Colors.BACKGROUND);
+    }
+
+    private void colorLabel(JLabel label){
+        label.setBackground(Colors.BACKGROUND);
+        label.setForeground(Colors.YELLOW);
+        //FONT??
+    }
+
+    private String convertNumberToType(int number){
+        if (number == 0){
+            return "2 Player Neighbors";
+        }else if(number == 1){
+            return "2 Player Angle";
+        }else{
+            return number + " Player";
+        }
     }
 
     private int convertTypeToNumber(int gameType){

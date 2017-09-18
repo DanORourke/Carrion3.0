@@ -92,6 +92,7 @@ class Lobby {
             @Override
             public void actionPerformed(ActionEvent e) {
                 status = new Client(username, password, ip, port).signIn();
+                update();
                 if (status.equals("Invalid")){
                     buttonWork.setForeground(Colors.RED);
                     buttonWork.setText("Invalid");
@@ -112,9 +113,6 @@ class Lobby {
                         }
                     });
                     timer.start();
-                    createActiveGames();
-                    frame.revalidate();
-                    frame.repaint();
                 }
             }
         });
@@ -150,6 +148,19 @@ class Lobby {
     private void createActiveGames(){
         activeGames = new JPanel(new GridLayout(0, 1, 0, 50));
         activeGames.setBackground(Colors.BACKGROUND);
+        updateActiveGames();
+    }
+
+    private void update(){
+        if (!status.equals("Invalid")){
+            updateActiveGames();
+            frame.revalidate();
+            frame.repaint();
+        }
+    }
+
+    private void updateActiveGames(){
+        activeGames.removeAll();
         if (status.equals("Empty")){
             JPanel panel= new JPanel(new GridBagLayout());
             panel.setBackground(Colors.BACKGROUND);
@@ -178,19 +189,25 @@ class Lobby {
         int i = 0;
         while (i < info.size()){
             int gameId = Integer.parseInt(info.get(i));
-            int gameStatus = Integer.parseInt(info.get(i+1));
-            int gameType = Integer.parseInt(info.get(i+2));
-            int myColor = Integer.parseInt(info.get(i+3));
-            i+=4;
+            int gameType = Integer.parseInt(info.get(i+1));
+            int gameStatus = Integer.parseInt(info.get(i+2));
+            i+=3;
             int numberOfPlayers = convertTypeToNumber(gameType);
             int total = i + numberOfPlayers;
             ArrayList<String> players = new ArrayList<>();
-            while (i < total){
-                players.add(info.get(i));
+            String encodedBoard = "NA";
+            int myColor = -1;
+            if (gameStatus != 0){
+                myColor = Integer.parseInt(info.get(i));
+                i++;
+                while (i < total){
+                    players.add(info.get(i));
+                    i++;
+                }
+                encodedBoard = info.get(i);
                 i++;
             }
-            String encodedBoard = info.get(i);
-            i++;
+
             JPanel panel = createSingleGamePanel(gameId, gameStatus, gameType, myColor, players, encodedBoard);
             activeGames.add(panel);
         }
@@ -199,7 +216,7 @@ class Lobby {
     private JPanel createSingleGamePanel(int gameId, int gameStatus, int gameType, int myColor,
                                          ArrayList<String> players, String encodedBoard){
 
-        JPanel gamePanel = new JPanel(new GridLayout(1, 0));
+        JPanel gamePanel = new JPanel(new GridLayout(1, 0, 0, 0));
         gamePanel.setBackground(Colors.BACKGROUND);
 
         JPanel gameInfo = new JPanel(new GridLayout(0, 1));
@@ -240,10 +257,21 @@ class Lobby {
         JPanel buttonPanel = new JPanel(new GridBagLayout());
         colorPanel(buttonPanel);
         JButton play = new JButton("Open");
+        if (gameStatus == 0){
+            play.setText("Exit");
+        }
         play.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new Largest(encodedBoard);
+                if (gameStatus == 0){
+                    //exit game
+                    new Largest(encodedBoard);
+                }else if (gameStatus == 7){
+                    //view from beginning, not end
+                    new Largest(encodedBoard);
+                }else {
+                    new Largest(encodedBoard);
+                }
             }
         });
         GridBagConstraints c = new GridBagConstraints();
@@ -273,7 +301,9 @@ class Lobby {
     }
 
     private String convertNumberToColor(int number){
-        if (number == 1){
+        if (number == -1){
+            return "NA";
+        }else if (number == 1){
             return "Red";
         }else if (number == 2){
             return "Orange";
@@ -301,9 +331,9 @@ class Lobby {
 
     private String convertNumberToType(int number){
         if (number == 0){
-            return "2 Player Neighbors";
+            return "Neighbors";
         }else if(number == 1){
-            return "2 Player Angle";
+            return "Angle";
         }else{
             return number + " Player";
         }
@@ -330,7 +360,7 @@ class Lobby {
         ArrayList<JRadioButton> buttons = new ArrayList<>();
         ButtonGroup group = new ButtonGroup();
 
-        JRadioButton neighbors = new JRadioButton("2 Player Neighbors");
+        JRadioButton neighbors = new JRadioButton("Neighbors");
         neighbors.setBackground(Colors.BACKGROUND);
         neighbors.setForeground(Colors.YELLOW);
         Font littleFont = new Font("Serif", Font.BOLD, 17);
@@ -338,7 +368,7 @@ class Lobby {
         group.add(neighbors);
         buttons.add(neighbors);
 
-        JRadioButton angle = new JRadioButton("2 Player Angle");
+        JRadioButton angle = new JRadioButton("Angle");
         angle.setBackground(Colors.BACKGROUND);
         angle.setForeground(Colors.YELLOW);
         angle.setFont(littleFont);
@@ -391,21 +421,25 @@ class Lobby {
                         type = t;
                     }
                 }
+                int gameType;
                 if (type == neighbors){
-                    new Largest("21,0");
+                    gameType = 0;
                 }else if(type == angle) {
-                    new Largest("21,1");
+                    gameType = 1;
                 }else if(type == two) {
-                    new Largest("21,2");
+                    gameType = 2;
                 }else if(type == three) {
-                    new Largest("21,3");
+                    gameType = 3;
                 }else if(type == four) {
-                    new Largest("21,4");
+                    gameType = 4;
                 }else if(type == five) {
-                    new Largest("21,5");
-                }else if(type == six) {
-                    new Largest("21,6");
+                    gameType = 5;
+                }else {
+                    //type == 6
+                    gameType = 0;
                 }
+                status = new Client(username, password, ip, port).newGame(gameType);
+                update();
             }
         });
 

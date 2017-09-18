@@ -40,6 +40,13 @@ public class Engine {
         initializeEngine(moves, generals);
     }
 
+    public ArrayList<String> getInfo(){
+        ArrayList<String> info = new ArrayList<>();
+        info.add(String.valueOf(playerTurn));
+        info.add(history.get(histIndex).getEncodedBoard());
+        return info;
+    }
+
     private ArrayList<General> initializeGenerals(ArrayList<String> moves){
         if (moves.size() == 2){
             return General.createNewGenerals(gameType);

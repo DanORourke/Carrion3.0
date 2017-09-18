@@ -5,14 +5,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-class Largest {
+public class Largest {
     private final Engine engine;
     private final DrawingPanel drawingPanel;
     private final JFrame frame;
     private final JTextArea hoverArea;
     private JPanel topPanel;
 
-    Largest(String encodedBoard){
+    public Largest(String encodedBoard){
         //TODO test encoded before giving to engine
         this.engine = new Engine(encodedBoard);
         this.drawingPanel = new DrawingPanel(engine);

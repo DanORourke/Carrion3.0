@@ -56,7 +56,7 @@ public class Entry {
         ArrayList<JRadioButton> buttons = new ArrayList<>();
         ButtonGroup group = new ButtonGroup();
 
-        JRadioButton neighbors = new JRadioButton("2 Player Neighbors");
+        JRadioButton neighbors = new JRadioButton("Neighbors");
         neighbors.setBackground(Colors.BACKGROUND);
         neighbors.setForeground(Colors.YELLOW);
         Font littleFont = new Font("Serif", Font.BOLD, 17);
@@ -64,7 +64,7 @@ public class Entry {
         group.add(neighbors);
         buttons.add(neighbors);
 
-        JRadioButton angle = new JRadioButton("2 Player Angle");
+        JRadioButton angle = new JRadioButton("Angle");
         angle.setBackground(Colors.BACKGROUND);
         angle.setForeground(Colors.YELLOW);
         angle.setFont(littleFont);
@@ -401,8 +401,15 @@ public class Entry {
             public void actionPerformed(ActionEvent e) {
                 String status = new Client(name.getText(), new String(pass.getPassword()),
                         ip.getText(), port.getText()).signIn();
-                if (status.equals("INVALID")){
-                    flag.setText("INVALID");
+                if (status.equals("Invalid")){
+                    flag.setText("Invalid");
+                    Timer timer = new Timer(5000, new ActionListener(){
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            flag.setText("");
+                        }
+                    });
+                    timer.start();
                 }
                 else {
                     new Lobby(name.getText(), new String(pass.getPassword()), ip.getText(), port.getText(), status);
@@ -422,8 +429,15 @@ public class Entry {
             public void actionPerformed(ActionEvent e) {
                 String status = new Client(name.getText(), new String(pass.getPassword()),
                         ip.getText(), port.getText()).newUser(new String(repeatPass.getPassword()));
-                if (status.equals("INVALID")){
-                    flag.setText("INVALID");
+                if (status.equals("Invalid")){
+                    flag.setText("Invalid");
+                    Timer timer = new Timer(5000, new ActionListener(){
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            flag.setText("");
+                        }
+                    });
+                    timer.start();
                 }
                 else {
                     new Lobby(name.getText(), new String(pass.getPassword()), ip.getText(), port.getText(), status);

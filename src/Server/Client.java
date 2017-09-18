@@ -28,7 +28,7 @@ public class Client {
         socket = new Socket();
         int timeout = 5000;
         try {
-            System.out.println(ip + " " + port);
+            System.out.println(ip + " " + port + " tellSocket: " + message);
             socket.connect(new InetSocketAddress(ip, Integer.parseInt(port)), timeout);
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             out.println(message);
@@ -42,32 +42,34 @@ public class Client {
             socket.setSoTimeout(3000);
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
-            return in.readLine();
+            String message = in.readLine();
+            System.out.println("response: " + message);
+            return message;
         } catch(SocketTimeoutException e){
             System.out.println("socket timed out");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "INVALID";
+        return "Invalid";
     }
 
     public String signIn(){
-        String status = "INVALID";
+        String status = "Invalid";
         if (!validFormat()){
             System.out.println("bad format " + ip + " " + port);
             return status;
         }
-        tellSocket(name + "," + pass + ",status");
+        tellSocket(name + ";" + pass + ";status");
         return response();
     }
 
     public String newUser(String repeatPass){
-        String newUser = "INVALID";
+        String newUser = "Invalid";
         if (!validFormat() || !repeatPass.equals(pass)){
             System.out.println("bad format " + ip + " " + port + " " + pass + " " + repeatPass);
             return newUser;
         }
-        tellSocket("newUser," + name + "," + pass);
+        tellSocket("newUser;" + name + ";" + pass);
         return response();
     }
 
@@ -86,7 +88,7 @@ public class Client {
         return isInteger(port, 10);
     }
 
-    private static boolean isInteger(String s, int radix) {
+    private boolean isInteger(String s, int radix) {
         if(s.isEmpty()) return false;
         for(int i = 0; i < s.length(); i++) {
             if(i == 0 && s.charAt(i) == '-') {
@@ -96,5 +98,11 @@ public class Client {
             if(Character.digit(s.charAt(i),radix) < 0) return false;
         }
         return true;
+    }
+
+    public String newGame(int gameType){
+        String message = name + ";" + pass + ";newGame;" + gameType;
+        tellSocket(message);
+        return response();
     }
 }

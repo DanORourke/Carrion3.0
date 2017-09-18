@@ -362,53 +362,38 @@ class Lobby {
         ButtonGroup group = new ButtonGroup();
 
         JRadioButton neighbors = new JRadioButton("Neighbors");
-        neighbors.setBackground(Colors.BACKGROUND);
-        neighbors.setForeground(Colors.YELLOW);
-        Font littleFont = new Font("Serif", Font.BOLD, 17);
-        neighbors.setFont(littleFont);
+        shapeRadio(neighbors);
         group.add(neighbors);
         buttons.add(neighbors);
 
         JRadioButton angle = new JRadioButton("Angle");
-        angle.setBackground(Colors.BACKGROUND);
-        angle.setForeground(Colors.YELLOW);
-        angle.setFont(littleFont);
+        shapeRadio(angle);
         group.add(angle);
         buttons.add(angle);
 
         JRadioButton two = new JRadioButton("2 Player");
-        two.setBackground(Colors.BACKGROUND);
-        two.setForeground(Colors.YELLOW);
-        two.setFont(littleFont);
+        shapeRadio(two);
         group.add(two);
         buttons.add(two);
 
         JRadioButton three = new JRadioButton("3 Player");
         three.setSelected(true);
-        three.setBackground(Colors.BACKGROUND);
-        three.setForeground(Colors.YELLOW);
-        three.setFont(littleFont);
+        shapeRadio(three);
         group.add(three);
         buttons.add(three);
 
         JRadioButton four = new JRadioButton("4 Player");
-        four.setBackground(Colors.BACKGROUND);
-        four.setForeground(Colors.YELLOW);
-        four.setFont(littleFont);
+        shapeRadio(four);
         group.add(four);
         buttons.add(four);
 
         JRadioButton five = new JRadioButton("5 Player");
-        five.setBackground(Colors.BACKGROUND);
-        five.setForeground(Colors.YELLOW);
-        five.setFont(littleFont);
+        shapeRadio(five);
         group.add(five);
         buttons.add(five);
 
         JRadioButton six = new JRadioButton("6 Player");
-        six.setBackground(Colors.BACKGROUND);
-        six.setForeground(Colors.YELLOW);
-        six.setFont(littleFont);
+        shapeRadio(six);
         group.add(six);
         buttons.add(six);
 
@@ -528,5 +513,13 @@ class Lobby {
         newGame.add(six, c);
 
         return newGame;
+    }
+
+    private void shapeRadio(JRadioButton btn){
+        btn.setBackground(Colors.BACKGROUND);
+        btn.setForeground(Colors.YELLOW);
+        btn.setFocusPainted(false);
+        Font littleFont = new Font("Serif", Font.BOLD, 17);
+        btn.setFont(littleFont);
     }
 }

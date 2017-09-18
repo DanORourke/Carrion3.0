@@ -105,4 +105,10 @@ public class Client {
         tellSocket(message);
         return response();
     }
+
+    public String exitGame(int id){
+        String message = name + ";" + pass + ";exitGame;" + id;
+        tellSocket(message);
+        return response();
+    }
 }

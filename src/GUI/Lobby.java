@@ -265,7 +265,8 @@ class Lobby {
             public void actionPerformed(ActionEvent e) {
                 if (gameStatus == 0){
                     //exit game
-                    new Largest(encodedBoard);
+                    status = new Client(username, password, ip, port).exitGame(gameId);
+                    update();
                 }else if (gameStatus == 7){
                     //view from beginning, not end
                     new Largest(encodedBoard);
@@ -436,7 +437,7 @@ class Lobby {
                     gameType = 5;
                 }else {
                     //type == 6
-                    gameType = 0;
+                    gameType = 6;
                 }
                 status = new Client(username, password, ip, port).newGame(gameType);
                 update();

@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Random;
 
 import Engine.Engine;
-import GUI.Largest;
 
 class DB {
     private Connection c;
@@ -126,19 +125,22 @@ class DB {
     private synchronized ArrayList<String> getUserInfo(String username){
         ArrayList<String> user = new ArrayList<>();
         try {
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery( "SELECT * FROM USER WHERE USERNAME = '" + username + "';" );
+            String sql = "SELECT * FROM USER WHERE USERNAME = ?;";
+            PreparedStatement pstmt = c.prepareStatement(sql);
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
             if (rs.isBeforeFirst()){
                 while (rs.next()){
                     user.addAll(Arrays.asList(rs.getString("USERNAME"),
                             rs.getString("SALT"), rs.getString("HASH")));
                 }
             }
-            stmt.close();
+            pstmt.close();
             rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        System.out.println(user);
         return user;
     }
 
@@ -193,12 +195,13 @@ class DB {
 
     private synchronized void addUser(String username, String salt, String hash){
         try {
-            Statement stmt = c.createStatement();
 
             String sql = "INSERT INTO USER (USERNAME,SALT,HASH) " +
-                    "VALUES ('" + username + "', '" + salt + "', '" + hash + "');";
-            stmt.executeUpdate(sql);
-            stmt.close();
+                    "VALUES (?, '" + salt + "', '" + hash + "');";
+            PreparedStatement pstmt = c.prepareStatement(sql);
+            pstmt.setString(1, username);
+            pstmt.executeUpdate();
+            pstmt.close();
             c.commit();
             System.out.println("User added");
         }catch (Exception e){
@@ -222,13 +225,19 @@ class DB {
 
     synchronized String getStatus(String username){
         try {
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery( "SELECT * FROM GAME WHERE PLAYER1 = '" + username + "' " +
-                                "OR PLAYER2 = '" + username + "' OR PLAYER3 = '" + username + "' " +
-                                "OR PLAYER4 = '" + username + "' OR PLAYER5 = '" + username + "' " +
-                                "OR PLAYER6 = '" + username + "' ORDER BY ID ASC LIMIT 10;" );
+            String sql ="SELECT * FROM GAME WHERE PLAYER1 = ? OR PLAYER2 = ? OR PLAYER3 = ? " +
+                                "OR PLAYER4 = ? OR PLAYER5 = ? OR PLAYER6 = ? ORDER BY ID DESC LIMIT 10;";
+            PreparedStatement pstmt = c.prepareStatement(sql);
+            pstmt.setString(1, username);
+            pstmt.setString(2, username);
+            pstmt.setString(3, username);
+            pstmt.setString(4, username);
+            pstmt.setString(5, username);
+            pstmt.setString(6, username);
+
+            ResultSet rs = pstmt.executeQuery();
             if (!rs.isBeforeFirst()){
-                stmt.close();
+                pstmt.close();
                 rs.close();
                 return "Empty";
             }
@@ -289,7 +298,7 @@ class DB {
                 }
 
             }
-            stmt.close();
+            pstmt.close();
             rs.close();
             return status;
         } catch (SQLException e) {
@@ -301,83 +310,506 @@ class DB {
     synchronized boolean newGame(String username, int gameType){
         if (gameType == 0){
             return newNeighbors(username);
+        }else if (gameType == 1) {
+            return newAngle(username);
+        } else if (gameType == 2){
+            return new2(username);
+        }else if (gameType == 3){
+            return new3(username);
+        }else if (gameType == 4){
+            return new4(username);
+        }else if (gameType == 5){
+            return new5(username);
+        }else{
+            //gameType = 6
+            return new6(username);
+        }
+    }
+
+    private synchronized HashMap <String, String> getNewGame(int type){
+        HashMap <String, String> game = new HashMap<>();
+        try {
+            Statement stmt = c.createStatement();
+            ResultSet rs = stmt.executeQuery( "SELECT * FROM GAME WHERE TYPE = " + type + " AND STATUS = 0;");
+            if (rs.isBeforeFirst()){
+                game.put("ID", rs.getString("ID"));
+                String player1 = rs.getString("PLAYER1");
+                if (player1 != null){
+                    game.put("PLAYER1", player1);
+                }
+                String player2 = rs.getString("PLAYER2");
+                if (player2 != null){
+                    game.put("PLAYER2", player2);
+                }
+                String player3 = rs.getString("PLAYER3");
+                if (player3 != null){
+                    game.put("PLAYER3", player3);
+                }
+                String player4 = rs.getString("PLAYER4");
+                if (player4 != null){
+                    game.put("PLAYER4", player4);
+                }
+                String player5 = rs.getString("PLAYER5");
+                if (player5 != null){
+                    game.put("PLAYER5", player5);
+                }
+                String player6 = rs.getString("PLAYER6");
+                if (player6 != null){
+                    game.put("PLAYER6", player6);
+                }
+            }
+            stmt.close();
+            rs.close();
+        }catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return game;
+    }
+
+    private synchronized void addPlayer(String username, int gameId, String place){
+        try {
+            String sql = "UPDATE GAME SET " + place + " = ? WHERE ID = ?";
+
+            PreparedStatement pstmt = c.prepareStatement(sql);
+            pstmt.setString(1, username);
+            pstmt.setInt(2, gameId);
+            pstmt.executeUpdate();
+            pstmt.close();
+            c.commit();
+            System.out.println("addPlayer");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private synchronized boolean startGame(String username, int type, String place){
+        try {
+            String sql = "INSERT INTO GAME (TYPE, STATUS, " + place + ") VALUES (?, 0, ?);";
+
+            PreparedStatement pstmt = c.prepareStatement(sql);
+            pstmt.setInt(1, type);
+            pstmt.setString(2, username);
+            pstmt.executeUpdate();
+            pstmt.close();
+            c.commit();
+            System.out.println("newGame started " + username + " " + type + " " + place);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return false;
-//        else if (gameType == 1){
-//            return newAngle(username);
-//        }else if (gameType == 2){
-//            return new2(username);
-//        }else if (gameType == 3){
-//            return new3(username);
-//        }else if (gameType == 4){
-//            return new4(username);
-//        }else if (gameType == 5){
-//            return new5(username);
-//        }else{
-//            //gameType = 6
-//            return new6(username);
-//        }
+    }
+
+    private synchronized boolean beginGame(int id, int type){
+        String encoded = "21," + String.valueOf(type);
+        ArrayList<String> info = new Engine(encoded).getInfo();
+        try {
+            Statement stmt = c.createStatement();
+            String sql = "UPDATE GAME SET STATUS = " + Integer.parseInt(info.get(0)) + ", " +
+                    "BOARD = '" + info.get(1) + "' WHERE ID = " + id + ";";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private synchronized boolean newNeighbors(String username){
+        int type = 0;
         try {
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery( "SELECT * FROM GAME WHERE TYPE = 0 AND STATUS = 0;");
-            if (!rs.isBeforeFirst()){
-                stmt = c.createStatement();
-                String sql = "INSERT INTO GAME (TYPE, STATUS, PLAYER1) VALUES (0, 0, '" + username + "');";
-                stmt.executeUpdate(sql);
-                stmt.close();
-                c.commit();
-                rs.close();
-                System.out.println("newGame started");
-                return true;
+            HashMap <String, String> newGame = getNewGame(type);
+
+            if (newGame.isEmpty()){
+                return startGame(username, type, "PLAYER1");
             }
 
-            int id = rs.getInt("ID");
-            String player1 = rs.getString("PLAYER1");
-            String player2 = rs.getString("PLAYER2");
-            stmt.close();
-            rs.close();
+            int id = Integer.parseInt(newGame.get("ID"));
+            String player1 = newGame.get("PLAYER1");
+            String player2 = newGame.get("PLAYER2");
+
 
             boolean entered = false;
 
             if (player1 == null && (player2 == null || !player2.equals(username))){
-                stmt = c.createStatement();
-                String sql = "UPDATE GAME SET PLAYER1 = '" + username + "' WHERE ID = " + id + ";";
-                stmt.executeUpdate(sql);
-                stmt.close();
-                c.commit();
+                addPlayer(username, id, "PLAYER1");
                 entered = true;
                 player1 = username;
-                System.out.println("newGame entered");
+
             }else if (player2 == null && (!player1.equals(username))){
-                stmt = c.createStatement();
-                String sql = "UPDATE GAME SET PLAYER2 = '" + username + "' WHERE ID = " + id + ";";
-                stmt.executeUpdate(sql);
-                stmt.close();
-                c.commit();
+                addPlayer(username, id, "PLAYER2");
                 entered = true;
                 player2 = username;
-                System.out.println("newGame entered");
             }
 
             if (entered && player1 != null && player2 != null){
-                ArrayList<String> info = new Engine("21,0").getInfo();
-                System.out.println(info);
-                stmt = c.createStatement();
-                String sql = "UPDATE GAME SET STATUS = " + Integer.parseInt(info.get(0)) + ", " +
-                                "BOARD = '" + info.get(1) + "' WHERE ID = " + id + ";";
-                stmt.executeUpdate(sql);
-                stmt.close();
-                c.commit();
-                System.out.println("newGame entered");
+                return beginGame(id, type);
             }
             if (entered){
                 return true;
             }
         }catch (Exception e){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return false;
+    }
+
+    private synchronized boolean newAngle(String username){
+        int type = 1;
+
+        try {
+            HashMap <String, String> newGame = getNewGame(type);
+
+            if (newGame.isEmpty()){
+                return startGame(username, type, "PLAYER1");
+
+            }
+
+            int id = Integer.parseInt(newGame.get("ID"));
+            String player1 = newGame.get("PLAYER1");
+            String player3 = newGame.get("PLAYER3");
+
+
+            boolean entered = false;
+
+            if (player1 == null && (player3 == null || !player3.equals(username))){
+                addPlayer(username, id, "PLAYER1");
+                entered = true;
+                player1 = username;
+            }else if (player3 == null && (!player1.equals(username))){
+                addPlayer(username, id, "PLAYER3");
+                entered = true;
+                player3 = username;
+            }
+
+            if (entered && player1 != null && player3 != null){
+                return beginGame(id, type);
+            }
+            if (entered){
+                return true;
+            }
+        }catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return false;
+    }
+
+    private synchronized boolean new2(String username){
+        int type = 2;
+        try {
+            HashMap <String, String> newGame = getNewGame(type);
+
+            if (newGame.isEmpty()){
+                return startGame(username, type, "PLAYER1");
+
+            }
+
+            int id = Integer.parseInt(newGame.get("ID"));
+            String player1 = newGame.get("PLAYER1");
+            String player4 = newGame.get("PLAYER4");
+
+
+            boolean entered = false;
+
+            if (player1 == null && (player4 == null || !player4.equals(username))){
+                addPlayer(username, id, "PLAYER1");
+                entered = true;
+                player1 = username;
+            }else if (player4 == null && (!player1.equals(username))){
+                addPlayer(username, id, "PLAYER4");
+                entered = true;
+                player4 = username;
+            }
+
+            if (entered && player1 != null && player4 != null){
+                return beginGame(id, type);
+            }
+            if (entered){
+                return true;
+            }
+        }catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return false;
+    }
+
+    private synchronized boolean new3(String username){
+        int type = 3;
+        try {
+            HashMap <String, String> newGame = getNewGame(type);
+
+            if (newGame.isEmpty()){
+                return startGame(username, type, "PLAYER1");
+
+            }
+
+            int id = Integer.parseInt(newGame.get("ID"));
+            String player1 = newGame.get("PLAYER1");
+            String player3 = newGame.get("PLAYER3");
+            String player5 = newGame.get("PLAYER5");
+
+
+            boolean entered = false;
+
+            if (player1 == null && (player3 == null || !player3.equals(username)) &&
+                    (player5 == null || !player5.equals(username))){
+                addPlayer(username, id, "PLAYER1");
+                entered = true;
+                player1 = username;
+            }else if (player3 == null && (player1 == null ||!player1.equals(username)) &&
+                    (player5 == null || !player5.equals(username))){
+                addPlayer(username, id, "PLAYER3");
+                entered = true;
+                player3 = username;
+                System.out.println("newGame entered");
+            }else if (player5 == null && (player1 == null ||!player1.equals(username)) &&
+                    (player3 == null || !player3.equals(username))){
+                addPlayer(username, id, "PLAYER5");
+                entered = true;
+                player5 = username;
+            }
+
+            if (entered && player1 != null && player3 != null && player5 != null){
+                return beginGame(id, type);
+            }
+            if (entered){
+                return true;
+            }
+        }catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return false;
+    }
+
+    private synchronized boolean new4(String username){
+        int type = 4;
+        try {
+            HashMap <String, String> newGame = getNewGame(type);
+
+            if (newGame.isEmpty()){
+                return startGame(username, type, "PLAYER2");
+
+            }
+
+            int id = Integer.parseInt(newGame.get("ID"));
+            String player2 = newGame.get("PLAYER2");
+            String player3 = newGame.get("PLAYER3");
+            String player5 = newGame.get("PLAYER5");
+            String player6 = newGame.get("PLAYER6");
+
+
+            boolean entered = false;
+
+            if (player2 == null && (player3 == null || !player3.equals(username)) &&
+                    (player5 == null || !player5.equals(username)) && (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER2");
+                entered = true;
+                player2 = username;
+            }else if (player3 == null && (player2 == null ||!player2.equals(username)) &&
+                    (player5 == null || !player5.equals(username)) && (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER3");
+                entered = true;
+                player3 = username;
+            }else if (player5 == null && (player2 == null ||!player2.equals(username)) &&
+                    (player3 == null || !player3.equals(username)) && (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER5");
+                entered = true;
+                player5 = username;
+            }else if (player6 == null && (player2 == null ||!player2.equals(username)) &&
+                    (player3 == null || !player3.equals(username)) && (player5 == null || !player5.equals(username))){
+                addPlayer(username, id, "PLAYER6");
+                entered = true;
+                player6 = username;
+            }
+
+            if (entered && player2 != null && player3 != null && player5 != null && player6 != null){
+                return beginGame(id, type);
+            }
+            if (entered){
+                return true;
+            }
+        }catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return false;
+    }
+
+    private synchronized boolean new5(String username){
+        int type = 5;
+        try {
+            HashMap <String, String> newGame = getNewGame(type);
+
+            if (newGame.isEmpty()){
+                return startGame(username, type, "PLAYER1");
+
+            }
+
+            int id = Integer.parseInt(newGame.get("ID"));
+            String player1 = newGame.get("PLAYER1");
+            String player2 = newGame.get("PLAYER2");
+            String player3 = newGame.get("PLAYER3");
+            String player5 = newGame.get("PLAYER5");
+            String player6 = newGame.get("PLAYER6");
+
+
+            boolean entered = false;
+
+            if (player1 == null && (player2 == null || !player2.equals(username)) &&
+                    (player3 == null || !player3.equals(username)) && (player5 == null || !player5.equals(username)) &&
+                    (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER1");
+                entered = true;
+                player1 = username;
+            }else if (player2 == null && (player1 == null ||!player1.equals(username)) &&
+                    (player3 == null || !player3.equals(username)) && (player5 == null || !player5.equals(username)) &&
+                    (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER2");
+                entered = true;
+                player2 = username;
+            }else if (player3 == null && (player1 == null ||!player1.equals(username)) &&
+                    (player2 == null || !player2.equals(username)) && (player5 == null || !player5.equals(username)) &&
+                    (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER3");
+                entered = true;
+                player3 = username;
+            }else if (player5 == null && (player1 == null ||!player1.equals(username)) &&
+                    (player2 == null || !player2.equals(username)) && (player3 == null || !player3.equals(username)) &&
+                    (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER5");
+                entered = true;
+                player5 = username;
+            }else if (player6 == null && (player1 == null ||!player1.equals(username)) &&
+                    (player2 == null || !player2.equals(username)) && (player3 == null || !player3.equals(username)) &&
+                    (player5 == null || !player5.equals(username))){
+                addPlayer(username, id, "PLAYER6");
+                entered = true;
+                player6 = username;
+            }
+
+            if (entered && player1 != null && player2 != null && player3 != null &&
+                    player5 != null && player6 != null){
+                return beginGame(id, type);
+            }
+            if (entered){
+                return true;
+            }
+        }catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return false;
+    }
+
+    private synchronized boolean new6(String username){
+        int type = 6;
+        try {
+            HashMap <String, String> newGame = getNewGame(type);
+
+            if (newGame.isEmpty()){
+                return startGame(username, type, "PLAYER1");
+            }
+
+            int id = Integer.parseInt(newGame.get("ID"));
+            String player1 = newGame.get("PLAYER1");
+            String player2 = newGame.get("PLAYER2");
+            String player3 = newGame.get("PLAYER3");
+            String player4 = newGame.get("PLAYER4");
+            String player5 = newGame.get("PLAYER5");
+            String player6 = newGame.get("PLAYER6");
+
+            boolean entered = false;
+
+            if (player1 == null && (player2 == null || !player2.equals(username)) &&
+                    (player3 == null || !player3.equals(username)) && (player4 == null || !player4.equals(username)) &&
+                    (player5 == null || !player5.equals(username)) && (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER1");
+                entered = true;
+                player1 = username;
+            }else if (player2 == null && (player1 == null || !player1.equals(username)) &&
+                    (player3 == null || !player3.equals(username)) && (player4 == null || !player4.equals(username)) &&
+                    (player5 == null || !player5.equals(username)) && (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER2");
+                entered = true;
+                player2 = username;
+            }else if (player3 == null && (player1 == null || !player1.equals(username)) &&
+                    (player2 == null || !player2.equals(username)) && (player4 == null || !player4.equals(username)) &&
+                    (player5 == null || !player5.equals(username)) && (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER3");
+                entered = true;
+                player3 = username;
+            }else if (player4 == null && (player1 == null || !player1.equals(username)) &&
+                    (player2 == null || !player2.equals(username)) && (player3 == null || !player3.equals(username)) &&
+                    (player5 == null || !player5.equals(username)) && (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER4");
+                entered = true;
+                player4 = username;
+            }else if (player5 == null && (player1 == null || !player1.equals(username)) &&
+                    (player2 == null || !player2.equals(username)) && (player3 == null || !player3.equals(username)) &&
+                    (player4 == null || !player4.equals(username)) && (player6 == null || !player6.equals(username))){
+                addPlayer(username, id, "PLAYER5");
+                entered = true;
+                player5 = username;
+            }else if (player6 == null && (player1 == null || !player1.equals(username)) &&
+                    (player2 == null || !player2.equals(username)) && (player3 == null || !player3.equals(username)) &&
+                    (player4 == null || !player4.equals(username)) && (player5 == null || !player5.equals(username))){
+                addPlayer(username, id, "PLAYER6");
+                entered = true;
+                player6 = username;
+            }
+
+            if (entered && player1 != null && player2 != null && player3 != null &&
+                    player4 != null && player5 != null && player6 != null){
+                return beginGame(id, type);
+            }
+            if (entered){
+                return true;
+            }
+        }catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return false;
+    }
+
+    public synchronized boolean exitGame(String username, int id){
+        try {
+            String sql = "UPDATE GAME SET " +
+                    "PLAYER1 = " +
+                    "CASE " +
+                    "When PLAYER1 = ? THEN NULL ELSE PLAYER1 END, " +
+                    "PLAYER2 = " +
+                    "CASE " +
+                    "When PLAYER2 = ? THEN NULL ELSE PLAYER2 END, " +
+                    "PLAYER3 = " +
+                    "CASE " +
+                    "When PLAYER3 = ? THEN NULL ELSE PLAYER3 END, " +
+                    "PLAYER4 = " +
+                    "CASE " +
+                    "When PLAYER4 = ? THEN NULL ELSE PLAYER4 END, " +
+                    "PLAYER5 = " +
+                    "CASE " +
+                    "When PLAYER5 = ? THEN NULL ELSE PLAYER5 END, " +
+                    "PLAYER6 = " +
+                    "CASE " +
+                    "When PLAYER6 = ? THEN NULL ELSE PLAYER6 END " +
+                    "WHERE ID = ?";
+
+            PreparedStatement pstmt = c.prepareStatement(sql);
+            pstmt.setString(1, username);
+            pstmt.setString(2, username);
+            pstmt.setString(3, username);
+            pstmt.setString(4, username);
+            pstmt.setString(5, username);
+            pstmt.setString(6, username);
+            pstmt.setInt(7, id);
+
+            pstmt.executeUpdate();
+            pstmt.close();
+            c.commit();
+            System.out.println("exitGame " + id);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
         return false;
     }

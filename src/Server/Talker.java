@@ -68,6 +68,8 @@ class Talker implements Runnable{
                     getStatus(username);
                 }else if (request.equals("newGame")){
                     newGame(username, ask);
+                }else if (request.equals("exitGame")){
+                    exitGame(username, ask);
                 }else if (request.equals("submitOrders")){
                     submitOrders(username, ask);
                 }else if (request.equals("updateGame")){
@@ -94,6 +96,14 @@ class Talker implements Runnable{
 
     private void newGame(String username, ArrayList<String> ask){
         if (ask.size() == 1 && isInteger(ask.get(0), 10) && db.newGame(username, Integer.parseInt(ask.get(0)))){
+            getStatus(username);
+        }else {
+            send("Invalid");
+        }
+    }
+
+    private void exitGame(String username, ArrayList<String> ask){
+        if (ask.size() == 1 && isInteger(ask.get(0), 10) && db.exitGame(username, Integer.parseInt(ask.get(0)))){
             getStatus(username);
         }else {
             send("Invalid");

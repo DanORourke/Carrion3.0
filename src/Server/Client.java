@@ -40,7 +40,8 @@ public class Client {
 
     private String response(){
         try {
-            socket.setSoTimeout(3000);
+            //my server will be super slow, might need to be longer
+            socket.setSoTimeout(10000);
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
             String message = in.readLine();

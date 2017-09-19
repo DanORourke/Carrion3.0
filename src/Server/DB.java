@@ -789,7 +789,7 @@ class DB {
                     "PLAYER6 = " +
                     "CASE " +
                     "When PLAYER6 = ? THEN NULL ELSE PLAYER6 END " +
-                    "WHERE ID = ?";
+                    "WHERE ID = ? AND STATUS = 0";
 
             PreparedStatement pstmt = c.prepareStatement(sql);
             pstmt.setString(1, username);

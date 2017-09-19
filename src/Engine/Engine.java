@@ -70,7 +70,7 @@ public class Engine {
         }
         indexOfNoChange = history.size() - 2;
         playMoves(moves, i);
-        if (userTeam != 0 && userTeam != playerTurn){
+        if (!offline && userTeam != playerTurn){
             indexOfNoChange  = history.size();
         }
     }
@@ -182,6 +182,9 @@ public class Engine {
     public void addEncodedTurn(String turn){
         ArrayList<String> moves = new ArrayList<>(Arrays.asList(turn.split(",")));
         playMoves(moves, 0);
+        if (!offline && userTeam != playerTurn){
+            indexOfNoChange  = history.size();
+        }
     }
 
     public String getLatestEncoded(){

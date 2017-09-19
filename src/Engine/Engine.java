@@ -35,7 +35,7 @@ public class Engine {
 
     public Engine(String encodedBoard, int userTeam){
         this.userTeam = userTeam;
-        this.offline = userTeam == 0;
+        this.offline = (userTeam == 0) || (userTeam == 7);
         ArrayList<String> moves = new ArrayList<>(Arrays.asList(encodedBoard.split(",")));
         mapRadius = Integer.valueOf(moves.get(0));
         gameType = Integer.valueOf(moves.get(1));
@@ -72,6 +72,13 @@ public class Engine {
         playMoves(moves, i);
         if (!offline && userTeam != playerTurn){
             indexOfNoChange  = history.size();
+        }
+        fillPlayers();
+        if ((players.keySet().contains(Alliance.UNOCCUPIED) && players.size() == 2) ||
+                (!players.keySet().contains(Alliance.UNOCCUPIED) && players.size() == 1)){
+
+            indexOfNoChange  = history.size();
+            histIndex = 0;
         }
     }
 
@@ -193,7 +200,10 @@ public class Engine {
 
     public int getPlayerTurn(){
         fillPlayers();
-        if (players.size() == 1){
+        //if only one real player left, its over
+        if (players.keySet().contains(Alliance.UNOCCUPIED) && players.size() == 2){
+            return 7;
+        }else if (!players.keySet().contains(Alliance.UNOCCUPIED) && players.size() == 1){
             return 7;
         }
         return playerTurn;

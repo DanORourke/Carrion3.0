@@ -266,6 +266,8 @@ public class General extends Piece {
     public int getStandardAttackBonus(General other){
         if (other != null && other.getName().equals("Oda Nobunaga") && other.isExposed() && !other.hasChief()){
             return (int)Math.ceil(((double)troops * 4) / 3);
+        }else if (other != null && other.getName().equals("Leonidas") && other.isExposed() && other.getTroops() < troops){
+            return other.getTroops();
         }
         return troops;
     }
@@ -273,8 +275,6 @@ public class General extends Piece {
     public int getStandardDefendBonus(General other){
         if (other != null && other.getName().equals("Oda Nobunaga") && other.isExposed() && !other.hasChief()){
             return (int)Math.ceil(((double)troops * 4) / 3);
-        }else if (other != null && other.getName().equals("Leonidas") && other.isExposed() && other.getTroops() < troops){
-            return other.getTroops();
         }
         return troops;
     }

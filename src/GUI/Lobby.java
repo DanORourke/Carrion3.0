@@ -257,6 +257,8 @@ class Lobby {
         JButton play = new JButton("Open");
         if (gameStatus == 0){
             play.setText("Exit");
+        }else if (gameStatus == 7){
+            play.setText("Study");
         }
         play.addActionListener(new ActionListener() {
             @Override
@@ -265,10 +267,6 @@ class Lobby {
                     //exit game
                     status = new Client(networkInfo).exitGame(gameId);
                     update();
-                }else if (gameStatus == 7){
-                    //view from beginning, not end
-                    new Largest(encodedBoard);
-
                 }else {
                     HashMap<Integer, String> playerNames = convertPlayerNames(gameType, players);
                     new Largest(encodedBoard, myColor, playerNames, networkInfo, gameId);
@@ -332,7 +330,7 @@ class Lobby {
         if (gameStatus == 0){
             return "Impending";
         }else if (gameStatus == 7){
-            return "Complete";
+            return "History Lesson";
         }else{
             return "Active";
         }

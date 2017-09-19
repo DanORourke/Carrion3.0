@@ -14,14 +14,10 @@ import java.util.List;
 import java.util.Random;
 
 public class Board {
-    //private final int gameType;
-    //private final int mapRadius;
     private HashMap<Coords, Parcel> board;
     private HashMap<Coords, GameData> changeData = new HashMap<>();
 
     Board(int gameType, int mapRadius, ArrayList<General> generals){
-        //this.gameType = gameType;
-        //this.mapRadius = mapRadius;
         createBoard(mapRadius);
         populateBoard(gameType, generals);
     }

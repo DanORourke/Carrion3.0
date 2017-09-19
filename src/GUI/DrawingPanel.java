@@ -31,7 +31,7 @@ public class DrawingPanel extends JPanel{
         //this.radius = radius;
         this.engine = engine;
         this.mapTileRadius = engine.getMapRadius();
-        this.camera = engine.getStateInfo()[0] - 1;
+        this.camera = engine.getStartingCamera() - 1;
         this.map = new HashMap<>();
         setXY();
         createMap();

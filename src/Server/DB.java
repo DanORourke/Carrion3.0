@@ -148,7 +148,7 @@ class DB {
         ArrayList<String> user = getUserInfo(username);
 
         if (user == null || !user.isEmpty() || username.equals("") ||
-                username.equals("newUser") || password.equals("")) {
+                username.equals("newUser") || password.equals("") || username.length() > 9) {
             return false;
         }else{
             ArrayList<String> newUser = createSaltnHash(password);
@@ -290,13 +290,10 @@ class DB {
                         }
                     }
                     for (Integer color : players.keySet()){
-                        if (!players.get(color).equals(username)){
-                            status += ";" + players.get(color);
-                        }
+                        status += ";" + players.get(color);
                     }
                     status += ";" + board;
                 }
-
             }
             pstmt.close();
             rs.close();
@@ -402,7 +399,7 @@ class DB {
 
     private synchronized boolean beginGame(int id, int type){
         String encoded = "21," + String.valueOf(type);
-        ArrayList<String> info = new Engine(encoded).getInfo();
+        ArrayList<String> info = new Engine(encoded, 0).getInfo();
         try {
             Statement stmt = c.createStatement();
             String sql = "UPDATE GAME SET STATUS = " + Integer.parseInt(info.get(0)) + ", " +
@@ -771,7 +768,7 @@ class DB {
         return false;
     }
 
-    public synchronized boolean exitGame(String username, int id){
+    synchronized boolean exitGame(String username, int id){
         try {
             String sql = "UPDATE GAME SET " +
                     "PLAYER1 = " +
@@ -812,5 +809,95 @@ class DB {
             e.printStackTrace();
         }
         return false;
+    }
+
+    synchronized String submitOrders(String username, int id, String orders){
+        HashMap <String, String> game = getGame(id);
+        //check if its my turn
+        if (!myTurn(username, game)){
+            return "Invalid";
+        }
+        Engine engine = new Engine(game.get("BOARD"), Integer.parseInt(game.get("STATUS")));
+        engine.addEncodedTurn(orders);
+        String oldEncoded = engine.getLatestEncoded();
+        engine.nextPhase(true);
+        String newEncoded = engine.getLatestEncoded();
+        int playerTurn = engine.getPlayerTurn();
+        int oldLength = oldEncoded.length();
+        updateGame(id, playerTurn, newEncoded);
+        return newEncoded.substring(oldLength + 1);
+    }
+
+    private synchronized void updateGame(int id, int playerTurn, String newEncoded){
+        try {
+            Statement stmt = c.createStatement();
+            String sql = "UPDATE GAME SET STATUS = " + playerTurn + ", " +
+                    "BOARD = '" + newEncoded + "' WHERE ID = " + id + ";";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private synchronized boolean myTurn(String username, HashMap <String, String> game){
+        int turn = Integer.parseInt(game.get("STATUS"));
+        if (turn == 1){
+            return username.equals(game.get("PLAYER1"));
+        }else if (turn == 2){
+            return username.equals(game.get("PLAYER2"));
+        }else if (turn == 3){
+            return username.equals(game.get("PLAYER3"));
+        }else if (turn == 4){
+            return username.equals(game.get("PLAYER4"));
+        }else if (turn == 5){
+            return username.equals(game.get("PLAYER5"));
+        }else {
+            return turn == 6 && username.equals(game.get("PLAYER6"));
+        }
+    }
+
+    private synchronized HashMap <String, String> getGame(int id){
+        HashMap <String, String> game = new HashMap<>();
+        try {
+            Statement stmt = c.createStatement();
+            ResultSet rs = stmt.executeQuery( "SELECT * FROM GAME WHERE ID = " + id + ";");
+            if (rs.isBeforeFirst()){
+                game.put("ID", rs.getString("ID"));
+                game.put("TYPE", rs.getString("TYPE"));
+                game.put("STATUS", rs.getString("STATUS"));
+                String player1 = rs.getString("PLAYER1");
+                if (player1 != null){
+                    game.put("PLAYER1", player1);
+                }
+                String player2 = rs.getString("PLAYER2");
+                if (player2 != null){
+                    game.put("PLAYER2", player2);
+                }
+                String player3 = rs.getString("PLAYER3");
+                if (player3 != null){
+                    game.put("PLAYER3", player3);
+                }
+                String player4 = rs.getString("PLAYER4");
+                if (player4 != null){
+                    game.put("PLAYER4", player4);
+                }
+                String player5 = rs.getString("PLAYER5");
+                if (player5 != null){
+                    game.put("PLAYER5", player5);
+                }
+                String player6 = rs.getString("PLAYER6");
+                if (player6 != null){
+                    game.put("PLAYER6", player6);
+                }
+                game.put("BOARD", rs.getString("BOARD"));
+            }
+            stmt.close();
+            rs.close();
+        }catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return game;
     }
 }

@@ -17,8 +17,8 @@ public class Engine {
     private final int mapRadius;
     private final int gameType;
     private General activeGeneral = null;
-    private Coords activeCoords = null;
-    private Coords nextActiveCoords = null;
+    private Coords activeCoords = new Coords(0,0,0);
+    private Coords nextActiveCoords = new Coords(0,0,0);
     private HashMap<Alliance, Player> players = new HashMap<>();
     private Board board;
     private int playerTurn;
@@ -30,13 +30,16 @@ public class Engine {
     private boolean assisted = false;
     private boolean settingChief = false;
     private boolean exposingGeneral = false;
+    private final int userTeam;
+    private final boolean offline;
 
-    public Engine(String encodedBoard){
+    public Engine(String encodedBoard, int userTeam){
+        this.userTeam = userTeam;
+        this.offline = userTeam == 0;
         ArrayList<String> moves = new ArrayList<>(Arrays.asList(encodedBoard.split(",")));
         mapRadius = Integer.valueOf(moves.get(0));
         gameType = Integer.valueOf(moves.get(1));
         ArrayList<General> generals = initializeGenerals(moves);
-        System.out.println(generals.size());
         initializeEngine(moves, generals);
     }
 
@@ -65,6 +68,14 @@ public class Engine {
         }else{
             i += gameType * 5;
         }
+        indexOfNoChange = history.size() - 2;
+        playMoves(moves, i);
+        if (userTeam != 0 && userTeam != playerTurn){
+            indexOfNoChange  = history.size();
+        }
+    }
+
+    private void playMoves(ArrayList<String> moves, int i){
         while(i < moves.size()){
             String moveType = moves.get(i);
             if (moveType.equals("next")){
@@ -128,7 +139,7 @@ public class Engine {
                     }
                     afterBattle(c, wonEnc, launch, true);
                 }else{
-                    //q, r, s (of active coords)  ,q, r, s (of clicked coords) , boolean leftclick(0=false, 1=true)
+                    //qc, rc, sc (of active coords)  ,q, r, s (of clicked coords) , boolean leftclick(0=false, 1=true)
                     int qc = Integer.valueOf(moves.get(i));
                     int rc = Integer.valueOf(moves.get(i+1));
                     int sc = Integer.valueOf(moves.get(i+2));
@@ -142,7 +153,6 @@ public class Engine {
                 }
             }
         }
-        System.out.println("history size: " + history.size());
     }
 
     private void addStartHistory(ArrayList<General> generals){
@@ -159,6 +169,31 @@ public class Engine {
         System.out.println(encoded);
         history.add(new GameState(board, activeCoords, playerTurn, turnStage, encoded));
         histIndex ++;
+    }
+
+    public String getEncodedTurn(){
+        String firstE = history.get(indexOfNoChange + 1).getEncodedBoard();
+        String secondE = history.get(history.size() - 1).getEncodedBoard();
+        int firstLength = firstE.length();
+        //skip the comma
+        return secondE.substring(firstLength + 1);
+    }
+
+    public void addEncodedTurn(String turn){
+        ArrayList<String> moves = new ArrayList<>(Arrays.asList(turn.split(",")));
+        playMoves(moves, 0);
+    }
+
+    public String getLatestEncoded(){
+        return history.get(history.size() - 1).getEncodedBoard();
+    }
+
+    public int getPlayerTurn(){
+        fillPlayers();
+        if (players.size() == 1){
+            return 7;
+        }
+        return playerTurn;
     }
 
     private String createClickEncoded(Coords c, boolean leftClick){
@@ -223,7 +258,7 @@ public class Engine {
             }
         }else if (turnStage == 1){
             rotatePlayer();
-            if (isEncoded){
+            if (isEncoded || !offline){
                 turnStage = 0;
             }else{
                 turnStage = -1;
@@ -244,7 +279,6 @@ public class Engine {
         playoutBattles();
         fillPlayers();
         //move the chief if someone else wants him and he is connected
-        System.out.println("movechief");
         moveChief();
         boolean looking = true;
         while(looking){
@@ -599,13 +633,21 @@ public class Engine {
     }
 
     private Alliance getUserTeam(){
-        int latest = history.get(history.size() - 1).getPlayerTurn();
-        for (Alliance a : players.keySet()){
-            if (a.getDataCode() == latest){
-                return a;
+        if (offline){
+            int latest = history.get(history.size() - 1).getPlayerTurn();
+            for (Alliance a : players.keySet()){
+                if (a.getDataCode() == latest){
+                    return a;
+                }
+            }
+        }else {
+            for (Alliance a : players.keySet()){
+                if (a.getDataCode() == userTeam){
+                    return a;
+                }
             }
         }
-        return null;
+        return Alliance.UNOCCUPIED;
     }
 
     private Alliance getTurnTeam(){
@@ -629,27 +671,14 @@ public class Engine {
     }
 
     private void initializeTurn(){
-        if (gameType == 0){
-            playerTurn = 1;
-            turnStage = 0;
-        }else if (gameType == 1){
-            playerTurn = 1;
-            turnStage = 0;
-        }else if (gameType == 2){
-            playerTurn = 1;
-            turnStage = 0;
-        }else if (gameType == 3){
-            playerTurn = 1;
-            turnStage = 0;
-        }else if (gameType == 4){
+        if (gameType == 4){
             playerTurn = 2;
-            turnStage = 0;
-        }else if (gameType == 5){
+        }else{
             playerTurn = 1;
-            turnStage = 0;
-        }else if (gameType == 6){
-            playerTurn = 1;
-            //for testing, should be 0
+        }
+        if (offline){
+            turnStage = -1;
+        }else {
             turnStage = 0;
         }
     }
@@ -696,6 +725,14 @@ public class Engine {
         return new int[]{playerTurn, turnStage, canAct};
     }
 
+    public int getStartingCamera(){
+        if (offline){
+            return playerTurn;
+        }else{
+            return userTeam;
+        }
+    }
+
     public String hoverTileInfo(Coords c){
         setState();
         Parcel activeParcel = board.get(c);
@@ -722,14 +759,14 @@ public class Engine {
 
     public HashMap<Coords, GameData> click(Coords c, boolean leftClick){
         if (histIndex <= indexOfNoChange){
-            System.out.println("not your turn");
+            System.out.println(c.toString() + "not your turn ");
             return new HashMap<>();
         }
         rememberClick = false;
         setState();
         System.out.println(c.toString() +
                 " isEmpty: " + board.get(c).isEmpty() +
-                " turnstage = " + turnStage);
+                " turnstage = " + turnStage + " activeCoords: " + activeCoords.toString());
         board.clearChangeData();
         activeGeneral = null;
         if (turnStage == 0){
@@ -819,7 +856,7 @@ public class Engine {
     private void moveLeftClick(Coords c){
         Parcel clickedParcel = board.get(c);
         // find active general
-        Alliance a = getUserTeam();
+        Alliance a = getTurnTeam();
         boolean active = false;
         if (activeCoords != null){
             activeGeneral = board.get(activeCoords).getAllianceGeneral(a);
@@ -963,7 +1000,7 @@ public class Engine {
     private void moveRightClick(Coords c){
         Parcel clickedParcel = board.get(c);
         // find active general
-        Alliance a = getUserTeam();
+        Alliance a = getTurnTeam();
         boolean active = false;
         if (activeCoords != null){
             activeGeneral = board.get(activeCoords).getAllianceGeneral(a);
@@ -1094,7 +1131,7 @@ public class Engine {
 
     private void setAssiting(Coords c){
         General g = board.get(c).getFirstGeneral();
-        if (board.get(c).hasSingleGeneral() && g.getAlliance().equals(getUserTeam())){
+        if (board.get(c).hasSingleGeneral() && g.getAlliance().equals(getTurnTeam())){
             assistingCoords = c;
             assisting = false;
             assisted = true;
@@ -1109,7 +1146,7 @@ public class Engine {
         General g = board.get(assistingCoords).getFirstGeneral();
         General g1 = p.getFirstGeneral();
         General g2 = p.getSecondGeneral();
-        if (g != null && g1 != null && g1.getAlliance().equals(getUserTeam()) &&
+        if (g != null && g1 != null && g1.getAlliance().equals(getTurnTeam()) &&
                 g.canAssist(c))
         {
             board.setAssist(g, g1);
@@ -1119,7 +1156,7 @@ public class Engine {
                     oldEncoded + ",assist," + assistingCoords.toString() + "," + c.toString()));
             histIndex = history.size() - 1;
 
-        }else if (g != null &&g2 != null && g2.getAlliance().equals(getUserTeam()) &&
+        }else if (g != null &&g2 != null && g2.getAlliance().equals(getTurnTeam()) &&
                 g.canAssist(c))
         {
             board.setAssist(g, g2);

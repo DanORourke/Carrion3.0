@@ -8,22 +8,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 class Lobby {
+    private final HashMap<String, String> networkInfo;
     private final String username;
-    private final String password;
-    private final String ip;
-    private final String port;
     private String status;
     private JFrame frame;
     private JPanel activeGames;
 
-    Lobby(String username, String password, String ip, String port, String status){
-        this.username = username;
-        //not ideal
-        this.password = password;
-        this.ip = ip;
-        this.port = port;
+    Lobby(HashMap<String, String> networkInfo, String status){
+        this.networkInfo = networkInfo;
+        this.username = networkInfo.get("username");
         this.status = status;
         this.frame = new JFrame("Carrion");
         setFrame();
@@ -91,7 +87,7 @@ class Lobby {
         refresh.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                status = new Client(username, password, ip, port).signIn();
+                status = new Client(networkInfo).signIn();
                 update();
                 if (status.equals("Invalid")){
                     buttonWork.setForeground(Colors.RED);
@@ -200,7 +196,7 @@ class Lobby {
             if (gameStatus != 0){
                 myColor = Integer.parseInt(info.get(i));
                 i++;
-                while (i < total){
+                while (i < total + 1){
                     players.add(info.get(i));
                     i++;
                 }
@@ -248,9 +244,11 @@ class Lobby {
         colorLabel(playerLabel);
         playerInfo.add(playerLabel);
         for (String playerName : players){
-            JLabel nameLabel = new JLabel(playerName);
-            colorLabel(nameLabel);
-            playerInfo.add(nameLabel);
+            if (!playerName.equals(username)){
+                JLabel nameLabel = new JLabel(playerName);
+                colorLabel(nameLabel);
+                playerInfo.add(nameLabel);
+            }
         }
         gamePanel.add(playerInfo);
 
@@ -265,13 +263,15 @@ class Lobby {
             public void actionPerformed(ActionEvent e) {
                 if (gameStatus == 0){
                     //exit game
-                    status = new Client(username, password, ip, port).exitGame(gameId);
+                    status = new Client(networkInfo).exitGame(gameId);
                     update();
                 }else if (gameStatus == 7){
                     //view from beginning, not end
                     new Largest(encodedBoard);
+
                 }else {
-                    new Largest(encodedBoard);
+                    HashMap<Integer, String> playerNames = convertPlayerNames(gameType, players);
+                    new Largest(encodedBoard, myColor, playerNames, networkInfo, gameId);
                 }
             }
         });
@@ -281,6 +281,43 @@ class Lobby {
         gamePanel.add(buttonPanel);
 
         return gamePanel;
+    }
+
+    private HashMap<Integer, String> convertPlayerNames(int gameType, ArrayList<String> players){
+        HashMap<Integer, String> playerNames = new HashMap<>();
+        if (gameType == 0){
+            playerNames.put(1, players.get(0));
+            playerNames.put(2, players.get(1));
+        }else if (gameType == 1){
+            playerNames.put(1, players.get(0));
+            playerNames.put(3, players.get(1));
+        }else if (gameType == 2){
+            playerNames.put(1, players.get(0));
+            playerNames.put(4, players.get(1));
+        }else if (gameType == 3){
+            playerNames.put(1, players.get(0));
+            playerNames.put(3, players.get(2));
+            playerNames.put(5, players.get(2));
+        }else if (gameType == 4){
+            playerNames.put(2, players.get(0));
+            playerNames.put(3, players.get(1));
+            playerNames.put(4, players.get(2));
+            playerNames.put(5, players.get(3));
+        }else if (gameType == 5){
+            playerNames.put(1, players.get(0));
+            playerNames.put(2, players.get(1));
+            playerNames.put(3, players.get(2));
+            playerNames.put(5, players.get(3));
+            playerNames.put(6, players.get(4));
+        }else if (gameType == 6){
+            playerNames.put(1, players.get(0));
+            playerNames.put(2, players.get(1));
+            playerNames.put(3, players.get(2));
+            playerNames.put(4, players.get(3));
+            playerNames.put(5, players.get(4));
+            playerNames.put(6, players.get(5));
+        }
+        return playerNames;
     }
 
     private String convertActiveGameStatus(int gameStatus){
@@ -424,7 +461,7 @@ class Lobby {
                     //type == 6
                     gameType = 6;
                 }
-                status = new Client(username, password, ip, port).newGame(gameType);
+                status = new Client(networkInfo).newGame(gameType);
                 update();
             }
         });

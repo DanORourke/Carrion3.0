@@ -72,8 +72,6 @@ class Talker implements Runnable{
                     exitGame(username, ask);
                 }else if (request.equals("submitOrders")){
                     submitOrders(username, ask);
-                }else if (request.equals("updateGame")){
-                    updateGame(username, ask);
                 }
             }else{
                 send("Invalid");
@@ -95,7 +93,7 @@ class Talker implements Runnable{
     }
 
     private void newGame(String username, ArrayList<String> ask){
-        if (ask.size() == 1 && isInteger(ask.get(0), 10) && db.newGame(username, Integer.parseInt(ask.get(0)))){
+        if (ask.size() == 1 && isInteger(ask.get(0)) && db.newGame(username, Integer.parseInt(ask.get(0)))){
             getStatus(username);
         }else {
             send("Invalid");
@@ -103,7 +101,7 @@ class Talker implements Runnable{
     }
 
     private void exitGame(String username, ArrayList<String> ask){
-        if (ask.size() == 1 && isInteger(ask.get(0), 10) && db.exitGame(username, Integer.parseInt(ask.get(0)))){
+        if (ask.size() == 1 && isInteger(ask.get(0)) && db.exitGame(username, Integer.parseInt(ask.get(0)))){
             getStatus(username);
         }else {
             send("Invalid");
@@ -111,14 +109,15 @@ class Talker implements Runnable{
     }
 
     private void submitOrders(String username, ArrayList<String> ask){
-
+        if (ask.size() == 2 && isInteger(ask.get(0))){
+            send(db.submitOrders(username, Integer.parseInt(ask.get(0)), ask.get(1)));
+        }else {
+            send("Invalid");
+        }
     }
 
-    private void updateGame(String username, ArrayList<String> ask){
-
-    }
-
-    private boolean isInteger(String s, int radix) {
+    private boolean isInteger(String s) {
+        int radix = 10;
         if(s.isEmpty()) return false;
         for(int i = 0; i < s.length(); i++) {
             if(i == 0 && s.charAt(i) == '-') {

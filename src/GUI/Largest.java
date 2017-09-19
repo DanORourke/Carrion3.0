@@ -1,20 +1,46 @@
 package GUI;
 import Engine.Engine;
+import Server.Client;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 
-public class Largest {
+class Largest {
     private final Engine engine;
     private final DrawingPanel drawingPanel;
     private final JFrame frame;
     private final JTextArea hoverArea;
+    private final boolean online;
+    private final int userTeam;
+    private final HashMap<Integer, String> playerNames;
+    private final HashMap<String, String> networkInfo;
+    private final int id;
     private JPanel topPanel;
 
-    public Largest(String encodedBoard){
-        //TODO test encoded before giving to engine
-        this.engine = new Engine(encodedBoard);
+    Largest(String encodedBoard, int userTeam,
+                   HashMap<Integer, String> playerNames, HashMap<String, String> networkInfo, int id){
+        this.online = true;
+        this.userTeam = userTeam;
+        this.playerNames = playerNames;
+        this.networkInfo = networkInfo;
+        this.id = id;
+        this.engine = new Engine(encodedBoard, userTeam);
+        this.drawingPanel = new DrawingPanel(engine);
+        this.frame = new JFrame("Carrion");
+        this.hoverArea = createHoverArea();
+        setFrame();
+        prepareFrame();
+    }
+
+    Largest(String encodedBoard){
+        this.online = false;
+        this.userTeam = 0;
+        this.playerNames = null;
+        this.networkInfo = null;
+        this.id = 0;
+        this.engine = new Engine(encodedBoard, 0);
         this.drawingPanel = new DrawingPanel(engine);
         this.frame = new JFrame("Carrion");
         this.hoverArea = createHoverArea();
@@ -145,7 +171,7 @@ public class Largest {
         actionButtonPanel.setOpaque(true);
         actionButtonPanel.setBackground(Colors.BACKGROUND);
 
-        JButton next = createNextButton();
+        JButton next = createNextButton(turnStage);
         actionButtonPanel.add(next);
 
         if (turnStage == 0){
@@ -174,14 +200,24 @@ public class Largest {
         frame.repaint();
     }
 
-    private JButton createNextButton(){
+    private JButton createNextButton(int turnStage){
         JButton next = new JButton("Next");
         next.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                engine.nextPhase(false);
-                drawingPanel.updateMap();
-                updateTopPanel();
+                if (userTeam != 0 && turnStage == 1){
+                    String encodedTurn = engine.getEncodedTurn();
+                    String result = new Client(networkInfo).submitOrders(id, encodedTurn);
+                    if (!result.equals("Invalid")){
+                        engine.addEncodedTurn(result);
+                        drawingPanel.updateMap();
+                        updateTopPanel();
+                    }
+                }else {
+                    engine.nextPhase(false);
+                    drawingPanel.updateMap();
+                    updateTopPanel();
+                }
             }
         });
         return next;
@@ -237,7 +273,7 @@ public class Largest {
         turnLabel.setHorizontalAlignment(SwingConstants.CENTER);
         String player = getPlayerColor(playerTurn, turnLabel);
         String stage = getTurnOrders(turnStage);
-        turnLabel.setText(player + " Player: " + stage);
+        turnLabel.setText(player + stage);
         return turnLabel;
     }
 
@@ -258,22 +294,46 @@ public class Largest {
             return "";
         }else if (playerTurn == 6){
             turnLabel.setForeground(Colors.PURPLE);
-            return "Purple";
+            if (online){
+                return playerNames.get(6) + ": ";
+            }else{
+                return "Purple Player: ";
+            }
         }else if (playerTurn == 4){
             turnLabel.setForeground(Colors.GREEN);
-            return "Green";
+            if (online){
+                return playerNames.get(4) + ": ";
+            }else{
+                return "Green Player: ";
+            }
         }else if (playerTurn == 2){
             turnLabel.setForeground(Colors.ORANGE);
-            return "Orange";
+            if (online){
+                return playerNames.get(2) + ": ";
+            }else{
+                return "Orange Player: ";
+            }
         }else if (playerTurn == 3){
             turnLabel.setForeground(Colors.YELLOW);
-            return "Yellow";
+            if (online){
+                return playerNames.get(3) + ": ";
+            }else{
+                return "Yellow Player: ";
+            }
         }else if (playerTurn == 1){
             turnLabel.setForeground(Colors.RED);
-            return "Red";
+            if (online){
+                return playerNames.get(1) + ": ";
+            }else{
+                return "Red Player: ";
+            }
         }else {
             turnLabel.setForeground(Colors.BLUE);
-            return "Blue";
+            if (online){
+                return playerNames.get(5) + ": ";
+            }else{
+                return "Blue Player: ";
+            }
         }
     }
 

@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class Client {
     private final String name;
@@ -17,11 +18,11 @@ public class Client {
     private final String port;
     private Socket socket;
 
-    public Client(String name, String pass, String ip, String port){
-        this.name = name;
-        this.pass = pass;
-        this.ip = ip;
-        this.port = port;
+    public Client(HashMap<String, String> networkInfo){
+        this.name = networkInfo.get("username");
+        this.pass = networkInfo.get("password");
+        this.ip = networkInfo.get("ip");
+        this.port = networkInfo.get("port");
     }
 
     private void tellSocket(String message){
@@ -80,15 +81,16 @@ public class Client {
             return false;
         }
         for (String part : ipList){
-            if (!(isInteger(part, 10) && (Integer.parseInt(part) >= 0 && Integer.parseInt(part) <= 255))){
+            if (!(isInteger(part) && (Integer.parseInt(part) >= 0 && Integer.parseInt(part) <= 255))){
                 System.out.println(part + " not right sized number");
                 return false;
             }
         }
-        return isInteger(port, 10);
+        return isInteger(port);
     }
 
-    private boolean isInteger(String s, int radix) {
+    private boolean isInteger(String s) {
+        int radix = 10;
         if(s.isEmpty()) return false;
         for(int i = 0; i < s.length(); i++) {
             if(i == 0 && s.charAt(i) == '-') {
@@ -108,6 +110,12 @@ public class Client {
 
     public String exitGame(int id){
         String message = name + ";" + pass + ";exitGame;" + id;
+        tellSocket(message);
+        return response();
+    }
+
+    public String submitOrders(int id, String orders){
+        String message = name + ";" + pass + ";submitOrders;" + id + ";" + orders;
         tellSocket(message);
         return response();
     }

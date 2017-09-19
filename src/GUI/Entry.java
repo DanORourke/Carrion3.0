@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Entry {
     private JFrame frame;
@@ -392,8 +393,13 @@ public class Entry {
         signIn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String status = new Client(name.getText(), new String(pass.getPassword()),
-                        ip.getText(), port.getText()).signIn();
+                HashMap<String, String> networkInfo = new HashMap<>();
+                networkInfo.put("username", name.getText());
+                networkInfo.put("password", new String(pass.getPassword()));
+                networkInfo.put("ip", ip.getText());
+                networkInfo.put("port", port.getText());
+
+                String status = new Client(networkInfo).signIn();
                 if (status.equals("Invalid")){
                     flag.setText("Invalid");
                     Timer timer = new Timer(5000, new ActionListener(){
@@ -405,7 +411,7 @@ public class Entry {
                     timer.start();
                 }
                 else {
-                    new Lobby(name.getText(), new String(pass.getPassword()), ip.getText(), port.getText(), status);
+                    new Lobby(networkInfo, status);
                 }
                 name.setText("");
                 pass.setText("");
@@ -420,8 +426,13 @@ public class Entry {
         newUser.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String status = new Client(name.getText(), new String(pass.getPassword()),
-                        ip.getText(), port.getText()).newUser(new String(repeatPass.getPassword()));
+                HashMap<String, String> networkInfo = new HashMap<>();
+                networkInfo.put("username", name.getText());
+                networkInfo.put("password", new String(pass.getPassword()));
+                networkInfo.put("ip", ip.getText());
+                networkInfo.put("port", port.getText());
+
+                String status = new Client(networkInfo).newUser(new String(repeatPass.getPassword()));
                 if (status.equals("Invalid")){
                     flag.setText("Invalid");
                     Timer timer = new Timer(5000, new ActionListener(){
@@ -433,7 +444,7 @@ public class Entry {
                     timer.start();
                 }
                 else {
-                    new Lobby(name.getText(), new String(pass.getPassword()), ip.getText(), port.getText(), status);
+                    new Lobby(networkInfo, status);
                 }
                 name.setText("");
                 pass.setText("");

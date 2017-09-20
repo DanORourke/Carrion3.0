@@ -46,6 +46,7 @@ public class Client {
                     new InputStreamReader(socket.getInputStream()));
             String message = in.readLine();
             System.out.println("response: " + message);
+            socket.close();
             return message;
         } catch(SocketTimeoutException e){
             System.out.println("socket timed out");

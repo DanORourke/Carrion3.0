@@ -3,14 +3,12 @@ import Engine.Engine;
 import Server.Client;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.HashMap;
 
-class Largest {
+class Largest extends JFrame{
     private final Engine engine;
     private final DrawingPanel drawingPanel;
-    private final JFrame frame;
     private final JTextArea hoverArea;
     private final boolean online;
     private final int userTeam;
@@ -21,6 +19,7 @@ class Largest {
 
     Largest(String encodedBoard, int userTeam,
                    HashMap<Integer, String> playerNames, HashMap<String, String> networkInfo, int id){
+        super("Carrion");
         this.online = true;
         this.userTeam = userTeam;
         this.playerNames = playerNames;
@@ -28,13 +27,13 @@ class Largest {
         this.id = id;
         this.engine = new Engine(encodedBoard, userTeam);
         this.drawingPanel = new DrawingPanel(engine);
-        this.frame = new JFrame("Carrion");
         this.hoverArea = createHoverArea();
         setFrame();
         prepareFrame();
     }
 
     Largest(String encodedBoard){
+        super("Carrion");
         this.online = false;
         this.userTeam = 0;
         this.playerNames = null;
@@ -42,18 +41,24 @@ class Largest {
         this.id = 0;
         this.engine = new Engine(encodedBoard, 0);
         this.drawingPanel = new DrawingPanel(engine);
-        this.frame = new JFrame("Carrion");
         this.hoverArea = createHoverArea();
         setFrame();
         prepareFrame();
     }
 
     private void setFrame(){
-        //frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(1200, 600);
-        frame.setResizable(true);
-        frame.setLocationRelativeTo( null );
-        frame.setVisible(true);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setSize(1200, 600);
+        setResizable(true);
+        setLocationRelativeTo( null );
+        setVisible(true);
+        WindowListener exitListener = new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                getContentPane().removeAll();
+            }
+        };
+        addWindowListener(exitListener);
     }
 
     private void prepareFrame(){
@@ -66,8 +71,8 @@ class Largest {
         split.setOneTouchExpandable(true);
         split.setResizeWeight(0.66);
         split.setDividerLocation(800);
-        frame.add(split);
-        frame.revalidate();
+        add(split);
+        revalidate();
         scroll.getViewport().setViewPosition(new Point(drawingPanel.getPreferredSize().width/2 -
                 scroll.getViewport().getViewRect().width/2,
                 drawingPanel.getPreferredSize().height/2 - scroll.getViewport().getViewRect().height/2));
@@ -161,8 +166,8 @@ class Largest {
         }
 
         if (canAct == 0){
-            frame.revalidate();
-            frame.repaint();
+            revalidate();
+            repaint();
             return;
         }
 
@@ -196,8 +201,8 @@ class Largest {
         c.insets = new Insets(10, 0, 0, 0);
         topPanel.add(actionButtonPanel, c);
 
-        frame.revalidate();
-        frame.repaint();
+        revalidate();
+        repaint();
     }
 
     private JButton createNextButton(int turnStage){

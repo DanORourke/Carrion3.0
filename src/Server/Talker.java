@@ -50,6 +50,11 @@ class Talker implements Runnable{
     private void send(String message){
         System.out.println("sending: " + message);
         out.println(message);
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void processAsk(ArrayList<String> ask){

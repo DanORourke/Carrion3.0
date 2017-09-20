@@ -11,9 +11,13 @@ import java.util.HashMap;
 
 public class Entry {
     private JFrame frame;
+    private Lobby lobby;
+    private Largest largest;
 
     public Entry(){
         this.frame = new JFrame("Carrion");
+        this.lobby = null;
+        this.largest = null;
         setFrame();
         prepareFrame();
     }
@@ -103,20 +107,23 @@ public class Entry {
                         type = t;
                     }
                 }
+                if (largest != null){
+                    largest.dispose();
+                }
                 if (type == neighbors){
-                    new Largest("21,0");
+                    largest = new Largest("21,0");
                 }else if(type == angle) {
-                    new Largest("21,1");
+                    largest = new Largest("21,1");
                 }else if(type == two) {
-                    new Largest("21,2");
+                    largest = new Largest("21,2");
                 }else if(type == three) {
-                    new Largest("21,3");
+                    largest = new Largest("21,3");
                 }else if(type == four) {
-                    new Largest("21,4");
+                    largest = new Largest("21,4");
                 }else if(type == five) {
-                    new Largest("21,5");
+                    largest = new Largest("21,5");
                 }else if(type == six) {
-                    new Largest("21,6");
+                    largest = new Largest("21,6");
                 }
             }
         });
@@ -243,7 +250,7 @@ public class Entry {
         info.setForeground(Colors.YELLOW);
 
         JLabel ipLabel = new JLabel("Ipv4");
-        JTextField ip = new JTextField("127.0.0.1");
+        JTextField ip = new JTextField("73.246.234.225");
         ipLabel.setBackground(Colors.BACKGROUND);
         ipLabel.setForeground(Colors.YELLOW);
 
@@ -411,7 +418,11 @@ public class Entry {
                     timer.start();
                 }
                 else {
-                    new Lobby(networkInfo, status);
+                    if (lobby != null){
+                        lobby.disposeLargest();
+                        lobby.dispose();
+                    }
+                    lobby = new Lobby(networkInfo, status);
                 }
                 name.setText("");
                 pass.setText("");
@@ -444,7 +455,11 @@ public class Entry {
                     timer.start();
                 }
                 else {
-                    new Lobby(networkInfo, status);
+                    if (lobby != null){
+                        lobby.disposeLargest();
+                        lobby.dispose();
+                    }
+                    lobby = new Lobby(networkInfo, status);
                 }
                 name.setText("");
                 pass.setText("");

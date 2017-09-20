@@ -1,7 +1,6 @@
 package GUI;
 
 import Server.Client;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -10,27 +9,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-class Lobby {
+class Lobby extends JFrame{
     private final HashMap<String, String> networkInfo;
     private final String username;
     private String status;
-    private JFrame frame;
     private JPanel activeGames;
+    private Largest largest;
 
     Lobby(HashMap<String, String> networkInfo, String status){
+        super("Carrion");
         this.networkInfo = networkInfo;
         this.username = networkInfo.get("username");
         this.status = status;
-        this.frame = new JFrame("Carrion");
+        this.largest = null;
         setFrame();
         prepareFrame();
     }
 
     private void setFrame(){
-        frame.setSize(900, 600);
-        frame.setResizable(true);
-        frame.setLocationRelativeTo( null );
-        frame.setVisible(true);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setSize(900, 600);
+        setResizable(true);
+        setLocationRelativeTo( null );
+        setVisible(true);
     }
 
     private void prepareFrame(){
@@ -67,8 +68,8 @@ class Lobby {
         c.fill = GridBagConstraints.VERTICAL;
         main.add(newGame, c);
 
-        frame.add(main);
-        frame.revalidate();
+        add(main);
+        revalidate();
     }
 
     private JPanel createTitlePanel(){
@@ -150,8 +151,8 @@ class Lobby {
     private void update(){
         if (!status.equals("Invalid")){
             updateActiveGames();
-            frame.revalidate();
-            frame.repaint();
+            revalidate();
+            repaint();
         }
     }
 
@@ -269,7 +270,8 @@ class Lobby {
                     update();
                 }else {
                     HashMap<Integer, String> playerNames = convertPlayerNames(gameType, players);
-                    new Largest(encodedBoard, myColor, playerNames, networkInfo, gameId);
+                    disposeLargest();
+                    largest = new Largest(encodedBoard, myColor, playerNames, networkInfo, gameId);
                 }
             }
         });
@@ -556,5 +558,12 @@ class Lobby {
         btn.setFocusPainted(false);
         Font littleFont = new Font("Serif", Font.BOLD, 17);
         btn.setFont(littleFont);
+    }
+
+    void disposeLargest(){
+        if (largest != null){
+            largest.dispose();
+
+        }
     }
 }

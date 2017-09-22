@@ -3,23 +3,23 @@ package GUI;
 import Server.Client;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
-class Lobby extends JFrame{
-    private final HashMap<String, String> networkInfo;
+public class Lobby extends JFrame{
+    private Client client;
     private final String username;
-    private String status;
+    private ArrayList<String> status;
     private JPanel activeGames;
     private Largest largest;
+    private JLabel flag;
 
-    Lobby(HashMap<String, String> networkInfo, String status){
-        super("Carrion");
-        this.networkInfo = networkInfo;
-        this.username = networkInfo.get("username");
+    public Lobby(Client client, ArrayList<String> status){
+        super(client.getUsername());
+        this.client = client;
+        client.setLobby(this);
+        this.username = client.getUsername();
         this.status = status;
         this.largest = null;
         setFrame();
@@ -32,6 +32,15 @@ class Lobby extends JFrame{
         setResizable(true);
         setLocationRelativeTo( null );
         setVisible(true);
+        WindowListener exitListener = new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                getContentPane().removeAll();
+                disposeLargest();
+                client.close();
+            }
+        };
+        addWindowListener(exitListener);
     }
 
     private void prepareFrame(){
@@ -81,44 +90,14 @@ class Lobby extends JFrame{
         Font font = new Font("Serif", Font.BOLD, 35);
         welcome.setFont(font);
 
-        JLabel buttonWork = new JLabel();
-        buttonWork.setBackground(Colors.BACKGROUND);
-
-        JButton refresh = new JButton("Refresh Page");
-        refresh.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                status = new Client(networkInfo).signIn();
-                update();
-                if (status.equals("Invalid")){
-                    buttonWork.setForeground(Colors.RED);
-                    buttonWork.setText("Invalid");
-                    Timer timer = new Timer(5000, new ActionListener(){
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            buttonWork.setText("");
-                        }
-                    });
-                    timer.start();
-                }else {
-                    buttonWork.setForeground(Colors.YELLOW);
-                    buttonWork.setText("Valid");
-                    Timer timer = new Timer(5000, new ActionListener(){
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            buttonWork.setText("");
-                        }
-                    });
-                    timer.start();
-                }
-            }
-        });
+        flag = new JLabel();
+        flag.setBackground(Colors.BACKGROUND);
 
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 0;
         c.weighty = 1.0;
-        c.weightx = 0.5;
+        c.weightx = 0.75;
         c.anchor = GridBagConstraints.WEST;
         c.insets = new Insets(10, 10, 10, 10);
         title.add(welcome, c);
@@ -129,15 +108,7 @@ class Lobby extends JFrame{
         c.weightx = 0.25;
         c.anchor = GridBagConstraints.EAST;
         c.insets = new Insets(10, 10, 10, 10);
-        title.add(buttonWork, c);
-
-        c.gridx = 2;
-        c.gridy = 0;
-        c.weighty = 1.0;
-        c.weightx = 0.25;
-        c.anchor = GridBagConstraints.EAST;
-        c.insets = new Insets(10, 10, 10, 10);
-        title.add(refresh, c);
+        title.add(flag, c);
 
         return title;
     }
@@ -149,16 +120,29 @@ class Lobby extends JFrame{
     }
 
     private void update(){
-        if (!status.equals("Invalid")){
+        if (!status.get(0).equals("Invalid")){
             updateActiveGames();
             revalidate();
             repaint();
+        }else {
+            flag.setText("Invalid");
+            Timer timer = new Timer(5000, new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            flag.setText("");
+                        }
+                    });
+                }
+            });
+            timer.start();
         }
     }
 
     private void updateActiveGames(){
         activeGames.removeAll();
-        if (status.equals("Empty")){
+        if (status.get(0).equals("Empty")){
             JPanel panel= new JPanel(new GridBagLayout());
             panel.setBackground(Colors.BACKGROUND);
             JLabel sign = new JLabel(username + " is a coward");
@@ -182,12 +166,11 @@ class Lobby extends JFrame{
         signPanel.add(sign, c);
         activeGames.add(signPanel);
 
-        ArrayList<String> info =  new ArrayList<>(Arrays.asList(status.split(";")));
         int i = 0;
-        while (i < info.size()){
-            int gameId = Integer.parseInt(info.get(i));
-            int gameType = Integer.parseInt(info.get(i+1));
-            int gameStatus = Integer.parseInt(info.get(i+2));
+        while (i < status.size()){
+            int gameId = Integer.parseInt(status.get(i));
+            int gameType = Integer.parseInt(status.get(i+1));
+            int gameStatus = Integer.parseInt(status.get(i+2));
             i+=3;
             int numberOfPlayers = convertTypeToNumber(gameType);
             int total = i + numberOfPlayers;
@@ -195,13 +178,13 @@ class Lobby extends JFrame{
             String encodedBoard = "NA";
             int myColor = -1;
             if (gameStatus != 0){
-                myColor = Integer.parseInt(info.get(i));
+                myColor = Integer.parseInt(status.get(i));
                 i++;
                 while (i < total + 1){
-                    players.add(info.get(i));
+                    players.add(status.get(i));
                     i++;
                 }
-                encodedBoard = info.get(i);
+                encodedBoard = status.get(i);
                 i++;
             }
 
@@ -266,12 +249,17 @@ class Lobby extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 if (gameStatus == 0){
                     //exit game
-                    status = new Client(networkInfo).exitGame(gameId);
-                    update();
+                    client.exitGame(gameId);
                 }else {
                     HashMap<Integer, String> playerNames = convertPlayerNames(gameType, players);
                     disposeLargest();
-                    largest = new Largest(encodedBoard, myColor, playerNames, networkInfo, gameId);
+                    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            setCursor(new Cursor(Cursor.WAIT_CURSOR));
+                            largest = new Largest(encodedBoard, myColor, playerNames, client, gameId);
+                            setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+                        }
+                    });
                 }
             }
         });
@@ -461,8 +449,7 @@ class Lobby extends JFrame{
                     //type == 6
                     gameType = 6;
                 }
-                status = new Client(networkInfo).newGame(gameType);
-                update();
+                client.newGame(gameType);
             }
         });
 
@@ -563,7 +550,48 @@ class Lobby extends JFrame{
     void disposeLargest(){
         if (largest != null){
             largest.dispose();
+        }
+    }
 
+    public void notConnected(){
+        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        flag.setText("Not Connected");
+        Timer timer = new Timer(5000, new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        flag.setText("");
+                    }
+                });
+            }
+        });
+        timer.start();
+        if (largest != null){
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    largest.notConnected();
+                }
+            });
+        }
+    }
+
+    public void updateStatus(ArrayList<String> status){
+        this.status = status;
+        update();
+    }
+
+    public void updateGame(ArrayList<String> info){
+        System.out.println(info);
+        if (largest != null){
+            System.out.println(largest.getId());
+        }
+        if (largest != null && largest.getId() == Integer.parseInt(info.get(0))){
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    largest.updateEngine(info.get(1));
+                }
+            });
         }
     }
 }

@@ -6,24 +6,24 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;
 
-class Largest extends JFrame{
+public class Largest extends JFrame{
     private final Engine engine;
     private final DrawingPanel drawingPanel;
     private final JTextArea hoverArea;
     private final boolean online;
     private final int userTeam;
     private final HashMap<Integer, String> playerNames;
-    private final HashMap<String, String> networkInfo;
+    private final Client client;
     private final int id;
     private JPanel topPanel;
 
     Largest(String encodedBoard, int userTeam,
-                   HashMap<Integer, String> playerNames, HashMap<String, String> networkInfo, int id){
-        super("Carrion");
+                   HashMap<Integer, String> playerNames, Client client, int id){
+        super("Game ID: " + id);
         this.online = true;
         this.userTeam = userTeam;
         this.playerNames = playerNames;
-        this.networkInfo = networkInfo;
+        this.client = client;
         this.id = id;
         this.engine = new Engine(encodedBoard, userTeam);
         this.drawingPanel = new DrawingPanel(engine);
@@ -33,11 +33,11 @@ class Largest extends JFrame{
     }
 
     Largest(String encodedBoard){
-        super("Carrion");
+        super("Offline");
         this.online = false;
         this.userTeam = 0;
         this.playerNames = null;
-        this.networkInfo = null;
+        this.client = null;
         this.id = 0;
         this.engine = new Engine(encodedBoard, 0);
         this.drawingPanel = new DrawingPanel(engine);
@@ -212,12 +212,8 @@ class Largest extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 if (userTeam != 0 && turnStage == 1){
                     String encodedTurn = engine.getEncodedTurn();
-                    String result = new Client(networkInfo).submitOrders(id, encodedTurn);
-                    if (!result.equals("Invalid")){
-                        engine.addEncodedTurn(result);
-                        drawingPanel.updateMap();
-                        updateTopPanel();
-                    }
+                    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+                    client.submitOrders(id, encodedTurn);
                 }else {
                     engine.nextPhase(false);
                     drawingPanel.updateMap();
@@ -226,6 +222,22 @@ class Largest extends JFrame{
             }
         });
         return next;
+    }
+
+    void notConnected(){
+        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        hoverArea.setText("Not Connected to Server");
+    }
+
+    int getId(){
+        return id;
+    }
+
+    void updateEngine(String turn){
+        engine.addEncodedTurn(turn);
+        drawingPanel.updateMap();
+        updateTopPanel();
+        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 
     private JButton createExposeButton(){

@@ -3,36 +3,35 @@ package Server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 
 public class Server {
     private final DB db;
-    private ServerSocket listener;
+    private final ServerSocket server;
+    private final HashMap<String, Talker> talkers = new HashMap<>();
 
     public Server(int port){
         this.db = new DB();
-        setListener(port);
-        listen();
-    }
-
-    private void setListener(int port){
+        ServerSocket s;
         try{
-            listener = new ServerSocket(port);
+            s = new ServerSocket(port);
 
         } catch (IOException e) {
             e.printStackTrace();
+            s = null;
             System.exit(0);
         }
+        server = s;
+        listen();
     }
 
     private void listen(){
         System.out.println("listening");
         while(true){
             try {
-                Socket socket = listener.accept();
+                Socket socket = server.accept();
                 System.out.println("New Listener");
-                Talker talker = new Talker(db, socket);
-                Thread thread = new Thread(talker);
-                thread.start();
+                new Talker(db, socket, talkers);
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -1,123 +1,183 @@
 package Server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 
-class Talker implements Runnable{
+class Talker{
+    private String username;
     private final DB db;
     private final Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
+    private final PrintWriter out;
+    private final Ears ears;
+    private final HashMap<String, Talker> talkers;
+    private String ping;
 
-    Talker(DB db, Socket socket){
+
+    Talker(DB db, Socket socket, HashMap<String, Talker> talkers){
         this.db = db;
         this.socket = socket;
+        this.talkers = talkers;
+        PrintWriter out1;
+        Ears ears1;
+        try {
+            out1 = new PrintWriter(socket.getOutputStream(), true);
+            ears1 = new Ears(socket, this);
+        } catch (IOException e) {
+            e.printStackTrace();
+            out1 = null;
+            ears1 = null;
+        }
+        out = out1;
+        ears = ears1;
+        Thread thread = new Thread(ears);
+        thread.start();
+        sendPing();
     }
 
-    public void run(){
-        try {
-            in = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            out = new PrintWriter(socket.getOutputStream(), true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        listen();
+    private void sendPing(){
+        send("ping");
+        ping = "ping";
+        scheduleTestConnection();
     }
 
-    private void listen(){
+    private void scheduleTestConnection(){
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                testConnection();
+            }
+        }, 60*1000);
+    }
+
+    private void testConnection(){
+        if (ping.equals("ping")){
+            close();
+        }else if (ping.equals("pong")){
+            sendPing();
+        }
+    }
+
+    void close(){
+        talkers.remove(username);
         try {
-            String input = in.readLine();
-            System.out.println("listening: " + input);
-            ArrayList<String> ask = new ArrayList<>(Arrays.asList(input.split(";")));
-            processAsk(ask);
+            if (ears != null){
+                ears.setStop();
+            }
+            send("close");
+            socket.shutdownOutput();
+            socket.shutdownInput();
+            socket.close();
+            System.out.println("socket closed: "+ socket.isClosed());
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println(talkers);
+    }
+
+    void receive(String message){
+        ArrayList<String> ask = new ArrayList<>(Arrays.asList(message.split(";")));
+        processAsk(ask);
     }
 
     private void send(String message){
         System.out.println("sending: " + message);
         out.println(message);
-        try {
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void processAsk(ArrayList<String> ask){
-        if (ask.size() > 0 && ask.get(0).equals("newUser")){
-            ask.remove(0);
+        if (ask.size() < 1){
+            return;
+        }
+        String request = ask.get(0);
+        ask.remove(0);
+        if (request.equals("ping")){
+            send("pong");
+        }else if (request.equals("pong")){
+            ping = "pong";
+        }else if (request.equals("close")){
+            close();
+        }else if (request.equals("newUser")){
             createNewUser(ask);
-        }else if (ask.size() > 2){
-            String username = ask.get(0);
-            String password = ask.get(1);
-            if (db.validUser(username, password)){
-                ask.remove(0);
-                ask.remove(0);
-                String request = ask.get(0);
-                ask.remove(0);
-                if (request.equals("status")){
-                    getStatus(username);
-                }else if (request.equals("newGame")){
-                    newGame(username, ask);
-                }else if (request.equals("exitGame")){
-                    exitGame(username, ask);
-                }else if (request.equals("submitOrders")){
-                    submitOrders(username, ask);
-                }
-            }else{
-                send("Invalid");
-            }
+        }else if (request.equals("signIn")){
+            signIn(ask);
+        }else if (request.equals("status")){
+            getStatus();
+        }else if (request.equals("newGame")){
+            newGame(ask);
+        }else if (request.equals("exitGame")){
+            exitGame(ask);
+        }else if (request.equals("submitOrders")){
+            submitOrders(ask);
         }
     }
 
     private void createNewUser(ArrayList<String> info){
         if (info.size()== 2 && db.createNewUser(info.get(0), info.get(1))){
-            send("Empty");
+            this.username = info.get(0);
+            talkers.put(username, this);
+            send("signIn;Empty");
         }else{
-            send("Invalid");
+            send("signIn;Invalid");
         }
     }
 
-    private void getStatus(String username){
-        send(db.getStatus(username));
-        //send("1;2;6;1;q;w;e;r;t;y;21,6;1;2;6;1;q;w;e;r;t;y;21,6;1;2;6;1;q;w;e;r;t;y;21,6;1;2;6;1;q;w;e;r;t;y;21,6");
+    private void signIn(ArrayList<String> info){
+        if (info.size()== 2 && db.validUser(info.get(0), info.get(1))){
+            this.username = info.get(0);
+            talkers.put(username, this);
+            send("signIn;" + db.getStatus(username));
+        }else{
+            send("signIn;Invalid");
+        }
     }
 
-    private void newGame(String username, ArrayList<String> ask){
-        if (ask.size() == 1 && isInteger(ask.get(0)) && db.newGame(username, Integer.parseInt(ask.get(0)))){
-            getStatus(username);
+    private void getStatus(){
+        send("status;" + db.getStatus(username));
+    }
+
+    private void newGame(ArrayList<String> ask){
+        if (ask.size() == 1 && isInteger(ask.get(0))){
+            ArrayList<String> results = db.newGame(username, Integer.parseInt(ask.get(0)));
+            for (String other: results){
+                if (talkers.containsKey(other)){
+                    talkers.get(other).getStatus();
+                }
+            }
+            getStatus();
         }else {
             send("Invalid");
         }
     }
 
-    private void exitGame(String username, ArrayList<String> ask){
+    private void exitGame( ArrayList<String> ask){
         if (ask.size() == 1 && isInteger(ask.get(0)) && db.exitGame(username, Integer.parseInt(ask.get(0)))){
-            getStatus(username);
+            getStatus();
         }else {
             send("Invalid");
         }
     }
 
-    private void submitOrders(String username, ArrayList<String> ask){
+    private void submitOrders(ArrayList<String> ask){
         if (ask.size() == 2 && isInteger(ask.get(0))){
-            send(db.submitOrders(username, Integer.parseInt(ask.get(0)), ask.get(1)));
-        }else {
-            send("Invalid");
+            int id = Integer.parseInt(ask.get(0));
+            ArrayList<String> others = db.submitOrders(username, id, ask.get(1));
+            if (!others.isEmpty()){
+                String encoded = others.get(0);
+                String theirEncoded = others.get(1);
+                send("gameUpdate;" + id + ";"+ encoded);
+                getStatus();
+                int i = 2;
+                while (i < others.size()){
+                    if (talkers.containsKey(others.get(i)) && !others.get(i).equals(username)){
+                        talkers.get(others.get(i)).getStatus();
+                        talkers.get(others.get(i)).send("gameUpdate;" + id + ";"+ theirEncoded);
+                    }
+                    i++;
+                }
+            }
         }
     }
 

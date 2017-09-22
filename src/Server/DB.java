@@ -304,7 +304,7 @@ class DB {
         return "Empty";
     }
 
-    synchronized boolean newGame(String username, int gameType){
+    synchronized ArrayList<String> newGame(String username, int gameType){
         if (gameType == 0){
             return newNeighbors(username);
         }else if (gameType == 1) {
@@ -379,7 +379,7 @@ class DB {
         }
     }
 
-    private synchronized boolean startGame(String username, int type, String place){
+    private synchronized void startGame(String username, int type, String place){
         try {
             String sql = "INSERT INTO GAME (TYPE, STATUS, " + place + ") VALUES (?, 0, ?);";
 
@@ -390,14 +390,12 @@ class DB {
             pstmt.close();
             c.commit();
             System.out.println("newGame started " + username + " " + type + " " + place);
-            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false;
     }
 
-    private synchronized boolean beginGame(int id, int type){
+    private synchronized void beginGame(int id, int type){
         String encoded = "21," + String.valueOf(type);
         ArrayList<String> info = new Engine(encoded, 0).getInfo();
         try {
@@ -407,20 +405,19 @@ class DB {
             stmt.executeUpdate(sql);
             stmt.close();
             c.commit();
-            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false;
     }
 
-    private synchronized boolean newNeighbors(String username){
+    private synchronized ArrayList<String> newNeighbors(String username){
+        ArrayList<String> players = new ArrayList<>();
         int type = 0;
         try {
             HashMap <String, String> newGame = getNewGame(type);
 
             if (newGame.isEmpty()){
-                return startGame(username, type, "PLAYER1");
+                startGame(username, type, "PLAYER1");
             }
 
             int id = Integer.parseInt(newGame.get("ID"));
@@ -442,26 +439,25 @@ class DB {
             }
 
             if (entered && player1 != null && player2 != null){
-                return beginGame(id, type);
-            }
-            if (entered){
-                return true;
+                beginGame(id, type);
+                players.add(player1);
+                players.add(player2);
             }
         }catch (Exception e){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
-        return false;
+        return players;
     }
 
-    private synchronized boolean newAngle(String username){
+    private synchronized ArrayList<String> newAngle(String username){
+        ArrayList<String> players = new ArrayList<>();
         int type = 1;
 
         try {
             HashMap <String, String> newGame = getNewGame(type);
 
             if (newGame.isEmpty()){
-                return startGame(username, type, "PLAYER1");
-
+                startGame(username, type, "PLAYER1");
             }
 
             int id = Integer.parseInt(newGame.get("ID"));
@@ -482,25 +478,24 @@ class DB {
             }
 
             if (entered && player1 != null && player3 != null){
-                return beginGame(id, type);
-            }
-            if (entered){
-                return true;
+                beginGame(id, type);
+                players.add(player1);
+                players.add(player3);
             }
         }catch (Exception e){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
-        return false;
+        return players;
     }
 
-    private synchronized boolean new2(String username){
+    private synchronized ArrayList<String> new2(String username){
+        ArrayList<String> players = new ArrayList<>();
         int type = 2;
         try {
             HashMap <String, String> newGame = getNewGame(type);
 
             if (newGame.isEmpty()){
-                return startGame(username, type, "PLAYER1");
-
+                startGame(username, type, "PLAYER1");
             }
 
             int id = Integer.parseInt(newGame.get("ID"));
@@ -521,25 +516,24 @@ class DB {
             }
 
             if (entered && player1 != null && player4 != null){
-                return beginGame(id, type);
-            }
-            if (entered){
-                return true;
+                beginGame(id, type);
+                players.add(player1);
+                players.add(player4);
             }
         }catch (Exception e){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
-        return false;
+        return players;
     }
 
-    private synchronized boolean new3(String username){
+    private synchronized ArrayList<String> new3(String username){
+        ArrayList<String> players = new ArrayList<>();
         int type = 3;
         try {
             HashMap <String, String> newGame = getNewGame(type);
 
             if (newGame.isEmpty()){
-                return startGame(username, type, "PLAYER1");
-
+                startGame(username, type, "PLAYER1");
             }
 
             int id = Integer.parseInt(newGame.get("ID"));
@@ -569,24 +563,25 @@ class DB {
             }
 
             if (entered && player1 != null && player3 != null && player5 != null){
-                return beginGame(id, type);
-            }
-            if (entered){
-                return true;
+                beginGame(id, type);
+                players.add(player1);
+                players.add(player3);
+                players.add(player5);
             }
         }catch (Exception e){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
-        return false;
+        return players;
     }
 
-    private synchronized boolean new4(String username){
+    private synchronized ArrayList<String> new4(String username){
+        ArrayList<String> players = new ArrayList<>();
         int type = 4;
         try {
             HashMap <String, String> newGame = getNewGame(type);
 
             if (newGame.isEmpty()){
-                return startGame(username, type, "PLAYER2");
+                startGame(username, type, "PLAYER2");
 
             }
 
@@ -622,24 +617,26 @@ class DB {
             }
 
             if (entered && player2 != null && player3 != null && player5 != null && player6 != null){
-                return beginGame(id, type);
-            }
-            if (entered){
-                return true;
+                beginGame(id, type);
+                players.add(player2);
+                players.add(player3);
+                players.add(player5);
+                players.add(player6);
             }
         }catch (Exception e){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
-        return false;
+        return players;
     }
 
-    private synchronized boolean new5(String username){
+    private synchronized ArrayList<String> new5(String username){
+        ArrayList<String> players = new ArrayList<>();
         int type = 5;
         try {
             HashMap <String, String> newGame = getNewGame(type);
 
             if (newGame.isEmpty()){
-                return startGame(username, type, "PLAYER1");
+                startGame(username, type, "PLAYER1");
 
             }
 
@@ -687,24 +684,27 @@ class DB {
 
             if (entered && player1 != null && player2 != null && player3 != null &&
                     player5 != null && player6 != null){
-                return beginGame(id, type);
-            }
-            if (entered){
-                return true;
+                beginGame(id, type);
+                players.add(player1);
+                players.add(player2);
+                players.add(player3);
+                players.add(player5);
+                players.add(player6);
             }
         }catch (Exception e){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
-        return false;
+        return players;
     }
 
-    private synchronized boolean new6(String username){
+    private synchronized ArrayList<String> new6(String username){
+        ArrayList<String> players = new ArrayList<>();
         int type = 6;
         try {
             HashMap <String, String> newGame = getNewGame(type);
 
             if (newGame.isEmpty()){
-                return startGame(username, type, "PLAYER1");
+                startGame(username, type, "PLAYER1");
             }
 
             int id = Integer.parseInt(newGame.get("ID"));
@@ -757,15 +757,18 @@ class DB {
 
             if (entered && player1 != null && player2 != null && player3 != null &&
                     player4 != null && player5 != null && player6 != null){
-                return beginGame(id, type);
-            }
-            if (entered){
-                return true;
+                beginGame(id, type);
+                players.add(player1);
+                players.add(player2);
+                players.add(player3);
+                players.add(player4);
+                players.add(player5);
+                players.add(player6);
             }
         }catch (Exception e){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
-        return false;
+        return players;
     }
 
     synchronized boolean exitGame(String username, int id){
@@ -811,12 +814,14 @@ class DB {
         return false;
     }
 
-    synchronized String submitOrders(String username, int id, String orders){
+    synchronized ArrayList<String> submitOrders(String username, int id, String orders){
+        ArrayList<String> results = new ArrayList<>();
         HashMap <String, String> game = getGame(id);
         //check if its my turn
         if (!myTurn(username, game)){
-            return "Invalid";
+            return results;
         }
+        String reallyOld = game.get("BOARD");
         Engine engine = new Engine(game.get("BOARD"), Integer.parseInt(game.get("STATUS")));
         engine.addEncodedTurn(orders);
         String oldEncoded = engine.getLatestEncoded();
@@ -824,8 +829,24 @@ class DB {
         String newEncoded = engine.getLatestEncoded();
         int playerTurn = engine.getPlayerTurn();
         int oldLength = oldEncoded.length();
+        int reallyOldLength = reallyOld.length();
         updateGame(id, playerTurn, newEncoded);
-        return newEncoded.substring(oldLength + 1);
+        results.add(newEncoded.substring(oldLength + 1));
+        results.add(newEncoded.substring(reallyOldLength + 1));
+        if (game.containsKey("PLAYER1")){
+            results.add(game.get("PLAYER1"));
+        }if (game.containsKey("PLAYER2")){
+            results.add(game.get("PLAYER2"));
+        }if (game.containsKey("PLAYER3")){
+            results.add(game.get("PLAYER3"));
+        }if (game.containsKey("PLAYER4")){
+            results.add(game.get("PLAYER4"));
+        }if (game.containsKey("PLAYER5")){
+            results.add(game.get("PLAYER5"));
+        }if (game.containsKey("PLAYER6")){
+            results.add(game.get("PLAYER6"));
+        }
+        return results;
     }
 
     private synchronized void updateGame(int id, int playerTurn, String newEncoded){

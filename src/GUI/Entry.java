@@ -11,13 +11,16 @@ import java.util.HashMap;
 
 public class Entry {
     private JFrame frame;
+    private JLabel flag;
     private Lobby lobby;
     private Largest largest;
+    private Client client;
 
     public Entry(){
         this.frame = new JFrame("Carrion");
         this.lobby = null;
         this.largest = null;
+        this.client = null;
         setFrame();
         prepareFrame();
     }
@@ -25,7 +28,7 @@ public class Entry {
     private void setFrame(){
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(300, 400);
-        frame.setResizable(false);
+        frame.setResizable(true);
         frame.setLocationRelativeTo( null );
         frame.setVisible(true);
     }
@@ -259,12 +262,12 @@ public class Entry {
         portLabel.setBackground(Colors.BACKGROUND);
         portLabel.setForeground(Colors.YELLOW);
 
-        JLabel flag = new JLabel();
+        flag = new JLabel();
         flag.setBackground(Colors.BACKGROUND);
         flag.setForeground(Colors.RED);
 
-        JButton signIn = createSignIn(name, pass, ip, port, flag);
-        JButton newUser = createNewUser(name, pass, repeatPass, ip, port, flag);
+        JButton signIn = createSignIn(name, pass, repeatPass, ip, port);
+        JButton newUser = createNewUser(name, pass, repeatPass, ip, port);
 
         GridBagConstraints c  = new GridBagConstraints();
         c.gridx = 0;
@@ -395,7 +398,8 @@ public class Entry {
         return online;
     }
 
-    private JButton createSignIn(JTextField name, JPasswordField pass, JTextField ip, JTextField port, JLabel flag){
+    private JButton createSignIn(JTextField name, JPasswordField pass, JPasswordField repeatPass,
+                                 JTextField ip, JTextField port){
         JButton signIn = new JButton("Sign In");
         signIn.addActionListener(new ActionListener() {
             @Override
@@ -403,36 +407,29 @@ public class Entry {
                 HashMap<String, String> networkInfo = new HashMap<>();
                 networkInfo.put("username", name.getText());
                 networkInfo.put("password", new String(pass.getPassword()));
+                networkInfo.put("repeat", new String(repeatPass.getPassword()));
                 networkInfo.put("ip", ip.getText());
                 networkInfo.put("port", port.getText());
-
-                String status = new Client(networkInfo).signIn();
-                if (status.equals("Invalid")){
-                    flag.setText("Invalid");
-                    Timer timer = new Timer(5000, new ActionListener(){
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            flag.setText("");
-                        }
-                    });
-                    timer.start();
+                if (client != null){
+                    System.out.println("sign in calling close");
+                    client.close();
                 }
-                else {
-                    if (lobby != null){
-                        lobby.disposeLargest();
-                        lobby.dispose();
+                client = new Client(networkInfo, Entry.this, false);
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
                     }
-                    lobby = new Lobby(networkInfo, status);
-                }
+                });
                 name.setText("");
                 pass.setText("");
+                repeatPass.setText("");
             }
         });
         return signIn;
     }
 
     private JButton createNewUser(JTextField name, JPasswordField pass, JPasswordField repeatPass,
-                                  JTextField ip, JTextField port, JLabel flag){
+                                  JTextField ip, JTextField port){
         JButton newUser = new JButton("New User");
         newUser.addActionListener(new ActionListener() {
             @Override
@@ -440,32 +437,63 @@ public class Entry {
                 HashMap<String, String> networkInfo = new HashMap<>();
                 networkInfo.put("username", name.getText());
                 networkInfo.put("password", new String(pass.getPassword()));
+                networkInfo.put("repeat", new String(repeatPass.getPassword()));
                 networkInfo.put("ip", ip.getText());
                 networkInfo.put("port", port.getText());
-
-                String status = new Client(networkInfo).newUser(new String(repeatPass.getPassword()));
-                if (status.equals("Invalid")){
-                    flag.setText("Invalid");
-                    Timer timer = new Timer(5000, new ActionListener(){
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            flag.setText("");
-                        }
-                    });
-                    timer.start();
+                if (client != null){
+                    client.close();
                 }
-                else {
-                    if (lobby != null){
-                        lobby.disposeLargest();
-                        lobby.dispose();
+                client = new Client(networkInfo, Entry.this, true);
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
                     }
-                    lobby = new Lobby(networkInfo, status);
-                }
+                });
                 name.setText("");
                 pass.setText("");
                 repeatPass.setText("");
             }
         });
         return newUser;
+    }
+
+    public void clientRejects(){
+        flag.setText("Invalid");
+        Timer timer = new Timer(5000, new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        flag.setText("");
+                    }
+                });
+            }
+        });
+        timer.start();
+        frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    }
+
+    public void signIn(ArrayList<String> info){
+        if (info.size() == 1 && info.get(0).equals("Invalid")){
+            flag.setText(info.get(0));
+            Timer timer = new Timer(5000, new ActionListener(){
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                        public void run() {
+                            flag.setText("");
+                        }
+                    });
+                }
+            });
+            timer.start();
+        }else if (info.size() > 0){
+            if (lobby != null){
+                lobby.disposeLargest();
+                lobby.dispose();
+            }
+            lobby = new Lobby(client, info);
+        }
+        frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 }

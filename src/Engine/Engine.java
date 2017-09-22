@@ -188,10 +188,24 @@ public class Engine {
 
     public void addEncodedTurn(String turn){
         ArrayList<String> moves = new ArrayList<>(Arrays.asList(turn.split(",")));
+        histIndex = history.size() - 1;
+        indexOfNoChange = history.size() - 2;
         playMoves(moves, 0);
-        if (!offline && userTeam != playerTurn){
+        if (!offline){
+            if (userTeam != playerTurn){
+                indexOfNoChange  = history.size();
+            }else{
+                indexOfNoChange = history.size() - 2;
+            }
+        }
+        fillPlayers();
+        if (!offline && ((players.keySet().contains(Alliance.UNOCCUPIED) && players.size() == 2) ||
+                (!players.keySet().contains(Alliance.UNOCCUPIED) && players.size() == 1))){
+
             indexOfNoChange  = history.size();
         }
+
+
     }
 
     public String getLatestEncoded(){
@@ -623,17 +637,41 @@ public class Engine {
 
     private void condenseAllocateHistory(){
         //remove all allocate history except for first, make easier to click through
-        int nextNext = 0;
-        int i = indexOfNoChange + 2;
-        boolean searching = true;
-        while (searching){
-            if (history.get(i).getTurnStage() != 0){
-                nextNext = i;
-                searching = false;
+        int i = history.size() - 1;
+        int start = 0;
+        int finish = 0;
+        boolean searchingStart = true;
+        boolean searchingFinish = true;
+        while (searchingStart){
+            boolean allocate = history.get(i).getTurnStage() == 0;
+            //System.out.println(i + " " + allocate);
+            if (i == 1 && searchingFinish){
+                finish = 1;
+                start = 1;
+                searchingStart = false;
+            }else if (searchingFinish && allocate){
+                finish = i+1;
+                searchingFinish = false;
+            }else if ((!searchingFinish && !allocate) || i == 0){
+                start = i + 1;
+                searchingStart = false;
             }
-            i++;
+            i--;
         }
-        history.subList(indexOfNoChange + 2, nextNext).clear();
+        //System.out.println(start + "  " + finish);
+        history.subList(start, finish).clear();
+
+//        int nextNext = 0;
+//        int i = indexOfNoChange + 2;
+//        boolean searching = true;
+//        while (searching){
+//            if (history.get(i).getTurnStage() != 0){
+//                nextNext = i;
+//                searching = false;
+//            }
+//            i++;
+//        }
+//        history.subList(indexOfNoChange + 2, nextNext).clear();
     }
 
     private Player getActivePlayer(){

@@ -1,94 +1,138 @@
 package Server;
 
-import java.io.BufferedReader;
+import GUI.Entry;
+import GUI.Lobby;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 public class Client {
-    private final String name;
-    private final String pass;
-    private final String ip;
-    private final String port;
-    private Socket socket;
+    private final String username;
+    private final Entry entry;
+    private final Socket socket;
+    private final PrintWriter out;
+    private final Ears ears;
+    private Lobby lobby;
+    private String ping;
 
-    public Client(HashMap<String, String> networkInfo){
-        this.name = networkInfo.get("username");
-        this.pass = networkInfo.get("password");
-        this.ip = networkInfo.get("ip");
-        this.port = networkInfo.get("port");
-    }
-
-    private void tellSocket(String message){
-        socket = new Socket();
+    public Client(HashMap<String, String> networkInfo, Entry entry, boolean newUser){
+        if (networkInfo.keySet().contains("username")){
+            username = networkInfo.get("username");
+        }else{
+            username = null;
+        }
+        this.entry = entry;
+        this.socket = new Socket();
         int timeout = 5000;
+        PrintWriter out1;
+        Ears ears1;
+        boolean connected = false;
+        if (validFormat(networkInfo, newUser)){
+            try {
+                socket.connect(new InetSocketAddress(networkInfo.get("ip"),
+                        Integer.parseInt(networkInfo.get("port"))), timeout);
+                out1 = new PrintWriter(socket.getOutputStream(), true);
+                ears1 = new Ears(socket, this);
+                Thread thread = new Thread(ears1);
+                thread.start();
+                connected = true;
+            } catch (IOException e) {
+                e.printStackTrace();
+                out1 = null;
+                ears1 = null;
+            }
+        }else{
+            out1 = null;
+            ears1 = null;
+        }
+        out = out1;
+        ears = ears1;
+        if (connected){
+            signIn(networkInfo, newUser);
+        }else{
+            close();
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    entry.clientRejects();
+                }
+            });
+        }
+        sendPing();
+    }
+
+    private void sendPing(){
+        send("ping");
+        ping = "ping";
+        scheduleTestConnection();
+    }
+
+    private void scheduleTestConnection(){
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                testConnection();
+            }
+        }, 60*1000);
+    }
+
+    private void testConnection(){
+        if (ping.equals("ping")){
+            close();
+        }else if (ping.equals("pong")){
+            sendPing();
+        }
+    }
+
+    public void setLobby(Lobby lobby){
+        this.lobby = lobby;
+    }
+
+    public void close(){
+        //tell gui
+        System.out.println("close client");
         try {
-            System.out.println(ip + " " + port + " tellSocket: " + message);
-            socket.connect(new InetSocketAddress(ip, Integer.parseInt(port)), timeout);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            out.println(message);
+            if (ears != null){
+                ears.setStop();
+            }
+            if (!socket.isClosed()){
+                send("close");
+                socket.shutdownOutput();
+                socket.shutdownInput();
+                socket.close();
+            }
+            System.out.println("socket closed: "+ socket.isClosed());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private String response(){
-        try {
-            //my server will be super slow, might need to be longer
-            socket.setSoTimeout(10000);
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream()));
-            String message = in.readLine();
-            System.out.println("response: " + message);
-            socket.close();
-            return message;
-        } catch(SocketTimeoutException e){
-            System.out.println("socket timed out");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "Invalid";
-    }
+    private boolean validFormat(HashMap<String,String> networkInfo, boolean newUser){
+        String ip = networkInfo.get("ip");
+        String port = networkInfo.get("port");
+        String pass = networkInfo.get("password");
+        String repeat = networkInfo.get("repeat");
 
-    public String signIn(){
-        String status = "Invalid";
-        if (!validFormat()){
-            System.out.println("bad format " + ip + " " + port);
-            return status;
-        }
-        tellSocket(name + ";" + pass + ";status");
-        return response();
-    }
-
-    public String newUser(String repeatPass){
-        String newUser = "Invalid";
-        if (!validFormat() || !repeatPass.equals(pass)){
-            System.out.println("bad format " + ip + " " + port + " " + pass + " " + repeatPass);
-            return newUser;
-        }
-        tellSocket("newUser;" + name + ";" + pass);
-        return response();
-    }
-
-    private boolean validFormat(){
-        ArrayList<String> ipList= new ArrayList<>(Arrays.asList(ip.split("\\.")));
-        if (ipList.size() != 4){
-            System.out.println(ipList.size() + " bad length");
+        if (newUser && username != null && pass != null && repeat != null && !(pass.equals(repeat))){
             return false;
         }
-        for (String part : ipList){
-            if (!(isInteger(part) && (Integer.parseInt(part) >= 0 && Integer.parseInt(part) <= 255))){
-                System.out.println(part + " not right sized number");
+        if (username != null && ip != null && port != null){
+            ArrayList<String> ipList= new ArrayList<>(Arrays.asList(ip.split("\\.")));
+            if (ipList.size() != 4){
+                System.out.println(ipList.size() + " bad length");
                 return false;
             }
+            for (String part : ipList){
+                if (!(isInteger(part) && (Integer.parseInt(part) >= 0 && Integer.parseInt(part) <= 255))){
+                    System.out.println(part + " not right sized number");
+                    return false;
+                }
+            }
+            return isInteger(port);
         }
-        return isInteger(port);
+        return false;
     }
 
     private boolean isInteger(String s) {
@@ -104,21 +148,90 @@ public class Client {
         return true;
     }
 
-    public String newGame(int gameType){
-        String message = name + ";" + pass + ";newGame;" + gameType;
-        tellSocket(message);
-        return response();
+    private void send(String message){
+        out.println(message);
     }
 
-    public String exitGame(int id){
-        String message = name + ";" + pass + ";exitGame;" + id;
-        tellSocket(message);
-        return response();
+    private void signIn(HashMap<String, String> networkInfo, boolean newUser){
+        if (newUser){
+            send("newUser;" + networkInfo.get("username") +  ";" + networkInfo.get("password"));
+        }else {
+
+            send("signIn;" + networkInfo.get("username") +  ";" + networkInfo.get("password"));
+        }
     }
 
-    public String submitOrders(int id, String orders){
-        String message = name + ";" + pass + ";submitOrders;" + id + ";" + orders;
-        tellSocket(message);
-        return response();
+    void receive(String message){
+        ArrayList<String> info = new ArrayList<>(Arrays.asList(message.split(";")));
+        if (info.size() < 1){
+            return;
+        }
+        String label = info.get(0);
+        info.remove(0);
+        if (label.equals("ping")){
+            send("pong");
+        }else if (label.equals("pong")){
+            ping = "pong";
+        }else if (label.equals("close")){
+            close();
+        }else if (label.equals("signIn")){
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    entry.signIn(info);
+                }
+            });
+        }else if (label.equals("status")){
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    lobby.updateStatus(info);
+                }
+            });
+        }else if (label.equals("gameUpdate")){
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    lobby.updateGame(info);
+                }
+            });
+        }
+    }
+
+    public void newGame(int gameType){
+        if (socket.isConnected()){
+            send("newGame;" + gameType);
+        }else{
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    lobby.notConnected();
+                }
+            });
+        }
+    }
+
+    public void exitGame(int id){
+        if (socket.isConnected()){
+            send("exitGame;" + id);
+        }else{
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    lobby.notConnected();
+                }
+            });
+        }
+    }
+
+    public void submitOrders(int id, String orders){
+        if (socket.isConnected()){
+            send("submitOrders;" + id + ";" + orders);
+        }else{
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    lobby.notConnected();
+                }
+            });
+        }
+    }
+
+    public String getUsername(){
+        return username;
     }
 }

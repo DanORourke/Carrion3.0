@@ -677,6 +677,7 @@ public class Lobby extends JFrame{
     public void updateStatus(ArrayList<String> status){
         this.status = status;
         update();
+        java.awt.Toolkit.getDefaultToolkit().beep();
     }
 
     public void updateGame(ArrayList<String> info){

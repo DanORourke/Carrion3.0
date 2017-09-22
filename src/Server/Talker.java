@@ -53,10 +53,12 @@ class Talker{
     }
 
     private void testConnection(){
-        if (ping.equals("ping")){
-            close();
-        }else if (ping.equals("pong")){
-            sendPing();
+        if (socket.isConnected()){
+            if (ping.equals("ping")){
+                close();
+            }else if (ping.equals("pong")){
+                sendPing();
+            }
         }
     }
 
@@ -66,20 +68,14 @@ class Talker{
             if (ears != null){
                 ears.setStop();
             }
-            send("close");
             socket.shutdownOutput();
             socket.shutdownInput();
             socket.close();
             System.out.println("socket closed: "+ socket.isClosed());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
         System.out.println(talkers);
-    }
-
-    void receive(String message){
-        ArrayList<String> ask = new ArrayList<>(Arrays.asList(message.split(";")));
-        processAsk(ask);
     }
 
     private void send(String message){
@@ -87,7 +83,9 @@ class Talker{
         out.println(message);
     }
 
-    private void processAsk(ArrayList<String> ask){
+    void receive(String message){
+        ArrayList<String> ask = new ArrayList<>(Arrays.asList(message.split(";")));
+
         if (ask.size() < 1){
             return;
         }
@@ -97,6 +95,8 @@ class Talker{
             send("pong");
         }else if (request.equals("pong")){
             ping = "pong";
+        }else if (request.equals("sendChat")){
+            chat(message.substring(9));
         }else if (request.equals("close")){
             close();
         }else if (request.equals("newUser")){
@@ -111,6 +111,12 @@ class Talker{
             exitGame(ask);
         }else if (request.equals("submitOrders")){
             submitOrders(ask);
+        }
+    }
+
+    private void chat(String message){
+        for (String friend: talkers.keySet()){
+            talkers.get(friend).send("newChat;" + username + ": " + message);
         }
     }
 

@@ -412,14 +412,12 @@ public class Entry {
                 networkInfo.put("port", port.getText());
                 if (client != null){
                     System.out.println("sign in calling close");
+                    client.sendClose();
                     client.close();
                 }
                 client = new Client(networkInfo, Entry.this, false);
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-                    }
-                });
+                frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+
                 name.setText("");
                 pass.setText("");
                 repeatPass.setText("");
@@ -441,14 +439,12 @@ public class Entry {
                 networkInfo.put("ip", ip.getText());
                 networkInfo.put("port", port.getText());
                 if (client != null){
+                    client.sendClose();
                     client.close();
                 }
                 client = new Client(networkInfo, Entry.this, true);
-                javax.swing.SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-                    }
-                });
+                frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+
                 name.setText("");
                 pass.setText("");
                 repeatPass.setText("");
@@ -458,7 +454,9 @@ public class Entry {
     }
 
     public void clientRejects(){
+        client = null;
         flag.setText("Invalid");
+        frame.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
         Timer timer = new Timer(5000, new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -470,7 +468,6 @@ public class Entry {
             }
         });
         timer.start();
-        frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 
     public void signIn(ArrayList<String> info){

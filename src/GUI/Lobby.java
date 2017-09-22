@@ -14,6 +14,7 @@ public class Lobby extends JFrame{
     private JPanel activeGames;
     private Largest largest;
     private JLabel flag;
+    private JTextArea chatArea;
 
     public Lobby(Client client, ArrayList<String> status){
         super(client.getUsername());
@@ -37,6 +38,7 @@ public class Lobby extends JFrame{
             public void windowClosing(WindowEvent e) {
                 getContentPane().removeAll();
                 disposeLargest();
+                client.sendClose();
                 client.close();
             }
         };
@@ -49,14 +51,19 @@ public class Lobby extends JFrame{
         JPanel title = createTitlePanel();
         createActiveGames();
         JScrollPane scroll = new JScrollPane(activeGames);
-        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUnitIncrement(10);
-        JPanel newGame = createNewGamePanel();
+        JTabbedPane tabbed = createTabbed();
+        tabbed.setMinimumSize(new Dimension(0,0));
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scroll, tabbed);
+        split.setBackground(Colors.BACKGROUND);
+        split.setOneTouchExpandable(true);
+        split.setResizeWeight(0.66);
+        split.setDividerLocation(600);
 
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
         c.gridy = 0;
-        c.gridwidth = 2;
+        c.weightx = 1.0;
         c.weighty = 0.2;
         c.fill = GridBagConstraints.BOTH;
         main.add(title, c);
@@ -67,18 +74,81 @@ public class Lobby extends JFrame{
         c.weightx = 1.0;
         c.weighty = 0.8;
         c.fill = GridBagConstraints.BOTH;
-        main.add(scroll, c);
-
-        c = new GridBagConstraints();
-        c.gridx = 1;
-        c.gridy = 1;
-        c.weightx = 0.0;
-        c.weighty = 0.8;
-        c.fill = GridBagConstraints.VERTICAL;
-        main.add(newGame, c);
+        main.add(split, c);
 
         add(main);
         revalidate();
+    }
+
+    private JTabbedPane createTabbed(){
+        JTabbedPane tabbed = new JTabbedPane();
+        tabbed.setForeground(Colors.RED);
+        tabbed.setBackground(Colors.BACKGROUND);
+        JPanel newGame = createNewGamePanel();
+        tabbed.add("New", newGame);
+        JPanel chat = createChatPanel();
+        tabbed.add("Chat", chat);
+        return tabbed;
+    }
+
+    private JPanel createChatPanel(){
+        JPanel chat = new JPanel(new GridBagLayout());
+        chat.setBackground(Colors.BACKGROUND);
+
+        chatArea = new JTextArea();
+        chatArea.setEditable(false);
+        chatArea.setWrapStyleWord(true);
+        chatArea.setLineWrap(true);
+
+        JTextArea type = new JTextArea();
+        type.setWrapStyleWord(true);
+        type.setLineWrap(true);
+
+        JButton sendChat = new JButton("Send");
+        sendChat.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String message = type.getText();
+                if (message != null && client != null){
+                    client.sendChat(message);
+                }
+                type.setText("");
+            }
+        });
+
+        GridBagConstraints c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 1;
+        c.weighty = 0.75;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(10, 10, 5, 10);
+        chat.add(chatArea, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 1;
+        c.weightx = 1;
+        c.weighty = 0.20;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(5, 10, 5, 10);
+        chat.add(type, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 0;
+        c.gridy = 2;
+        c.weightx = 1;
+        c.weighty = 0.05;
+        c.anchor = GridBagConstraints.EAST;
+        c.insets = new Insets(5, 10, 10, 10);
+        chat.add(sendChat, c);
+
+
+        return chat;
+    }
+
+    public void newChat(String message){
+        chatArea.append(message + "\n");
     }
 
     private JPanel createTitlePanel(){
@@ -97,15 +167,15 @@ public class Lobby extends JFrame{
         c.gridx = 0;
         c.gridy = 0;
         c.weighty = 1.0;
-        c.weightx = 0.75;
-        c.anchor = GridBagConstraints.WEST;
+        c.weightx = 1.0;
+        c.anchor = GridBagConstraints.CENTER;
         c.insets = new Insets(10, 10, 10, 10);
         title.add(welcome, c);
 
         c.gridx = 1;
         c.gridy = 0;
         c.weighty = 1.0;
-        c.weightx = 0.25;
+        c.weightx = 0.0;
         c.anchor = GridBagConstraints.EAST;
         c.insets = new Insets(10, 10, 10, 10);
         title.add(flag, c);
@@ -196,7 +266,7 @@ public class Lobby extends JFrame{
     private JPanel createSingleGamePanel(int gameId, int gameStatus, int gameType, int myColor,
                                          ArrayList<String> players, String encodedBoard){
 
-        JPanel gamePanel = new JPanel(new GridLayout(1, 0, 0, 0));
+        JPanel gamePanel = new JPanel(new GridBagLayout());
         gamePanel.setBackground(Colors.BACKGROUND);
 
         JPanel gameInfo = new JPanel(new GridLayout(0, 1));
@@ -210,7 +280,6 @@ public class Lobby extends JFrame{
         JLabel gType = new JLabel("Game Type: " + convertNumberToType(gameType));
         colorLabel(gType);
         gameInfo.add(gType);
-        gamePanel.add(gameInfo);
 
         JPanel colorInfo = new JPanel(new GridLayout(0, 1));
         colorPanel(colorInfo);
@@ -220,7 +289,6 @@ public class Lobby extends JFrame{
         JLabel activeLabel = new JLabel("Active Color: " + convertActiveGameStatus(gameStatus));
         colorLabel(activeLabel);
         colorInfo.add(activeLabel);
-        gamePanel.add(colorInfo);
 
         JPanel playerInfo = new JPanel(new GridLayout(0, 1));
         colorPanel(playerInfo);
@@ -234,10 +302,8 @@ public class Lobby extends JFrame{
                 playerInfo.add(nameLabel);
             }
         }
-        gamePanel.add(playerInfo);
 
-        JPanel buttonPanel = new JPanel(new GridBagLayout());
-        colorPanel(buttonPanel);
+
         JButton play = new JButton("Open");
         if (gameStatus == 0){
             play.setText("Exit");
@@ -263,10 +329,42 @@ public class Lobby extends JFrame{
                 }
             }
         });
+
         GridBagConstraints c = new GridBagConstraints();
-        c.anchor = GridBagConstraints.CENTER;
-        buttonPanel.add(play, c);
-        gamePanel.add(buttonPanel);
+        c.gridx = 0;
+        c.gridy = 0;
+        c.weightx = 0.30;
+        c.weighty = 1.0;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(10, 10, 10, 10);
+        gamePanel.add(gameInfo, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 1;
+        c.gridy = 0;
+        c.weightx = 0.30;
+        c.weighty = 1.0;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(10, 10, 10, 10);
+        gamePanel.add(colorInfo, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 2;
+        c.gridy = 0;
+        c.weightx = 0.30;
+        c.weighty = 1.0;
+        c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets(10, 10, 10, 10);
+        gamePanel.add(playerInfo, c);
+
+        c = new GridBagConstraints();
+        c.gridx = 3;
+        c.gridy = 0;
+        c.weightx = 0.30;
+        c.weighty = 1.0;
+        c.anchor = GridBagConstraints.WEST;
+        c.insets = new Insets(10, 10, 10, 10);
+        gamePanel.add(play, c);
 
         return gamePanel;
     }
@@ -284,7 +382,7 @@ public class Lobby extends JFrame{
             playerNames.put(4, players.get(1));
         }else if (gameType == 3){
             playerNames.put(1, players.get(0));
-            playerNames.put(3, players.get(2));
+            playerNames.put(3, players.get(1));
             playerNames.put(5, players.get(2));
         }else if (gameType == 4){
             playerNames.put(2, players.get(0));

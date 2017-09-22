@@ -51,15 +51,14 @@ public class Client {
         ears = ears1;
         if (connected){
             signIn(networkInfo, newUser);
+            sendPing();
         }else{
-            close();
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     entry.clientRejects();
                 }
             });
         }
-        sendPing();
     }
 
     private void sendPing(){
@@ -105,7 +104,13 @@ public class Client {
             }
             System.out.println("socket closed: "+ socket.isClosed());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+    }
+
+    public void sendClose(){
+        if (socket.isConnected()){
+            send("close");
         }
     }
 
@@ -115,24 +120,27 @@ public class Client {
         String pass = networkInfo.get("password");
         String repeat = networkInfo.get("repeat");
 
-        if (newUser && username != null && pass != null && repeat != null && !(pass.equals(repeat))){
+        System.out.println((username == null) + " " + (pass == null) + username + " : " + pass);
+
+
+        if ((username == null || username.equals("")) || (pass == null || pass.equals("")) ||
+                (repeat == null || repeat.equals("")) || !(pass.equals(repeat)) ||
+                (ip == null || ip.equals("")) || (port == null || port.equals(""))){
             return false;
         }
-        if (username != null && ip != null && port != null){
-            ArrayList<String> ipList= new ArrayList<>(Arrays.asList(ip.split("\\.")));
-            if (ipList.size() != 4){
-                System.out.println(ipList.size() + " bad length");
+
+        ArrayList<String> ipList= new ArrayList<>(Arrays.asList(ip.split("\\.")));
+        if (ipList.size() != 4){
+            System.out.println(ipList.size() + " bad length");
+            return false;
+        }
+        for (String part : ipList){
+            if (!(isInteger(part) && (Integer.parseInt(part) >= 0 && Integer.parseInt(part) <= 255))){
+                System.out.println(part + " not right sized number");
                 return false;
             }
-            for (String part : ipList){
-                if (!(isInteger(part) && (Integer.parseInt(part) >= 0 && Integer.parseInt(part) <= 255))){
-                    System.out.println(part + " not right sized number");
-                    return false;
-                }
-            }
-            return isInteger(port);
         }
-        return false;
+        return isInteger(port);
     }
 
     private boolean isInteger(String s) {
@@ -174,6 +182,12 @@ public class Client {
             ping = "pong";
         }else if (label.equals("close")){
             close();
+        }else if (label.equals("newChat")){
+            javax.swing.SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    lobby.newChat(message.substring(8));
+                }
+            });
         }else if (label.equals("signIn")){
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -228,6 +242,12 @@ public class Client {
                     lobby.notConnected();
                 }
             });
+        }
+    }
+
+    public void sendChat(String message){
+        if (socket.isConnected()){
+            send("sendChat;" + message);
         }
     }
 

@@ -124,7 +124,7 @@ public class Client {
 
 
         if ((username == null || username.equals("")) || (pass == null || pass.equals("")) ||
-                (repeat == null || repeat.equals("")) || !(pass.equals(repeat)) ||
+                (newUser && (repeat == null || repeat.equals("")) && !(pass.equals(repeat))) ||
                 (ip == null || ip.equals("")) || (port == null || port.equals(""))){
             return false;
         }

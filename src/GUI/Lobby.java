@@ -2,6 +2,7 @@ package GUI;
 
 import Server.Client;
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -184,7 +185,12 @@ public class Lobby extends JFrame{
     }
 
     private void createActiveGames(){
-        activeGames = new JPanel(new GridLayout(0, 1, 0, 50));
+//        activeGames = new JPanel(new GridLayout(0, 1, 0, 10));
+//        activeGames.setBackground(Colors.BACKGROUND);
+//        updateActiveGames();
+        activeGames = new JPanel();
+        activeGames.setLayout(new BoxLayout(activeGames, BoxLayout.PAGE_AXIS));
+        activeGames.setOpaque(true);
         activeGames.setBackground(Colors.BACKGROUND);
         updateActiveGames();
     }
@@ -226,6 +232,7 @@ public class Lobby extends JFrame{
             return;
         }
         JPanel signPanel= new JPanel(new GridBagLayout());
+        signPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 100));
         signPanel.setBackground(Colors.BACKGROUND);
         JLabel sign = new JLabel(" Battles");
         sign.setBackground(Colors.BACKGROUND);
@@ -234,6 +241,8 @@ public class Lobby extends JFrame{
         GridBagConstraints c = new GridBagConstraints();
         c.anchor = GridBagConstraints.CENTER;
         signPanel.add(sign, c);
+        signPanel.setPreferredSize(new Dimension(25, 75));
+        signPanel.setMinimumSize(new Dimension(25, 75));
         activeGames.add(signPanel);
 
         int i = 0;
@@ -259,14 +268,19 @@ public class Lobby extends JFrame{
             }
 
             JPanel panel = createSingleGamePanel(gameId, gameStatus, gameType, myColor, players, encodedBoard);
+            panel.setMaximumSize(new Dimension(Short.MAX_VALUE, 100));
             activeGames.add(panel);
         }
+        activeGames.add(Box.createVerticalGlue());
+        activeGames.add(new JLabel());
     }
 
     private JPanel createSingleGamePanel(int gameId, int gameStatus, int gameType, int myColor,
                                          ArrayList<String> players, String encodedBoard){
 
         JPanel gamePanel = new JPanel(new GridBagLayout());
+        gamePanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(),
+                                                                BorderFactory.createLoweredBevelBorder()));
         gamePanel.setBackground(Colors.BACKGROUND);
 
         JPanel gameInfo = new JPanel(new GridLayout(0, 1));
@@ -418,7 +432,7 @@ public class Lobby extends JFrame{
         if (gameStatus == 0){
             return "Impending";
         }else if (gameStatus == 7){
-            return "History Lesson";
+            return "History";
         }else{
             return "Active";
         }

@@ -390,6 +390,7 @@ public class DrawingPanel extends JPanel{
             String s = engine.hoverTileInfo(c);
             if (!s.equals("")){
                 hoverArea.setText(s);
+                hoverArea.moveCaretPosition(0);
             }
         }
     }
@@ -399,28 +400,28 @@ public class DrawingPanel extends JPanel{
         private Coords infoC;
         public void mouseClicked(MouseEvent e) {
             //interact with tile
-            int x = e.getX();
-            int y = e.getY();
-            Coords c = getClosestHex(x, y);
-            Tile tile = map.get(c);
-            GameData gd = tile.getGd();
-            if (gd.isBorder() || gd.isOutskirts()){
-                engine.clearActive();
-                return;
-            }
-            boolean leftClick = true;
-            if (SwingUtilities.isRightMouseButton(e)){
-                leftClick = false;
-            }
-            HashMap<Coords, GameData> update = engine.click(c, leftClick);
-
-            for (Coords cn : update.keySet()){
-                Tile ct = map.get(cn);
-                map.put(cn, new Tile(ct.getX(), ct.getY(), update.get(cn)));
-            }
-            sendClickInfo(c);
-            revalidate();
-            repaint();
+//            int x = e.getX();
+//            int y = e.getY();
+//            Coords c = getClosestHex(x, y);
+//            Tile tile = map.get(c);
+//            GameData gd = tile.getGd();
+//            if (gd.isBorder() || gd.isOutskirts()){
+//                engine.clearActive();
+//                return;
+//            }
+//            boolean leftClick = true;
+//            if (SwingUtilities.isRightMouseButton(e)){
+//                leftClick = false;
+//            }
+//            HashMap<Coords, GameData> update = engine.click(c, leftClick);
+//
+//            for (Coords cn : update.keySet()){
+//                Tile ct = map.get(cn);
+//                map.put(cn, new Tile(ct.getX(), ct.getY(), update.get(cn)));
+//            }
+//            sendClickInfo(c);
+//            revalidate();
+//            repaint();
         }
         public void mousePressed(MouseEvent e) {
             //set start location to move the view from
@@ -428,6 +429,33 @@ public class DrawingPanel extends JPanel{
         }
 
         public void mouseReleased(MouseEvent e) {
+            int x = e.getX();
+            int y = e.getY();
+            int dx = origin.x - x;
+            int dy = origin.y - y;
+            //if not needed, dragged makes them always close
+            if (Math.abs(dx) < 5 && Math.abs(dy) < 5){
+                Coords c = getClosestHex(origin.x, origin.y);
+                Tile tile = map.get(c);
+                GameData gd = tile.getGd();
+                if (gd.isBorder() || gd.isOutskirts()){
+                    engine.clearActive();
+                    return;
+                }
+                boolean leftClick = true;
+                if (SwingUtilities.isRightMouseButton(e)){
+                    leftClick = false;
+                }
+                HashMap<Coords, GameData> update = engine.click(c, leftClick);
+
+                for (Coords cn : update.keySet()){
+                    Tile ct = map.get(cn);
+                    map.put(cn, new Tile(ct.getX(), ct.getY(), update.get(cn)));
+                }
+                sendClickInfo(c);
+                revalidate();
+                repaint();
+            }
             origin = null;
         }
 

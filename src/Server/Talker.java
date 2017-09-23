@@ -13,6 +13,7 @@ class Talker{
     private final Ears ears;
     private final HashMap<String, Talker> talkers;
     private String ping;
+    private Timer timer;
 
 
     Talker(DB db, Socket socket, HashMap<String, Talker> talkers){
@@ -43,7 +44,7 @@ class Talker{
     }
 
     private void scheduleTestConnection(){
-        Timer timer = new Timer();
+        timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -63,6 +64,7 @@ class Talker{
     }
 
     void close(){
+        timer.cancel();
         talkers.remove(username);
         try {
             if (ears != null){

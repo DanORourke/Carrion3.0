@@ -146,7 +146,6 @@ class DB {
 
     synchronized boolean createNewUser(String username, String password) {
         ArrayList<String> user = getUserInfo(username);
-
         if (user == null || !user.isEmpty() || username.equals("") ||
                 username.equals("newUser") || password.equals("") || username.length() > 9) {
             return false;

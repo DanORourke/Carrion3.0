@@ -64,7 +64,7 @@ public class Lobby extends JFrame{
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
-        c.weighty = 0.2;
+        c.weighty = 0.0;
         c.fill = GridBagConstraints.BOTH;
         main.add(title, c);
 
@@ -72,7 +72,7 @@ public class Lobby extends JFrame{
         c.gridx = 0;
         c.gridy = 1;
         c.weightx = 1.0;
-        c.weighty = 0.8;
+        c.weighty = 1.0;
         c.fill = GridBagConstraints.BOTH;
         main.add(split, c);
 

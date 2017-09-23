@@ -577,6 +577,11 @@ public class General extends Piece {
             }else{
                 s += movementPoints + " movement points.\n";
             }
+            if (lines){
+                s += "Suffered interaction penalty.\n";
+            }else {
+                s += "Not suffered interaction penalty.\n";
+            }
         }
         if (user){
             if (wantsChief){

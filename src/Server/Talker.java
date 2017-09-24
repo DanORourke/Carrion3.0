@@ -54,7 +54,7 @@ class Talker{
     }
 
     private void testConnection(){
-        if (socket.isConnected()){
+        if (!socket.isClosed()){
             if (ping.equals("ping")){
                 close();
             }else if (ping.equals("pong")){

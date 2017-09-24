@@ -163,6 +163,8 @@ public class Lobby extends JFrame{
 
         flag = new JLabel();
         flag.setBackground(Colors.BACKGROUND);
+        flag.setForeground(Colors.RED);
+        flag.setFont(font);
 
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
@@ -667,7 +669,7 @@ public class Lobby extends JFrame{
 
     public void notConnected(){
         setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-        flag.setText("Not Connected");
+        flag.setText("Not Connected to Server");
         Timer timer = new Timer(5000, new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {

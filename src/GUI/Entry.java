@@ -415,9 +415,8 @@ public class Entry {
                     client.sendClose();
                     client.close();
                 }
-                client = new Client(networkInfo, Entry.this, false);
                 frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-
+                client = new Client(networkInfo, Entry.this, false);
                 name.setText("");
                 pass.setText("");
                 repeatPass.setText("");
@@ -442,8 +441,8 @@ public class Entry {
                     client.sendClose();
                     client.close();
                 }
-                client = new Client(networkInfo, Entry.this, true);
                 frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+                client = new Client(networkInfo, Entry.this, true);
 
                 name.setText("");
                 pass.setText("");
@@ -453,9 +452,10 @@ public class Entry {
         return newUser;
     }
 
-    public void clientRejects(){
+    public void clientRejects(boolean validFormat){
         client = null;
-        flag.setText("Invalid");
+        String reason = (validFormat ? "No Server" : "Invalid Form");
+        flag.setText(reason);
         frame.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
         Timer timer = new Timer(5000, new ActionListener(){
             @Override
@@ -472,7 +472,7 @@ public class Entry {
 
     public void signIn(ArrayList<String> info){
         if (info.size() == 1 && info.get(0).equals("Invalid")){
-            flag.setText(info.get(0));
+            flag.setText("Server rejects: wrong password or name taken");
             Timer timer = new Timer(5000, new ActionListener(){
                 @Override
                 public void actionPerformed(ActionEvent e) {

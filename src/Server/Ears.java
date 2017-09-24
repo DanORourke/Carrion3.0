@@ -1,7 +1,5 @@
 package Server;
 
-import sun.net.ConnectionResetException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -75,7 +73,6 @@ class Ears implements Runnable{
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
-                    System.out.println("Ears calling close");
                     client.close();
                 }
             }

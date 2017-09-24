@@ -29,7 +29,8 @@ public class Client {
         PrintWriter out1;
         Ears ears1;
         boolean connected = false;
-        if (validFormat(networkInfo, newUser)){
+        boolean validFormat = validFormat(networkInfo, newUser);
+        if (validFormat){
             try {
                 socket.connect(new InetSocketAddress(networkInfo.get("ip"),
                         Integer.parseInt(networkInfo.get("port"))), timeout);
@@ -55,7 +56,7 @@ public class Client {
         }else{
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    entry.clientRejects();
+                    entry.clientRejects(validFormat);
                 }
             });
         }
@@ -108,7 +109,7 @@ public class Client {
     }
 
     public void sendClose(){
-        if (socket.isConnected()){
+        if (!socket.isClosed()){
             send("close");
         }
     }
@@ -157,6 +158,7 @@ public class Client {
     }
 
     private void send(String message){
+        System.out.println("sending: " + message);
         out.println(message);
     }
 
@@ -210,7 +212,7 @@ public class Client {
     }
 
     public void newGame(int gameType){
-        if (socket.isConnected()){
+        if (!socket.isClosed()){
             send("newGame;" + gameType);
         }else{
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -222,7 +224,7 @@ public class Client {
     }
 
     public void exitGame(int id){
-        if (socket.isConnected()){
+        if (!socket.isClosed()){
             send("exitGame;" + id);
         }else{
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
@@ -234,9 +236,12 @@ public class Client {
     }
 
     public void submitOrders(int id, String orders){
-        if (socket.isConnected()){
+        if (!socket.isClosed()){
+
             send("submitOrders;" + id + ";" + orders);
         }else{
+            System.out.println("not connected");
+
             javax.swing.SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     lobby.notConnected();
@@ -246,7 +251,7 @@ public class Client {
     }
 
     public void sendChat(String message){
-        if (socket.isConnected()){
+        if (!socket.isClosed()){
             send("sendChat;" + message);
         }
     }

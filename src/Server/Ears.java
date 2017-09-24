@@ -71,6 +71,9 @@ class Ears implements Runnable{
                         System.out.println("hear message: " + message);
                         client.receive(message);
                     }
+                } catch (SocketException e){
+                    System.out.println("reset");
+                    client.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                     client.close();

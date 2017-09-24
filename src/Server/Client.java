@@ -16,6 +16,7 @@ public class Client {
     private final Ears ears;
     private Lobby lobby;
     private String ping;
+    private Timer timer;
 
     public Client(HashMap<String, String> networkInfo, Entry entry, boolean newUser){
         if (networkInfo.keySet().contains("username")){
@@ -69,7 +70,7 @@ public class Client {
     }
 
     private void scheduleTestConnection(){
-        Timer timer = new Timer();
+        timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -91,7 +92,7 @@ public class Client {
     }
 
     public void close(){
-        //tell gui
+        timer.cancel();
         System.out.println("close client");
         try {
             if (ears != null){

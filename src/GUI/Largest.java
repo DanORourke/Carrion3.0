@@ -236,9 +236,13 @@ public class Largest extends JFrame{
     }
 
     void updateEngine(String turn){
-        engine.addEncodedTurn(turn);
-        drawingPanel.updateMap();
-        updateTopPanel();
+        if (turn.equals("Invalid")){
+            hoverArea.setText("Invalid");
+        }else{
+            engine.addEncodedTurn(turn);
+            drawingPanel.updateMap();
+            updateTopPanel();
+        }
         setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 

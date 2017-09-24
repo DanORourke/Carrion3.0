@@ -185,6 +185,8 @@ class Talker{
                     }
                     i++;
                 }
+            }else {
+                send("gameUpdate;" + id + ";Invalid");
             }
         }
     }

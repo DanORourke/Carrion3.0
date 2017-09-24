@@ -1,5 +1,6 @@
 package GUI;
 import Engine.Engine;
+import Engine.Alliance;
 import Server.Client;
 import javax.swing.*;
 import java.awt.*;
@@ -23,6 +24,7 @@ public class Largest extends JFrame{
         this.online = true;
         this.userTeam = userTeam;
         this.playerNames = playerNames;
+        Alliance.playerNames.putAll(playerNames);
         this.client = client;
         this.id = id;
         this.engine = new Engine(encodedBoard, userTeam);

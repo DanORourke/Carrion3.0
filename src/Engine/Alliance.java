@@ -3,7 +3,6 @@ package Engine;
 import Engine.Piece.*;
 import Engine.Piece.General.General;
 import GUI.Coords;
-
 import java.util.HashMap;
 import java.util.List;
 
@@ -12,6 +11,9 @@ public enum Alliance {
     RED{
         @Override
         public String toString() {
+            if (playerNames.containsKey(1)){
+                return playerNames.get(1);
+            }
             return "Red";
         }
 
@@ -107,6 +109,9 @@ public enum Alliance {
     YELLOW{
         @Override
         public String toString() {
+            if (playerNames.containsKey(2)){
+                return playerNames.get(2);
+            }
             return "Yellow";
         }
 
@@ -203,6 +208,9 @@ public enum Alliance {
     BLUE{
         @Override
         public String toString() {
+            if (playerNames.containsKey(5)){
+                return playerNames.get(5);
+            }
             return "Blue";
         }
 
@@ -298,6 +306,9 @@ public enum Alliance {
     ORANGE{
         @Override
         public String toString() {
+            if (playerNames.containsKey(2)){
+                return playerNames.get(2);
+            }
             return "Orange";
         }
 
@@ -393,6 +404,9 @@ public enum Alliance {
     GREEN{
         @Override
         public String toString() {
+            if (playerNames.containsKey(4)){
+                return playerNames.get(4);
+            }
             return "Green";
         }
 
@@ -489,6 +503,9 @@ public enum Alliance {
     PURPLE{
         @Override
         public String toString() {
+            if (playerNames.containsKey(6)){
+                return playerNames.get(6);
+            }
             return "Purple";
         }
 
@@ -639,6 +656,8 @@ public enum Alliance {
             return 0;
         }
     },;
+
+    public static final HashMap<Integer, String> playerNames = new HashMap<>();
 
     public abstract boolean inMyTerritory(Coords c);
 

@@ -185,6 +185,11 @@ public class Largest extends JFrame{
             JButton expose = createExposeButton();
             actionButtonPanel.add(Box.createHorizontalGlue());
             actionButtonPanel.add(expose);
+
+            JButton abscond = createAbscondButton();
+            actionButtonPanel.add(Box.createHorizontalGlue());
+            actionButtonPanel.add(abscond);
+
         }else if (turnStage == 1){
             JButton assist = createAssistButton();
             actionButtonPanel.add(Box.createHorizontalGlue());
@@ -209,6 +214,9 @@ public class Largest extends JFrame{
 
     private JButton createNextButton(int turnStage){
         JButton next = new JButton("Next");
+        if (turnStage == 1){
+            next.setText("Submit Orders");
+        }
         next.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -258,6 +266,20 @@ public class Largest extends JFrame{
         return expose;
     }
 
+    private JButton createAbscondButton(){
+        JButton abscond = new JButton("Abscond");
+        abscond.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                engine.abscond(false);
+                hoverArea.setText("You have run away with what little treasure you could carry.");
+                drawingPanel.updateMap();
+                updateTopPanel();
+            }
+        });
+        return abscond;
+    }
+
     private JButton createAssistButton(){
         JButton assist = new JButton("Assist General");
         assist.addActionListener(new ActionListener() {
@@ -265,9 +287,9 @@ public class Largest extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 engine.assist();
                 hoverArea.setText("Left click on the general you are ordering to assist, " +
-                        "then left click on the general you are ordering be assisted.  " +
+                        "then left click on the general you are ordering be assisted.\n\n" +
                         "A general cannot assist another if he is more than one space away or " +
-                        "engaged in battle.  If a general is attacked when he is assisting another, he will suffer " +
+                        "engaged in battle.\n\nIf a general is attacked when he is assisting another, he will suffer " +
                         "a penalty due to the distraction.");
             }
         });

@@ -25,6 +25,7 @@ public class General extends Piece {
     final boolean dropAfterWin;
     final Coords iAmAssisting;
     final ArrayList<Coords> assistingMe = new ArrayList<>();
+    final Alliance abandoned;
 
     public General(String name){
         super(new Coords(0, 0, 0), 1, Alliance.UNOCCUPIED);
@@ -38,13 +39,14 @@ public class General extends Piece {
         this.launchPoint = null;
         this.dropAfterWin = false;
         this.iAmAssisting = null;
+        this.abandoned = Alliance.UNOCCUPIED;
 
     }
 
     public General(Coords coords, int type, Alliance alliance, String name, int troops,
                    int movementPoints, boolean hasChief, boolean wantsChief, boolean exposed, boolean lines,
                    Coords launchPoint, boolean dropAfterWin,
-                    Coords iAmAssisting, ArrayList<Coords> assistingMe){
+                    Coords iAmAssisting, ArrayList<Coords> assistingMe, Alliance abandoned){
         super(coords, type, alliance);
         this.name = name;
         this.troops = troops;
@@ -57,107 +59,118 @@ public class General extends Piece {
         this.dropAfterWin = dropAfterWin;
         this.iAmAssisting = iAmAssisting;
         this.assistingMe.addAll(assistingMe);
+        this.abandoned = abandoned;
     }
 
     @Override
     public Piece copy(){
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewNew(Coords c, int type, Alliance alliance){
         return new General(c, type, alliance, name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewMoved(Coords c, int n){
         return new General(c, getType(), getAlliance(), getName(), troops, movementPoints - n,
                 hasChief, wantsChief, exposed, lines, launchPoint, dropAfterWin,
-                null, new ArrayList<>());
+                null, new ArrayList<>(), abandoned);
     }
 
     public General createNewStuck(){
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, 0, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewTroop(int addedTroops){
         return new General(getCoords(), getType(), getAlliance(), getName(), troops + addedTroops,
                 movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewWantsChief(boolean wantsChief){
         return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewHasChief(boolean hasChief){
         return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, false,
-                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewExposed(boolean exposed){
         return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewLines(){
         return new General(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, true, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, true, launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General resetGeneralMove(){
         return new General(getCoords(), getType(), getAlliance(), name, troops, calcMovementPoints(),
                 hasChief, wantsChief, exposed, false, null,
-                false, null, new ArrayList<>());
+                false, null, new ArrayList<>(), abandoned);
     }
 
     public General resetGeneralAllocate(){
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewFighting(Coords launchPoint, boolean dropAfterWin){
         //keep iamassisting to tell if general is distracted
         return new General(getCoords(), getType(), getAlliance(), name, troops, 0, hasChief, wantsChief,
-                exposed,true, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed,true, launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewAssisting(Coords iAmAssisting){
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints - 1, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewAssisted(Coords assistingGeneral){
         assistingMe.add(assistingGeneral);
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewClearAssisting(){
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, null, assistingMe);
+                launchPoint, dropAfterWin, null, assistingMe, abandoned);
     }
 
     public General createNewRemoveAssistingMe(Coords assistingGeneral){
         assistingMe.remove(assistingGeneral);
         return new General(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     public General createNewTraitor(Alliance alliance){
         return new General(getCoords(), getType(), alliance, name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, Alliance.UNOCCUPIED);
+    }
+
+    public General createNewAbandoned(Alliance abandoned){
+        return new General(getCoords(), getType(), Alliance.UNOCCUPIED, name,
+                troops, movementPoints, hasChief, wantsChief, exposed, lines,
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
+    }
+
+    public Alliance getAbandoned(){
+        return abandoned;
     }
 
     public String getName() {

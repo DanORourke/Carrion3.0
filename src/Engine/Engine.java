@@ -117,6 +117,10 @@ public class Engine {
                     settingChief = false;
                     i+= 5;
                 }
+                else if (moveType.equals("abscond")){
+                    abscond(true);
+                    i++;
+                }
                 else if (moveType.equals("assist")){
                     int q = Integer.valueOf(moves.get(i+1));
                     int r = Integer.valueOf(moves.get(i+2));
@@ -790,8 +794,8 @@ public class Engine {
         Alliance userTeam = getUserTeam();
         Alliance turnTeam = getTurnTeam();
         if (turnStage == -1){
-            userTeam = Alliance.UNOCCUPIED;
-            turnTeam = Alliance.UNOCCUPIED;
+            userTeam = null;
+            turnTeam = null;
         }
         if (histIndex <= indexOfNoChange){
             if (turnStage == 0){
@@ -800,10 +804,17 @@ public class Engine {
                 return activeParcel.getOldMoveString(turnTeam, userTeam, board);
             }
         }else{
+            String s = "";
+            if (assisting){
+                s = "Left click on the general you are ordering to do the assisting.\n\n";
+            }
+            if (assisted){
+                s = "Left click on the general you are ordering to be assisted.\n\n";
+            }
             if (turnStage == 0){
-                return activeParcel.getActiveAllocateString(userTeam, players);
+                return s + activeParcel.getActiveAllocateString(userTeam, players);
             }else{
-                return activeParcel.getActiveMoveString(userTeam, board);
+                return s + activeParcel.getActiveMoveString(userTeam, board);
             }
         }
     }
@@ -962,6 +973,36 @@ public class Engine {
                 board.moveGeneral(activeGeneral, c);
                 rememberClick = true;
             }
+            //kill unoccupied field general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.getPieces().size() == 1 &&
+                    clickedParcel.getFirstGeneral().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    activeGeneral.canMove(false)){
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.killGeneral(board.get(c).getAllianceGeneral(Alliance.UNOCCUPIED));
+                rememberClick = true;
+            }
+            //kill unoccupied general is unoccupied town
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasTown() &&
+                    clickedParcel.getPieces().size() == 2 &&
+                    clickedParcel.getFirstGeneral().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    activeGeneral.canMove(false)){
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.killGeneral(board.get(c).getAllianceGeneral(Alliance.UNOCCUPIED));
+                rememberClick = true;
+            }
+            //enter unoccupied capitol, gaining generals
+            else if (clickedParcel.hasCapitol() && clickedParcel.getPieces().size() == 1 &&
+                    clickedParcel.getCapitol().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    activeGeneral.canMove(false)){
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                fillPlayers();
+                board.winTraitors(activeGeneral, players.get(Alliance.UNOCCUPIED));
+                rememberClick = true;
+            }
             //attack empty enemy town
             else if (clickedParcel.hasTown() && clickedParcel.getPieces().size() == 1 &&
                     !clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
@@ -1024,7 +1065,7 @@ public class Engine {
             else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasTown() &&
                     clickedParcel.getPieces().size() == 2 &&
                     !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
-                    !clickedParcel.getTown().getAlliance().equals(a) &&
+                    !clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
                     activeGeneral.canMove(true))
             {
                 board.moveGeneral(activeGeneral, c);
@@ -1036,7 +1077,7 @@ public class Engine {
             else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasTown() &&
                     clickedParcel.getPieces().size() == 2 &&
                     !clickedParcel.getFirstGeneral().getAlliance().equals(a) &&
-                    !clickedParcel.getTown().getAlliance().equals(a) &&
+                    clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
                     activeGeneral.canMove(false))
             {
                 board.moveGeneral(activeGeneral, c);
@@ -1103,6 +1144,42 @@ public class Engine {
             {
                 board.moveGeneral(activeGeneral, c);
                 activeGeneral = board.get(c).getFirstGeneral();
+                board.occupyTown(activeGeneral);
+                rememberClick = true;
+            }
+            //kill unoccupied field general
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.getPieces().size() == 1 &&
+                    clickedParcel.getFirstGeneral().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    activeGeneral.canMove(true)){
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.killGeneral(board.get(c).getAllianceGeneral(Alliance.UNOCCUPIED));
+                activeGeneral = board.get(c).getFirstGeneral();
+                board.dropSupply(activeGeneral);
+                rememberClick = true;
+            }
+            //kill unoccupied general in unoccupied town
+            else if (clickedParcel.hasSingleGeneral() && clickedParcel.hasTown() &&
+                    clickedParcel.getPieces().size() == 2 &&
+                    clickedParcel.getFirstGeneral().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    clickedParcel.getTown().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    activeGeneral.canMove(true)){
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.killGeneral(board.get(c).getAllianceGeneral(Alliance.UNOCCUPIED));
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                board.occupyTown(activeGeneral);
+                rememberClick = true;
+            }
+            //enter unoccupied capitol, gaining generals
+            else if (clickedParcel.hasCapitol() && clickedParcel.getPieces().size() == 1 &&
+                    clickedParcel.getCapitol().getAlliance().equals(Alliance.UNOCCUPIED) &&
+                    activeGeneral.canMove(true)){
+                board.moveGeneral(activeGeneral, c);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                fillPlayers();
+                board.winTraitors(activeGeneral, players.get(Alliance.UNOCCUPIED));
+                activeGeneral = board.get(c).getAllianceGeneral(a);
                 board.occupyTown(activeGeneral);
                 rememberClick = true;
             }
@@ -1299,6 +1376,16 @@ public class Engine {
 
     public void setExposingGeneral(){
         exposingGeneral = true;
+    }
+
+    public void abscond(boolean isEncoded){
+        if (!isEncoded){
+            nextPhase(false);
+        }
+        fillPlayers();
+        board.abscondPlayer(players.get(getTurnTeam()));
+        addToHistory(",abscond");
+        histIndex = history.size() - 1;
     }
 
     public void back(){

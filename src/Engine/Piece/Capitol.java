@@ -9,40 +9,51 @@ public class Capitol extends Piece{
     private final boolean hasChief;
     private final boolean wantsChief;
     private final int troops;
+    private final Alliance abandoned;
 
     public Capitol(Coords coords, Alliance alliance){
         super(coords, 7, alliance);
         this.hasChief = true;
         this.wantsChief = false;
         this.troops = 2;
+        this.abandoned = Alliance.UNOCCUPIED;
     }
 
-    public Capitol(Coords coords, Alliance alliance, boolean chief, boolean wantsChief, int troops){
+    public Capitol(Coords coords, Alliance alliance, boolean chief, boolean wantsChief, int troops, Alliance abandoned){
         super(coords, 7, alliance);
         this.hasChief = chief;
         this.wantsChief = wantsChief;
         this.troops = troops;
+        this.abandoned = abandoned;
     }
 
     @Override
     public Piece copy(){
-        return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, troops);
+        return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, troops, abandoned);
     }
 
     public Capitol createNewWantsChief(boolean wantsChief){
-        return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, troops);
+        return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, troops, abandoned);
     }
 
     public Capitol createNewHasChief(boolean hasChief){
-        return new Capitol(getCoords(), getAlliance(), hasChief, false, troops);
+        return new Capitol(getCoords(), getAlliance(), hasChief, false, troops, abandoned);
     }
 
     public Capitol createNewTroops(int troopChange){
-        return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, troops + troopChange);
+        return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, troops + troopChange, abandoned);
     }
 
     public Capitol resetCapitolAllocate(){
-        return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, 2);
+        return new Capitol(getCoords(), getAlliance(), hasChief, wantsChief, 2, abandoned);
+    }
+
+    public Capitol createNewAbandoned(Alliance abandoned){
+        return new Capitol(getCoords(), Alliance.UNOCCUPIED, hasChief, wantsChief, troops, abandoned);
+    }
+
+    public Alliance getAbandoned(){
+        return abandoned;
     }
 
     public boolean hasChief() {

@@ -8,6 +8,7 @@ import Engine.Piece.Town;
 import GUI.Coords;
 import GUI.GameData;
 
+import javax.smartcardio.CommandAPDU;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -540,7 +541,7 @@ public class Board {
                 removePiece(p);
             }else if (p.isGeneral()){
                 Parcel parc = board.get(p.getCoords());
-                if (parc.hasSingleGeneral()){
+                if (!parc.isBattle()){
                     traitors.add((General)p);
                 }
                 removePiece(p);
@@ -551,14 +552,60 @@ public class Board {
                 addPiece(ghost);
             }
         }
-//        if (!traitors.isEmpty()){
-//            General gen = traitors.get(new Random().nextInt(traitors.size())).createNewTraitor(killer);
-//            addPiece(gen);
-//        }
         for (General g : traitors){
             //turn all non fighting generals
             General gen = g.createNewTraitor(killer);
             addPiece(gen);
         }
+    }
+
+    void abscondPlayer(Player quitter){
+        ArrayList<General> traitors = new ArrayList<>();
+        for (Piece p : quitter.getPieces()){
+            if (p.isSupply()){
+                removePiece(p);
+            }else if (p.isGeneral()){
+                Parcel parc = board.get(p.getCoords());
+                if (!parc.isBattle() && !parc.hasCapitol()){
+                    traitors.add((General)p);
+                }
+                removePiece(p);
+            }else if (p.isTown()){
+                Town ghost = new Town(p.getCoords(), Alliance.UNOCCUPIED);
+                removePiece(p);
+                addPiece(ghost);
+            }else if (p.isCapitol()){
+                Capitol ghost = ((Capitol)p).createNewAbandoned(quitter.getAlliance());
+                removePiece(p);
+                addPiece(ghost);
+            }
+        }
+
+        for (General g : traitors){
+            //turn all non fighting generals
+            General gen = g.createNewAbandoned(quitter.getAlliance());
+            addPiece(gen);
+        }
+    }
+
+    void winTraitors(General g, Player player){
+        Parcel parc = board.get(g.getCoords());
+        Capitol cap = parc.getCapitol();
+        Alliance abandoned = cap.getAbandoned();
+        Town t = new Town(g.getCoords(), Alliance.UNOCCUPIED);
+        removePiece(cap);
+        addPiece(t);
+
+        for (Piece p : player.getPieces()){
+            if (p.isGeneral()){
+                General old = (General)p;
+                if (old.getAbandoned().equals(abandoned)){
+                    General traitor =old.createNewTraitor(g.getAlliance());
+                    removePiece(old);
+                    addPiece(traitor);
+                }
+            }
+        }
+
     }
 }

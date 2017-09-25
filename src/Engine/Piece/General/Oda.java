@@ -17,96 +17,96 @@ public class Oda extends General{
     private Oda(Coords coords, int type, Alliance alliance, String name, int troops,
                         int movementPoints, boolean hasChief, boolean wantsChief, boolean exposed, boolean lines,
                         Coords launchPoint, boolean dropAfterWin,
-                        Coords iAmAssisting, ArrayList<Coords> assistingMe){
+                        Coords iAmAssisting, ArrayList<Coords> assistingMe, Alliance abandoned){
         super(coords, type, alliance, name, troops, movementPoints, hasChief, wantsChief, exposed, lines, launchPoint,
-                dropAfterWin, iAmAssisting, assistingMe);
+                dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public Piece copy(){
         return new Oda(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewNew(Coords c, int type, Alliance alliance){
         return new Oda(c, type, alliance, name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewMoved(Coords c, int n){
         return new Oda(c, getType(), getAlliance(), getName(), troops, movementPoints - n,
                 hasChief, wantsChief, exposed, lines, launchPoint, dropAfterWin,
-                null, new ArrayList<>());
+                null, new ArrayList<>(), abandoned);
     }
 
     @Override
     public General createNewStuck(){
         return new Oda(getCoords(), getType(), getAlliance(), name,
                 troops, 0, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewTroop(int addedTroops){
         return new Oda(getCoords(), getType(), getAlliance(), getName(), troops + addedTroops,
                 movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewWantsChief(boolean wantsChief){
         return new Oda(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewHasChief(boolean hasChief){
         return new Oda(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewExposed(boolean exposed){
         return new Oda(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, lines, launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewLines(){
         return new Oda(getCoords(), getType(), getAlliance(), name, troops, movementPoints, hasChief, wantsChief,
-                exposed, true, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed, true, launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General resetGeneralMove(){
         return new Oda(getCoords(), getType(), getAlliance(), name, troops, calcMovementPoints(),
                 hasChief, wantsChief, exposed, false, null,
-                false, null, new ArrayList<>());
+                false, null, new ArrayList<>(), abandoned);
     }
 
     @Override
     public General resetGeneralAllocate(){
         return new Oda(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewFighting(Coords launchPoint, boolean dropAfterWin){
         //keep iamassisting to tell if general is distracted
         return new Oda(getCoords(), getType(), getAlliance(), name, troops, 0, hasChief, wantsChief,
-                exposed,true, launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                exposed,true, launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewAssisting(Coords iAmAssisting){
         return new Oda(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints - 1, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
@@ -114,14 +114,14 @@ public class Oda extends General{
         assistingMe.add(assistingGeneral);
         return new Oda(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewClearAssisting(){
         return new Oda(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, null, assistingMe);
+                launchPoint, dropAfterWin, null, assistingMe, abandoned);
     }
 
     @Override
@@ -129,14 +129,21 @@ public class Oda extends General{
         assistingMe.remove(assistingGeneral);
         return new Oda(getCoords(), getType(), getAlliance(), name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override
     public General createNewTraitor(Alliance alliance){
         return new Oda(getCoords(), getType(), alliance, name,
                 troops, movementPoints, hasChief, wantsChief, exposed, lines,
-                launchPoint, dropAfterWin, iAmAssisting, assistingMe);
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, Alliance.UNOCCUPIED);
+    }
+
+    @Override
+    public General createNewAbandoned(Alliance abandoned){
+        return new Oda(getCoords(), getType(), Alliance.UNOCCUPIED, name,
+                troops, movementPoints, hasChief, wantsChief, exposed, lines,
+                launchPoint, dropAfterWin, iAmAssisting, assistingMe, abandoned);
     }
 
     @Override

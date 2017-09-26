@@ -980,6 +980,9 @@ public class Engine {
                 board.moveGeneral(activeGeneral, c);
                 activeGeneral = board.get(c).getAllianceGeneral(a);
                 board.killGeneral(board.get(c).getAllianceGeneral(Alliance.UNOCCUPIED));
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                //drop general into first slot in parcel
+                board.moveGeneral(activeGeneral, c);
                 rememberClick = true;
             }
             //kill unoccupied general is unoccupied town
@@ -991,6 +994,9 @@ public class Engine {
                 board.moveGeneral(activeGeneral, c);
                 activeGeneral = board.get(c).getAllianceGeneral(a);
                 board.killGeneral(board.get(c).getAllianceGeneral(Alliance.UNOCCUPIED));
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                //drop general into first slot in parcel
+                board.moveGeneral(activeGeneral, c);
                 rememberClick = true;
             }
             //enter unoccupied capitol, gaining generals
@@ -1156,6 +1162,9 @@ public class Engine {
                 board.killGeneral(board.get(c).getAllianceGeneral(Alliance.UNOCCUPIED));
                 activeGeneral = board.get(c).getFirstGeneral();
                 board.dropSupply(activeGeneral);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                //drop general into first slot in parcel
+                board.moveGeneral(activeGeneral, c);
                 rememberClick = true;
             }
             //kill unoccupied general in unoccupied town
@@ -1169,6 +1178,9 @@ public class Engine {
                 board.killGeneral(board.get(c).getAllianceGeneral(Alliance.UNOCCUPIED));
                 activeGeneral = board.get(c).getAllianceGeneral(a);
                 board.occupyTown(activeGeneral);
+                activeGeneral = board.get(c).getAllianceGeneral(a);
+                //drop general into first slot in parcel
+                board.moveGeneral(activeGeneral, c);
                 rememberClick = true;
             }
             //enter unoccupied capitol, gaining generals

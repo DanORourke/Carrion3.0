@@ -80,7 +80,7 @@ class Talker{
         System.out.println(talkers);
     }
 
-    private void send(String message){
+    void send(String message){
         System.out.println("sending: " + message);
         out.println(message);
     }
@@ -142,7 +142,7 @@ class Talker{
         }
     }
 
-    private void getStatus(){
+    void getStatus(){
         send("status;" + db.getStatus(username));
     }
 

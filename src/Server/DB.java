@@ -3,10 +3,7 @@ package Server;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
 import Engine.Engine;
 
@@ -36,7 +33,6 @@ class DB {
     }
 
     private void initializeDb(){
-        //set up db if first time opened, boolean firstTime affects network procedure
         try {
             Statement stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery( "SELECT name FROM sqlite_master " +
@@ -96,7 +92,8 @@ class DB {
                     "PLAYER4 TEXT, " +
                     "PLAYER5 TEXT, " +
                     "PLAYER6 TEXT, " +
-                    "BOARD TEXT)";
+                    "BOARD TEXT, " +
+                    "LASTUPDATE TEXT)";
             stmt.executeUpdate(sql);
             stmt.close();
             c.commit();
@@ -105,22 +102,6 @@ class DB {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
     }
-//
-//    private void createMapTable(){
-//        try {
-//            Statement stmt = c.createStatement();
-//            String sql = "CREATE TABLE MAP " +
-//                    "(PLAYERID INTEGER NOT NULL, " +
-//                    "GAMEID INT NOT NULL, " +
-//                    "PLAYERCOLOR INT NOT NULL)";
-//            stmt.executeUpdate(sql);
-//            stmt.close();
-//            c.commit();
-//            System.out.println("MAP Table created successfully");
-//        } catch ( Exception e ) {
-//            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-//        }
-//    }
 
     private synchronized ArrayList<String> getUserInfo(String username){
         ArrayList<String> user = new ArrayList<>();
@@ -395,12 +376,13 @@ class DB {
     }
 
     private synchronized void beginGame(int id, int type){
+        long time =  System.currentTimeMillis() / 1000L;
         String encoded = "21," + String.valueOf(type);
         ArrayList<String> info = new Engine(encoded, 0).getInfo();
         try {
             Statement stmt = c.createStatement();
             String sql = "UPDATE GAME SET STATUS = " + Integer.parseInt(info.get(0)) + ", " +
-                    "BOARD = '" + info.get(1) + "' WHERE ID = " + id + ";";
+                    "BOARD = '" + info.get(1) + "', LASTUPDATE = " + time + " WHERE ID = " + id + ";";
             stmt.executeUpdate(sql);
             stmt.close();
             c.commit();
@@ -850,9 +832,10 @@ class DB {
 
     private synchronized void updateGame(int id, int playerTurn, String newEncoded){
         try {
+            long time = System.currentTimeMillis() / 1000L;
             Statement stmt = c.createStatement();
             String sql = "UPDATE GAME SET STATUS = " + playerTurn + ", " +
-                    "BOARD = '" + newEncoded + "' WHERE ID = " + id + ";";
+                    "BOARD = '" + newEncoded + "', LASTUPDATE = " + time + " WHERE ID = " + id + ";";
             stmt.executeUpdate(sql);
             stmt.close();
             c.commit();
@@ -919,5 +902,71 @@ class DB {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
         return game;
+    }
+
+    HashMap<Integer, HashMap<String, String>> getSquatters(int waitTime){
+        long time =  System.currentTimeMillis() / 1000L;
+        long tooLongAgo = time - waitTime;
+        HashMap<Integer, HashMap<String, String>> squatters = new HashMap<>();
+        try {
+            Statement stmt = c.createStatement();
+            ResultSet rs = stmt.executeQuery( "SELECT * FROM GAME WHERE " +
+                    "STATUS != 0 AND STATUS != 7 AND " +
+                    "LASTUPDATE < " + tooLongAgo + ";");
+            if (rs.isBeforeFirst()){
+                HashMap<String, String> game = new HashMap<>();
+                game.put("STATUS", rs.getString("STATUS"));
+                game.put("BOARD", rs.getString("BOARD"));
+                String player1 = rs.getString("PLAYER1");
+                if (player1 != null){
+                    game.put("PLAYER1", player1);
+                }
+                String player2 = rs.getString("PLAYER2");
+                if (player2 != null){
+                    game.put("PLAYER2", player2);
+                }
+                String player3 = rs.getString("PLAYER3");
+                if (player3 != null){
+                    game.put("PLAYER3", player3);
+                }
+                String player4 = rs.getString("PLAYER4");
+                if (player4 != null){
+                    game.put("PLAYER4", player4);
+                }
+                String player5 = rs.getString("PLAYER5");
+                if (player5 != null){
+                    game.put("PLAYER5", player5);
+                }
+                String player6 = rs.getString("PLAYER6");
+                if (player6 != null){
+                    game.put("PLAYER6", player6);
+                }
+                squatters.put(rs.getInt("ID"), game);
+            }
+            stmt.close();
+            rs.close();
+        }catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return squatters;
+    }
+
+    void updateSquatGame(int id, int playerTurn, String newEncoded, int waitTime){
+        try {
+            long time = System.currentTimeMillis() / 1000L;
+            long tooLongAgo = time - waitTime;
+            Statement stmt = c.createStatement();
+            String sql = "UPDATE GAME " +
+                    "SET " +
+                    "STATUS = CASE WHEN LASTUPDATE < " + tooLongAgo + " THEN " + playerTurn + " ELSE STATUS END, " +
+                    "BOARD = CASE WHEN LASTUPDATE < " + tooLongAgo + " THEN '" + newEncoded + "' ELSE BOARD END, " +
+                    "LASTUPDATE = CASE WHEN LASTUPDATE < " + tooLongAgo + " THEN " + time + " ELSE LASTUPDATE END " +
+                    "WHERE ID = " + id + ";";
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.commit();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

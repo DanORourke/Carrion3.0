@@ -312,6 +312,7 @@ public class Engine {
         //move the chief if someone else wants him and he is connected
         moveChief();
         boolean looking = true;
+        int attempts = 0;
         while(looking){
             playerTurn++;
             if (playerTurn > 6){
@@ -323,6 +324,11 @@ public class Engine {
                     players.get(a).resetPlayerPiecesAllocate(board);
                     looking = false;
                 }
+            }
+            attempts++;
+            if (attempts > 6){
+                playerTurn = 0;
+                looking = false;
             }
         }
         indexOfNoChange = histIndex;

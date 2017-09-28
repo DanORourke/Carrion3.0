@@ -4,20 +4,18 @@ import Server.Client;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Entry {
-    private JFrame frame;
+public class Entry extends JFrame{
     private JLabel flag;
     private Lobby lobby;
     private Largest largest;
     private Client client;
 
     public Entry(){
-        this.frame = new JFrame("Carrion");
+        super("Carrion");
         this.lobby = null;
         this.largest = null;
         this.client = null;
@@ -26,17 +24,27 @@ public class Entry {
     }
 
     private void setFrame(){
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(300, 400);
-        frame.setResizable(true);
-        frame.setLocationRelativeTo( null );
-        frame.setVisible(true);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setSize(300, 400);
+        setResizable(true);
+        setLocationRelativeTo( null );
+        setVisible(true);
+        WindowListener exitListener = new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.out.println("close");
+                getContentPane().removeAll();
+                lobby.dispose();
+                System.exit(0);
+            }
+        };
+        addWindowListener(exitListener);
     }
 
     private void prepareFrame(){
         JTabbedPane tabbed = createTabbed();
-        frame.add(tabbed);
-        frame.revalidate();
+        add(tabbed);
+        revalidate();
     }
 
     private JTabbedPane createTabbed(){
@@ -415,7 +423,7 @@ public class Entry {
                     client.sendClose();
                     client.close();
                 }
-                frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+                setCursor(new Cursor(Cursor.WAIT_CURSOR));
                 client = new Client(networkInfo, Entry.this, false);
                 name.setText("");
                 pass.setText("");
@@ -441,7 +449,7 @@ public class Entry {
                     client.sendClose();
                     client.close();
                 }
-                frame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+                setCursor(new Cursor(Cursor.WAIT_CURSOR));
                 client = new Client(networkInfo, Entry.this, true);
 
                 name.setText("");
@@ -456,7 +464,7 @@ public class Entry {
         client = null;
         String reason = (validFormat ? "No Server" : "Invalid Form");
         flag.setText(reason);
-        frame.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+        setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
         Timer timer = new Timer(5000, new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -491,6 +499,6 @@ public class Entry {
             }
             lobby = new Lobby(client, info);
         }
-        frame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
 }

@@ -133,7 +133,7 @@ class Talker{
     }
 
     private void signIn(ArrayList<String> info){
-        if (info.size()== 2 && db.validUser(info.get(0), info.get(1))){
+        if (info.size()== 2 && db.validUser(info.get(0), info.get(1)) && !talkers.containsKey(info.get(0))){
             this.username = info.get(0);
             talkers.put(username, this);
             send("signIn;" + db.getStatus(username));

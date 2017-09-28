@@ -73,9 +73,9 @@ public class Server {
             for (String key : game.keySet()){
                 if(!key.equals("BOARD") && !key.equals("STATUS")){
                     if (talkers.containsKey(key)){
-                        //could send update to largest, but not sure it happened
-                        //talkers.get(key).send("gameUpdate;" + id + ";next,abscond,next");
+                        //maybe shouldn't send update to largest because player could update in between two db calls
                         talkers.get(key).getStatus();
+                        talkers.get(key).send("gameUpdate;" + id + ";next,abscond,next");
                     }
                 }
             }

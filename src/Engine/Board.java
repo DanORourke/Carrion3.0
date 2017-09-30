@@ -165,9 +165,11 @@ public class Board {
     private void removeAssistingFromGeneralsAssistingMe(General g){
         for (Coords c : g.getAssistingMe()){
             General assisting = getAssistingGeneral(c);
-            General nAssisting = assisting.createNewClearAssisting();
-            removePiece(assisting);
-            addPiece(nAssisting);
+            if (assisting != null){
+                General nAssisting = assisting.createNewClearAssisting();
+                removePiece(assisting);
+                addPiece(nAssisting);
+            }
         }
     }
 

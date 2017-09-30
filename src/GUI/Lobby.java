@@ -99,6 +99,7 @@ public class Lobby extends JFrame{
         chatArea.setEditable(false);
         chatArea.setWrapStyleWord(true);
         chatArea.setLineWrap(true);
+        JScrollPane scrollChat = new JScrollPane(chatArea);
 
         JTextArea type = new JTextArea();
         type.setWrapStyleWord(true);
@@ -123,7 +124,7 @@ public class Lobby extends JFrame{
         c.weighty = 0.75;
         c.fill = GridBagConstraints.BOTH;
         c.insets = new Insets(10, 10, 5, 10);
-        chat.add(chatArea, c);
+        chat.add(scrollChat, c);
 
         c = new GridBagConstraints();
         c.gridx = 0;

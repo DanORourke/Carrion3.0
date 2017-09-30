@@ -177,7 +177,7 @@ public class Engine {
 
     private void addClickToHistory(Coords c, boolean leftClick){
         String encoded = createClickEncoded(c, leftClick);
-        System.out.println(encoded);
+        //System.out.println(encoded);
         history.add(new GameState(board, activeCoords, playerTurn, turnStage, encoded));
         histIndex ++;
     }

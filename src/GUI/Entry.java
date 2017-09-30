@@ -34,7 +34,9 @@ public class Entry extends JFrame{
             public void windowClosing(WindowEvent e) {
                 System.out.println("close");
                 getContentPane().removeAll();
-                lobby.dispose();
+                if (lobby != null){
+                    lobby.dispose();
+                }
                 System.exit(0);
             }
         };

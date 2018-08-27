@@ -430,6 +430,8 @@ public class Entry extends JFrame{
                 name.setText("");
                 pass.setText("");
                 repeatPass.setText("");
+                revalidate();
+                repaint();
             }
         });
         return signIn;
@@ -453,10 +455,11 @@ public class Entry extends JFrame{
                 }
                 setCursor(new Cursor(Cursor.WAIT_CURSOR));
                 client = new Client(networkInfo, Entry.this, true);
-
                 name.setText("");
                 pass.setText("");
                 repeatPass.setText("");
+                revalidate();
+                repaint();
             }
         });
         return newUser;
@@ -464,7 +467,8 @@ public class Entry extends JFrame{
 
     public void clientRejects(boolean validFormat){
         client = null;
-        String reason = (validFormat ? "No Server" : "Invalid Form");
+        String reason = (validFormat) ? "No Server" : "Invalid Form";
+        System.out.println(reason);
         flag.setText(reason);
         setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
         Timer timer = new Timer(5000, new ActionListener(){
@@ -472,12 +476,18 @@ public class Entry extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 javax.swing.SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
+                        System.out.println(reason);
                         flag.setText("");
+                        revalidate();
+                        repaint();
                     }
                 });
             }
         });
+        timer.setRepeats(false);
         timer.start();
+        revalidate();
+        repaint();
     }
 
     public void signIn(ArrayList<String> info){
@@ -489,6 +499,8 @@ public class Entry extends JFrame{
                     javax.swing.SwingUtilities.invokeLater(new Runnable() {
                         public void run() {
                             flag.setText("");
+                            revalidate();
+                            repaint();
                         }
                     });
                 }
@@ -502,5 +514,7 @@ public class Entry extends JFrame{
             lobby = new Lobby(client, info);
         }
         setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        revalidate();
+        repaint();
     }
 }

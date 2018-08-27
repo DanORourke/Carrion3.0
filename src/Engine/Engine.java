@@ -229,7 +229,7 @@ public class Engine {
 
     private String createClickEncoded(Coords c, boolean leftClick){
         //could remove s coord and calculate it up top instead, q + r + s = 0, but might keep it to use as verification
-        System.out.println("histIndex: " + histIndex);
+        //System.out.println("histIndex: " + histIndex);
         String oldEncoded = history.get(histIndex).getEncodedBoard();
         String left;
         if (leftClick){
@@ -275,7 +275,7 @@ public class Engine {
         }
         history.add(new GameState(new Board(board), null,  playerTurn, turnStage, oldEncoded));
         histIndex = history.size() - 1;
-        System.out.println("hist size: " + history.size() + " histIndex: " + histIndex);
+        //System.out.println("hist size: " + history.size() + " histIndex: " + histIndex);
     }
 
     private void rotatePhase(boolean isEncoded){
@@ -467,7 +467,7 @@ public class Engine {
                     fillPlayers();
                     Player killed = players.get(gd.getAlliance());
                     if (killed.noGenerals()){
-                        System.out.println("kill player " + gd.getAlliance().toString());
+//                        System.out.println("kill player " + gd.getAlliance().toString());
                         board.killPlayer(killed, ga.getAlliance());
                     }
                 }
@@ -488,7 +488,7 @@ public class Engine {
                     fillPlayers();
                     Player killed = players.get(ga.getAlliance());
                     if (killed.noGenerals()){
-                        System.out.println("kill player " + ga.getAlliance().toString());
+                        //System.out.println("kill player " + ga.getAlliance().toString());
                         board.killPlayer(killed, gd.getAlliance());
                     }
                 }
@@ -509,7 +509,7 @@ public class Engine {
                     fillPlayers();
                     Player killed = players.get(gd.getAlliance());
                     if (killed.noGenerals()){
-                        System.out.println("kill player " + gd.getAlliance().toString());
+                        //System.out.println("kill player " + gd.getAlliance().toString());
                         board.killPlayer(killed, ga.getAlliance());
                     }
                 }
@@ -531,7 +531,7 @@ public class Engine {
                     fillPlayers();
                     Player killed = players.get(ga.getAlliance());
                     if (killed.noGenerals()){
-                        System.out.println("kill player " + ga.getAlliance().toString());
+                        //System.out.println("kill player " + ga.getAlliance().toString());
                         board.killPlayer(killed, gd.getAlliance());
                     }
                 }
@@ -543,7 +543,7 @@ public class Engine {
             if (attackerWon == 1){
                 fillPlayers();
                 Player killed = players.get(gd.getAlliance());
-                System.out.println("kill player " + gd.getAlliance().toString());
+                //System.out.println("kill player " + gd.getAlliance().toString());
                 board.killPlayer(killed, ga.getAlliance());
                 ga = board.get(battleField).getAllianceGeneral(ga.getAlliance());
                 board.dropAttackerDown(ga);
@@ -564,7 +564,7 @@ public class Engine {
                     fillPlayers();
                     Player killed = players.get(ga.getAlliance());
                     if (killed.noGenerals()){
-                        System.out.println("kill player " + ga.getAlliance().toString());
+                        //System.out.println("kill player " + ga.getAlliance().toString());
                         board.killPlayer(killed, gd.getAlliance());
                     }
                 }
@@ -588,7 +588,7 @@ public class Engine {
                     fillPlayers();
                     Player killed = players.get(ga.getAlliance());
                     if (killed.noGenerals()){
-                        System.out.println("kill player " + ga.getAlliance().toString());
+                        //System.out.println("kill player " + ga.getAlliance().toString());
                         board.killPlayer(killed, t.getAlliance());
                     }
                 }
@@ -599,7 +599,7 @@ public class Engine {
             if (attackerWon == 1){
                 fillPlayers();
                 Player killed = players.get(cap.getAlliance());
-                System.out.println("kill player " + ga.getAlliance().toString());
+                //System.out.println("kill player " + ga.getAlliance().toString());
                 board.killPlayer(killed, ga.getAlliance());
                 ga = board.get(battleField).getFirstGeneral();
                 if (ga.getDropAfterWin()){
@@ -615,7 +615,7 @@ public class Engine {
                     fillPlayers();
                     Player killed = players.get(ga.getAlliance());
                     if (killed.noGenerals()){
-                        System.out.println("kill player " + ga.getAlliance().toString());
+                        //System.out.println("kill player " + ga.getAlliance().toString());
                         board.killPlayer(killed, cap.getAlliance());
                     }
                 }
@@ -832,9 +832,9 @@ public class Engine {
         }
         rememberClick = false;
         setState();
-        System.out.println(c.toString() +
-                " isEmpty: " + board.get(c).isEmpty() +
-                " turnstage = " + turnStage + " activeCoords: " + activeCoords.toString());
+//        System.out.println(c.toString() +
+//                " isEmpty: " + board.get(c).isEmpty() +
+//                " turnstage = " + turnStage + " activeCoords: " + activeCoords.toString());
         board.clearChangeData();
         activeGeneral = null;
         if (turnStage == 0){
@@ -1407,27 +1407,27 @@ public class Engine {
     }
 
     public void back(){
-        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
-                " ecodedBoard: " + history.get(histIndex).getEncodedBoard());
+//        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
+//                " ecodedBoard: " + history.get(histIndex).getEncodedBoard());
         if (histIndex > 0){
             histIndex --;
         }
         //setState();
         //fillPlayers(history.get(history.size()-1).getBoard());
-        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
-                " ecodedBoard: " + history.get(histIndex).getEncodedBoard() + "\n");
+//        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
+//                " ecodedBoard: " + history.get(histIndex).getEncodedBoard() + "\n");
     }
 
     public void forward(){
-        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
-                " ecodedBoard: " + history.get(histIndex).getEncodedBoard());
+//        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
+//                " ecodedBoard: " + history.get(histIndex).getEncodedBoard());
         if (histIndex < history.size() - 1){
             histIndex ++;
         }
         //setState();
         //fillPlayers(history.get(history.size()-1).getBoard());
-        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
-                " ecodedBoard: " + history.get(histIndex).getEncodedBoard() + "\n");
+//        System.out.println("history size: " + history.size() + " histIndex: " + histIndex +
+//                " ecodedBoard: " + history.get(histIndex).getEncodedBoard() + "\n");
     }
 
     public void current(){
